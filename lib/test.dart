@@ -144,6 +144,11 @@ class _FinanciasState extends State<Financias> {
 
   TextEditingController limiteController = TextEditingController();
   TextEditingController gastoController = TextEditingController();
+  double get progresso {
+    if (limite == 0) return 0;
+
+    return gastou / limite;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -154,8 +159,18 @@ class _FinanciasState extends State<Financias> {
         children: [
           Text("Limite: $limite", style: TextStyle(fontSize: 20)),
           Text("Total gasto: $gastou", style: TextStyle(fontSize: 20)),
-
           SizedBox(height: 20),
+
+          LinearProgressIndicator(value: progresso > 1 ? 1 : progresso),
+
+          if (progresso >= 1)
+            Text("Você atingiu o limite!", style: TextStyle(color: Colors.red)),
+          SizedBox(height: 20),
+          if (progresso >= 0.5 && progresso < 1)
+            Text(
+              "Você já gastou mais de 50% do limite!",
+              style: TextStyle(color: Colors.orange),
+            ),
 
           TextField(
             controller: limiteController,
