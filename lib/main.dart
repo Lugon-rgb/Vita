@@ -1,0 +1,243 @@
+
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark(),
+      home: const ProfileScreen(),
+    );
+  }
+}
+
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0D0F14),
+
+      appBar: AppBar(
+        title: const Text("Perfil"),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+
+        child: ListView(
+          children: [
+
+            _buildProfileCard(),
+
+            const SizedBox(height: 20),
+
+            _buildSectionTitle("Configurações"),
+
+            _buildSwitchTile("Notificações Push", true),
+            _buildSwitchTile("Quizzes Semanais", true),
+            _buildSwitchTile("Mostrar Nível XP", false),
+            _buildSwitchTile("Mostrar Status do Streak", true),
+
+            const SizedBox(height: 20),
+
+            _buildSectionTitle("Dados e Progresso"),
+
+            _buildInfoCard("Refazer Guia de Semana"),
+            _buildInfoCard("Limpar Atividade Recente"),
+
+            const SizedBox(height: 20),
+
+            _buildLogoutButton(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1D24),
+        borderRadius: BorderRadius.circular(16),
+      ),
+
+      child: Column(
+        children: [
+
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.blueAccent.withOpacity(0.2),
+
+            child: const Icon(
+              Icons.person,
+              color: Colors.blueAccent,
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          const Text(
+            "João",
+
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 4),
+
+          const Text(
+            "user@example.com",
+
+            style: TextStyle(
+              color: Colors.grey,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+            children: const [
+
+              _StatItem(
+                label: "Nível",
+                value: "18",
+              ),
+
+              _StatItem(
+                label: "Streak",
+                value: "7",
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+
+      child: Text(
+        title,
+
+        style: const TextStyle(
+          color: Colors.grey,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSwitchTile(String title, bool value) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1D24),
+        borderRadius: BorderRadius.circular(12),
+      ),
+
+      child: SwitchListTile(
+        value: value,
+
+        onChanged: (_) {},
+
+        title: Text(title),
+
+        activeThumbColor: Colors.blueAccent,
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(String title) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+
+      padding: const EdgeInsets.all(16),
+
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1D24),
+        borderRadius: BorderRadius.circular(12),
+      ),
+
+      child: Text(title),
+    );
+  }
+
+  Widget _buildLogoutButton() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+
+      decoration: BoxDecoration(
+        color: Colors.redAccent.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+
+      child: const Center(
+        child: Text(
+          "Sair da Conta",
+
+          style: TextStyle(
+            color: Colors.redAccent,
+          ),
+        ),
+      ),
+    );
+    
+  }
+}
+
+class _StatItem extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _StatItem({
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+
+        Text(
+          value,
+
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.blueAccent,
+          ),
+        ),
+
+        Text(
+          label,
+
+          style: const TextStyle(
+            color: Colors.grey,
+          ),
+        ),
+      ],
+    );
+  }
+}

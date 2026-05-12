@@ -16,6 +16,8 @@ class MyApp extends StatelessWidget {
 // ---------------- TELA PRINCIPAL ----------------
 
 class VitaTeste extends StatefulWidget {
+  const VitaTeste({super.key});
+
   @override
   State<VitaTeste> createState() => _VitaTesteState();
 }
@@ -77,6 +79,8 @@ class _VitaTesteState extends State<VitaTeste> {
 // ---------------- TELA QUIZ ----------------
 
 class TelaQuiz extends StatelessWidget {
+  const TelaQuiz({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
