@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-// import 'pages/conquistas.dart';
+import 'package:vita_appprojetos/pages/home_page.dart';
+import 'package:vita_appprojetos/pages/metas.dart';
+import 'package:vita_appprojetos/pages/pagina_login.dart';
+import 'package:vita_appprojetos/pages/tela_usuario.dart';
+import 'pages/conquistas.dart';
 import 'pages/titulos.dart';
-
 
 void main() {
   runApp(const VitaApp());
@@ -31,7 +34,13 @@ class VitaApp extends StatelessWidget {
         ),
       ),
       // home: const ConquistasPage()
-      home: const TitulosPage()
+      // home: const GoalsPage(),
+      home: PaginaLogin(),
+      routes: {
+        '/METAS': (context) => const GoalsPage(),
+        '/PERFIL': (context) => const ProfileScreen(),
+        '/HOME': (context) => const HomePage(),
+      },
     );
   }
 }

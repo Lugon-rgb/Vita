@@ -1,9 +1,7 @@
-
-
 import 'package:flutter/material.dart';
 
 // Função principal que inicia o app
-void main() {
+/* void main() {
   runApp(const MyApp());
 }
 
@@ -19,7 +17,7 @@ class MyApp extends StatelessWidget {
       home: const ProfileScreen(), // tela inicial
     );
   }
-}
+} */
 
 // Tela principal (perfil)
 class ProfileScreen extends StatelessWidget {
@@ -104,10 +102,7 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 4),
 
           // Email
-          const Text(
-            "user@example.com",
-            style: TextStyle(color: Colors.grey),
-          ),
+          const Text("user@example.com", style: TextStyle(color: Colors.grey)),
 
           const SizedBox(height: 12),
 
@@ -118,7 +113,7 @@ class ProfileScreen extends StatelessWidget {
               _StatItem(label: "Nível", value: "18"),
               _StatItem(label: "Streak", value: "7"),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -155,7 +150,7 @@ class ProfileScreen extends StatelessWidget {
         value: value,
         onChanged: (_) {}, // NÃO faz nada (só visual)
         title: Text(title),
-        activeColor: Colors.blueAccent,
+        activeThumbColor: Colors.blueAccent,
       ),
     );
   }
@@ -186,10 +181,7 @@ class ProfileScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: const Center(
-        child: Text(
-          "Sair da Conta",
-          style: TextStyle(color: Colors.redAccent),
-        ),
+        child: Text("Sair da Conta", style: TextStyle(color: Colors.redAccent)),
       ),
     );
   }
@@ -219,13 +211,8 @@ class _StatItem extends StatelessWidget {
         ),
 
         // Texto (ex: Nível)
-        Text(
-          label,
-          style: const TextStyle(color: Colors.grey),
-        ),
+        Text(label, style: const TextStyle(color: Colors.grey)),
       ],
     );
   }
 }
-tela_usuario.dart
-Displaying tela_usuario.dart.

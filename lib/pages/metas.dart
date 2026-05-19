@@ -1,33 +1,30 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+// void main() {
+//   runApp(const MyApp());
+// }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const GoalsPage(),
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0F1117),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       home: const GoalsPage(),
+//       theme: ThemeData(
+//         brightness: Brightness.dark,
+//         scaffoldBackgroundColor: const Color(0xFF0F1117),
+//       ),
+//     );
+//   }
+// }
 
 class Goal {
   String title;
   bool completed;
 
-  Goal({
-    required this.title,
-    this.completed = false,
-  });
+  Goal({required this.title, this.completed = false});
 }
 
 class GoalsPage extends StatefulWidget {
@@ -48,11 +45,7 @@ class _GoalsPageState extends State<GoalsPage> {
     if (controller.text.trim().isEmpty) return;
 
     setState(() {
-      goals.add(
-        Goal(
-          title: controller.text,
-        ),
-      );
+      goals.add(Goal(title: controller.text));
     });
 
     controller.clear();
@@ -64,9 +57,7 @@ class _GoalsPageState extends State<GoalsPage> {
       context: context,
       backgroundColor: const Color(0xFF1A1D26),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(25),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       builder: (context) {
         return Padding(
@@ -76,10 +67,7 @@ class _GoalsPageState extends State<GoalsPage> {
             children: [
               const Text(
                 "Nova Meta",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 20),
@@ -132,10 +120,7 @@ class _GoalsPageState extends State<GoalsPage> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   "Metas",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                 ),
               ),
 
@@ -146,10 +131,7 @@ class _GoalsPageState extends State<GoalsPage> {
                     ? const Center(
                         child: Text(
                           "Nenhuma meta criada ainda",
-                          style: TextStyle(
-                            color: Colors.white54,
-                            fontSize: 16,
-                          ),
+                          style: TextStyle(color: Colors.white54, fontSize: 16),
                         ),
                       )
                     : ListView.builder(
@@ -165,8 +147,7 @@ class _GoalsPageState extends State<GoalsPage> {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   goal.title,
@@ -179,17 +160,12 @@ class _GoalsPageState extends State<GoalsPage> {
                                 const SizedBox(height: 15),
 
                                 ClipRRect(
-                                  borderRadius:
-                                      BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(10),
                                   child: LinearProgressIndicator(
-                                    value:
-                                        goal.completed ? 1 : 0,
+                                    value: goal.completed ? 1 : 0,
                                     minHeight: 10,
-                                    backgroundColor:
-                                        Colors.white12,
-                                    valueColor:
-                                        AlwaysStoppedAnimation<
-                                            Color>(
+                                    backgroundColor: Colors.white12,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
                                       goal.completed
                                           ? Colors.green
                                           : Colors.blue,
@@ -200,22 +176,18 @@ class _GoalsPageState extends State<GoalsPage> {
                                 const SizedBox(height: 15),
 
                                 Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     IconButton(
                                       onPressed: () {
                                         setState(() {
-                                          goal.completed =
-                                              !goal.completed;
+                                          goal.completed = !goal.completed;
                                         });
                                       },
                                       icon: Icon(
                                         goal.completed
-                                            ? Icons
-                                                .check_circle
-                                            : Icons
-                                                .check_circle_outline,
+                                            ? Icons.check_circle
+                                            : Icons.check_circle_outline,
                                       ),
                                       color: Colors.green,
                                     ),
@@ -226,9 +198,7 @@ class _GoalsPageState extends State<GoalsPage> {
                                           goals.removeAt(index);
                                         });
                                       },
-                                      icon: const Icon(
-                                        Icons.delete,
-                                      ),
+                                      icon: const Icon(Icons.delete),
                                       color: Colors.red,
                                     ),
                                   ],
@@ -247,15 +217,10 @@ class _GoalsPageState extends State<GoalsPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: showAddGoalModal,
         backgroundColor: Colors.blue,
-        child: const Icon(
-          Icons.add,
-          size: 30,
-          color: Colors.white,
-        ),
+        child: const Icon(Icons.add, size: 30, color: Colors.white),
       ),
 
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.endFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
 
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: selectedBottomIndex,
@@ -269,26 +234,14 @@ class _GoalsPageState extends State<GoalsPage> {
         unselectedItemColor: Colors.white60,
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Início",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.flag),
-            label: "Metas",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.note),
-            label: "Notas",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Início"),
+          BottomNavigationBarItem(icon: Icon(Icons.flag), label: "Metas"),
+          BottomNavigationBarItem(icon: Icon(Icons.note), label: "Notas"),
           BottomNavigationBarItem(
             icon: Icon(Icons.attach_money),
             label: "Finanças",
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Perfil",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Perfil"),
         ],
       ),
     );
