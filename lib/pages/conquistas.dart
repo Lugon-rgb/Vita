@@ -147,15 +147,32 @@ static const Color lendario = Colors.orange;
 
     final bool ehDesbloqueada = icone == Icons.check_circle;
 
-    // desbloqueado : bloqueado
-    final Color corTextoTitulo = ehDesbloqueada ? Colors.white : const Color.fromRGBO(255, 255, 255, 0.384);
-    final Color corTextoDescricao = ehDesbloqueada ? const Color.fromRGBO(255, 255, 255, 0.702) : const Color.fromRGBO(255, 255, 255, 0.239);
-    
-    final Color corIcone = ehDesbloqueada ? corRaridade : const Color.fromRGBO(117, 117, 117, 1);
-    
-    final Color corBordaCirculo = ehDesbloqueada ? corRaridade.withValues(alpha: 0.4) : const Color.fromRGBO(255, 255, 255, 0.102);
-    final Color corFundoCirculo = ehDesbloqueada ? corRaridade.withValues(alpha: 0.1) : Colors.transparent;
+    Color corTextoTitulo;
+    Color corTextoDescricao;
+    Color corIcone;
+    Color corBordaCirculo;
+    Color corFundoCirculo;
 
+    if (ehDesbloqueada) {
+      corTextoTitulo = Colors.white;
+      corTextoDescricao = const Color.fromRGBO(255, 255, 255, 0.702);
+      corIcone = corRaridade;
+      corBordaCirculo = corRaridade.withValues(alpha: 0.4);
+      corFundoCirculo = corRaridade.withValues(alpha: 0.1);
+    } else {
+      corTextoTitulo = const Color.fromRGBO(255, 255, 255, 0.384);
+      corTextoDescricao = const Color.fromRGBO(255, 255, 255, 0.239);
+      corIcone = const Color.fromRGBO(117, 117, 117, 1);
+      corBordaCirculo = const Color.fromRGBO(255, 255, 255, 0.102);
+      corFundoCirculo = Colors.transparent;
+    }
+
+    double valorOpacidade;
+    if (ehDesbloqueada) {
+      valorOpacidade = 1.0;
+    } else {
+      valorOpacidade = 0.6;
+    }
     
     return Card(
       color: const Color(0xFF1E1E1E),
@@ -169,7 +186,7 @@ static const Color lendario = Colors.orange;
             border: Border.all(color: corBordaCirculo, width: 1), 
           ),
           child: Opacity(
-            opacity: ehDesbloqueada ? 1.0 : 0.6,
+            opacity: valorOpacidade,
             child: Icon(icone, color: corIcone),
           ),
         ),

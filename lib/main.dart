@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'pages/notas.dart';
 // import 'pages/conquistas.dart';
-import 'pages/titulos.dart';
+// import 'pages/titulos.dart';
 
 
 void main() {
@@ -31,7 +32,8 @@ class VitaApp extends StatelessWidget {
         ),
       ),
       // home: const ConquistasPage()
-      home: const TitulosPage()
+      // home: const TitulosPage()
+      home: const NotasPage()
     );
   }
 }

@@ -139,16 +139,35 @@ static const Color misterioso = Color.fromARGB(255, 218, 32, 32);
 // criando função para criar cada conquista + descrição + ícone + cor da raridade p colorir o circulo do icone
   Widget titulo (String nome, String descricao, IconData icone, Color corRaridade) {
 
-final bool ehDesbloqueado = icone == Icons.check_circle;
+    final bool ehDesbloqueado = icone == Icons.check_circle;
 
-    // desbloqueado : bloqueado
-    final Color corTextoTitulo = ehDesbloqueado ? Colors.white : const Color.fromRGBO(255, 255, 255, 0.384);
-    final Color corTextoDescricao = ehDesbloqueado ? const Color.fromRGBO(255, 255, 255, 0.702) : const Color.fromRGBO(255, 255, 255, 0.239);
+    Color corTextoTitulo;
+    Color corTextoDescricao;
+    Color corIcone;
+    Color corBordaCirculo;
+    Color corFundoCirculo;
+
+    if (ehDesbloqueado) {
+      corTextoTitulo = Colors.white;
+      corTextoDescricao = const Color.fromRGBO(255, 255, 255, 0.702);
+      corIcone = corRaridade;
+      corBordaCirculo = corRaridade.withValues(alpha: 0.4);
+      corFundoCirculo = corRaridade.withValues(alpha: 0.1);
+    } else {
+      corTextoTitulo = const Color.fromRGBO(255, 255, 255, 0.384);
+      corTextoDescricao = const Color.fromRGBO(255, 255, 255, 0.239);
+      corIcone = const Color.fromRGBO(117, 117, 117, 1);
+      corBordaCirculo = const Color.fromRGBO(255, 255, 255, 0.102);
+      corFundoCirculo = Colors.transparent;
+    }
+
+    double valorOpacidade;
+    if (ehDesbloqueado) {
+      valorOpacidade = 1.0;
+    } else {
+      valorOpacidade = 0.6;
+    }
     
-    final Color corIcone = ehDesbloqueado ? corRaridade : const Color.fromRGBO(117, 117, 117, 1);
-    
-    final Color corBordaCirculo = ehDesbloqueado ? corRaridade.withValues(alpha: 0.4) : const Color.fromRGBO(255, 255, 255, 0.102);
-    final Color corFundoCirculo = ehDesbloqueado ? corRaridade.withValues(alpha: 0.1) : Colors.transparent;
 
     return Card(
       color: const Color(0xFF1E1E1E),
@@ -162,7 +181,7 @@ final bool ehDesbloqueado = icone == Icons.check_circle;
             border: Border.all(color: corBordaCirculo, width: 1), 
           ),
           child: Opacity(
-            opacity: ehDesbloqueado ? 1.0 : 0.6,
+            opacity: valorOpacidade,
             child: Icon(icone, color: corIcone),
           ),
         ),
