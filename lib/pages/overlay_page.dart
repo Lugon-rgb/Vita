@@ -3,14 +3,14 @@ import 'package:vita_appprojetos/pages/home_page.dart';
 import 'package:vita_appprojetos/pages/metas.dart';
 import 'package:vita_appprojetos/pages/tela_usuario.dart';
 
-class NavBar extends StatefulWidget {
-  const NavBar({super.key});
+class OverlayPage extends StatefulWidget {
+  const OverlayPage({super.key});
 
   @override
-  State<NavBar> createState() => _NavBarState();
+  State<OverlayPage> createState() => _OverlayPageState();
 }
 
-class _NavBarState extends State<NavBar> {
+class _OverlayPageState extends State<OverlayPage> {
   int currentPageIndex = 0;
 
   final List _pages = [

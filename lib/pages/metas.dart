@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vita_appprojetos/uitl/bottom_nav_bar.dart';
 
 // void main() {
 //   runApp(const MyApp());
@@ -221,29 +222,6 @@ class _GoalsPageState extends State<GoalsPage> {
       ),
 
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: selectedBottomIndex,
-        onTap: (index) {
-          setState(() {
-            selectedBottomIndex = index;
-          });
-        },
-        backgroundColor: const Color(0xFF141821),
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.white60,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Início"),
-          BottomNavigationBarItem(icon: Icon(Icons.flag), label: "Metas"),
-          BottomNavigationBarItem(icon: Icon(Icons.note), label: "Notas"),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.attach_money),
-            label: "Finanças",
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Perfil"),
-        ],
-      ),
     );
   }
 }

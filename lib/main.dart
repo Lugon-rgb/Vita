@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/pages/home_page.dart';
 import 'package:vita_appprojetos/pages/metas.dart';
+import 'package:vita_appprojetos/pages/overlay_page.dart';
 import 'package:vita_appprojetos/pages/pagina_login.dart';
 import 'package:vita_appprojetos/pages/tela_usuario.dart';
 import 'pages/conquistas.dart';
@@ -39,7 +40,7 @@ class VitaApp extends StatelessWidget {
       routes: {
         '/METAS': (context) => const GoalsPage(),
         '/PERFIL': (context) => const ProfileScreen(),
-        '/HOME': (context) => const HomePage(),
+        '/HOME': (context) => const OverlayPage(),
       },
     );
   }

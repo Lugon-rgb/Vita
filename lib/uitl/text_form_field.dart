@@ -5,6 +5,9 @@ class RoundedTextFormField extends StatelessWidget {
   final String hintText;
   final bool obscureText;
   final TextEditingController? controller;
+  final Widget? iconDec;
+  final String? Function(String?)? vali;
+  final void Function(String?)? onSaved;
 
   const RoundedTextFormField({
     super.key,
@@ -12,6 +15,9 @@ class RoundedTextFormField extends StatelessWidget {
     this.fieldLabel,
     this.obscureText = false,
     this.controller,
+    this.iconDec,
+    this.vali,
+    this.onSaved,
   });
 
   @override
@@ -21,7 +27,10 @@ class RoundedTextFormField extends StatelessWidget {
       child: Center(
         child: Container(
           child: TextFormField(
+            validator: vali,
+            onSaved: onSaved,
             decoration: InputDecoration(
+              suffixIcon: iconDec,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),

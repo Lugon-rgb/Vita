@@ -10,9 +10,12 @@ class PaginaLogin extends StatefulWidget {
 }
 
 class _PaginaLoginState extends State<PaginaLogin> {
+  bool _isObscured = true;
+  bool _isObscuredR = true;
   bool _isLoginMode = true;
 
   void onPressed() {}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -135,48 +138,84 @@ class _PaginaLoginState extends State<PaginaLogin> {
   }
 
   Widget _campoDeTexto(BuildContext context) {
+    void _obscure() {
+      setState(() {
+        _isObscured = !_isObscured;
+      });
+    }
+
     return SizedBox(
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 12.0),
-            child: RoundedTextFormField(
-              fieldLabel: "Email",
-              hintText: "seu@email.com",
+      child: Form(
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 12.0),
+              child: RoundedTextFormField(
+                fieldLabel: "Email",
+                hintText: "seu@email.com",
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 12.0),
-            child: RoundedTextFormField(
-              fieldLabel: "Senha",
-              hintText: "Senha",
-              obscureText: true,
+            Padding(
+              padding: const EdgeInsets.only(top: 12.0),
+              child: RoundedTextFormField(
+                fieldLabel: "Senha",
+                hintText: "Senha",
+                obscureText: _isObscured,
+                iconDec: IconButton(
+                  onPressed: _obscure,
+                  icon: _isObscured
+                      ? Icon(Icons.visibility_off_outlined)
+                      : Icon(Icons.visibility_outlined),
+                  iconSize: 35,
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _campoDeTextoRegister(BuildContext context) {
+    void _obscureR() {
+      setState(() {
+        _isObscuredR = !_isObscuredR;
+      });
+    }
+
     return SizedBox(
       child: Column(
         mainAxisSize: MainAxisSize.max,
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 1.0, bottom: 12),
-            child: Container(
-              height: 250,
-              width: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Color.fromRGBO(255, 255, 255, 1)),
+            child: GestureDetector(
+              onTap: () {
+                ImageInput(allowEdit: true);
+              },
+              child: Container(
+                height: 250,
+                width: 250,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Color.fromRGBO(255, 255, 255, 1)),
+                ),
+                child: Stack(
+                  alignment: AlignmentGeometry.center,
+                  children: [
+                    Icon(
+                      Icons.camera_alt_outlined,
+                      color: Colors.grey[700],
+                      size: 45,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 12.0),
+            padding: const EdgeInsets.only(top: 13.0),
             child: RoundedTextFormField(
               fieldLabel: "Nome",
               hintText: "Seu nome",
@@ -195,6 +234,13 @@ class _PaginaLoginState extends State<PaginaLogin> {
               fieldLabel: "Senha",
               hintText: "Senha",
               obscureText: true,
+              iconDec: IconButton(
+                onPressed: _obscureR,
+                icon: _isObscuredR
+                    ? Icon(Icons.visibility_off_outlined)
+                    : Icon(Icons.visibility_outlined),
+                iconSize: 35,
+              ),
             ),
           ),
           Padding(
@@ -203,6 +249,13 @@ class _PaginaLoginState extends State<PaginaLogin> {
               fieldLabel: "Confirmar senha",
               hintText: "Confirmar senha",
               obscureText: true,
+              iconDec: IconButton(
+                onPressed: _obscureR,
+                icon: _isObscuredR
+                    ? Icon(Icons.visibility_off_outlined)
+                    : Icon(Icons.visibility_outlined),
+                iconSize: 35,
+              ),
             ),
           ),
         ],
@@ -218,6 +271,10 @@ class _PaginaLoginState extends State<PaginaLogin> {
       );
     }
 
+    void _login() {
+      Navigator.pushReplacementNamed(context, "/HOME");
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -225,7 +282,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
         SizedBox(
           child: MyButton(
             text: "Log In",
-            onPressed: onPressed,
+            onPressed: _login,
             elevation: 0,
             color: Colors.blue,
             textColor: Colors.white,
@@ -245,6 +302,12 @@ class _PaginaLoginState extends State<PaginaLogin> {
   }
 
   Widget _bottombuttonsRegister(BuildContext context) {
+    void _contaCriada() {
+      setState(() {
+        _isLoginMode = true;
+      });
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -252,7 +315,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
         SizedBox(
           child: MyButton(
             text: "Criar conta",
-            onPressed: onPressed,
+            onPressed: _contaCriada,
             elevation: 0,
             color: Colors.blue,
             textColor: Colors.white,

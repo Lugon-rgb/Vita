@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:vita_appprojetos/pages/pagina_login.dart';
+import 'package:vita_appprojetos/uitl/bottom_nav_bar.dart';
 
 // Função principal que inicia o app
 /* void main() {
@@ -20,8 +22,26 @@ class MyApp extends StatelessWidget {
 } */
 
 // Tela principal (perfil)
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  late Map<String, bool> switchStates;
+
+  @override
+  void initState() {
+    super.initState();
+    switchStates = {
+      "Notificações Push": true,
+      "Quizzes Semanais": true,
+      "Mostrar Nível XP": false,
+      "Mostrar Status do Streak": true,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,10 +70,10 @@ class ProfileScreen extends StatelessWidget {
             _buildSectionTitle("Configurações"),
 
             // Lista de switches (visual apenas)
-            _buildSwitchTile("Notificações Push", true),
-            _buildSwitchTile("Quizzes Semanais", true),
-            _buildSwitchTile("Mostrar Nível XP", false),
-            _buildSwitchTile("Mostrar Status do Streak", true),
+            _buildSwitchTile("Notificações Push"),
+            _buildSwitchTile("Quizzes Semanais"),
+            _buildSwitchTile("Mostrar Nível XP"),
+            _buildSwitchTile("Mostrar Status do Streak"),
 
             const SizedBox(height: 20),
 
@@ -87,7 +107,7 @@ class ProfileScreen extends StatelessWidget {
           // Ícone de usuário
           CircleAvatar(
             radius: 30,
-            backgroundColor: Colors.blueAccent.withOpacity(0.2),
+            backgroundColor: Colors.blueAccent.withValues(alpha: 0.2),
             child: const Icon(Icons.person, color: Colors.blueAccent),
           ),
 
@@ -139,18 +159,25 @@ class ProfileScreen extends StatelessWidget {
   // =========================
   // SWITCH (CONFIGURAÇÃO)
   // =========================
-  Widget _buildSwitchTile(String title, bool value) {
+  Widget _buildSwitchTile(String title) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: const Color(0xFF1A1D24),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: SwitchListTile(
-        value: value,
-        onChanged: (_) {}, // NÃO faz nada (só visual)
-        title: Text(title),
-        activeThumbColor: Colors.blueAccent,
+      child: Material(
+        type: MaterialType.transparency,
+        child: SwitchListTile(
+          value: switchStates[title]!,
+          onChanged: (bool newValue) {
+            setState(() {
+              switchStates[title] = newValue;
+            });
+          },
+          title: Text(title),
+          activeThumbColor: Colors.blueAccent,
+        ),
       ),
     );
   }
@@ -174,14 +201,25 @@ class ProfileScreen extends StatelessWidget {
   // "BOTÃO" SAIR (VISUAL)
   // =========================
   Widget _buildLogoutButton() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.redAccent.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Center(
-        child: Text("Sair da Conta", style: TextStyle(color: Colors.redAccent)),
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: ((context) => PaginaLogin())),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.redAccent.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(
+          child: Text(
+            "Sair da Conta",
+            style: TextStyle(color: Colors.redAccent),
+          ),
+        ),
       ),
     );
   }
