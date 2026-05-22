@@ -49,7 +49,7 @@ final TextEditingController _buscaController = TextEditingController();
                 // botao nova nota 
                 ElevatedButton.icon( 
                   onPressed: () {
-                    // abrir a tela de criacao do "nova nota"
+                    // abrir a tela de criacao do "nova nota" (ainda nao implementado)
                   },
                   icon: const Icon(Icons.add, color: Colors.white, size: 18),
                   label: const Text(  
@@ -80,18 +80,18 @@ final TextEditingController _buscaController = TextEditingController();
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
 
-                hintText: 'Pesquisar notas...', // muito maneira essa funcao pprt
+                hintText: 'Pesquisar notas...', // muito maneira essa funcao 
                 hintStyle: const TextStyle(color: Color.fromARGB(97, 255, 255, 255)),
                 prefixIcon: const Icon(Icons.search, color: Color.fromARGB(97, 255, 255, 255), size: 20), // nao da p usar fora do textfield, teria que fazer uma row mesmo
 
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
 
                 filled: true, // p eu pintar o fundo do textfield, eu aparentemente preciso dizer antes que ele TEM uma cor no fundo, pq eh transparente por padrao
-                fillColor: const Color(0xFF1E1E1E), // dai eu pinto (la ele)
+                fillColor: const Color(0xFF1E1E1E), // dai eu pinto, la ele
 
                 enabledBorder: OutlineInputBorder( 
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none, // meio que "tira" a borda, deixa meio q invisivel a linha em volta da caixa
+                  borderSide: BorderSide.none, // eh p tirar a borda, p deixar invisivel a linha em volta da caixa
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -149,7 +149,7 @@ final TextEditingController _buscaController = TextEditingController();
     );
   }
 
-  // Widget auxiliar pro bloco de captura rápida
+  // widget auxiliar pro bloco de captura rápida
   Widget _construirCapturaRapida() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -178,9 +178,9 @@ final TextEditingController _buscaController = TextEditingController();
             ],
           ),
 
-          const SizedBox(height: 12), // da um espacinho pro prox campo
+          const SizedBox(height: 12),
 
-          // Input Título
+          // input do título
           TextField(
             controller: _tituloController,
             style: const TextStyle(color: Colors.white),
@@ -189,11 +189,11 @@ final TextEditingController _buscaController = TextEditingController();
               hintStyle: const TextStyle(color: Color.fromRGBO(255, 255, 255, 0.384)), 
               // isDense: true,
               contentPadding: const EdgeInsets.all(12), // padding entre o texto e a caixa
-              enabledBorder: OutlineInputBorder( // como a borda da caixa fica sem estar selecionada
+              enabledBorder: OutlineInputBorder( // sem estar selecionada
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Color(0xFF262626)),
               ),
-              focusedBorder: OutlineInputBorder( // como a borda fica depois de ser selecionada pelo usuario
+              focusedBorder: OutlineInputBorder( // depois de ser selecionada 
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Color(0xFF2A4BA0)), // a mudanca da cor eh meio q um feedback visual
               ),
@@ -202,7 +202,7 @@ final TextEditingController _buscaController = TextEditingController();
 
           const SizedBox(height: 12),
 
-          // Input Conteúdo
+          // input do conteúdo
           TextField(
             controller: _conteudoController,
             maxLines: 3, // nao limita as linhas de fato, ele eh mais pra limitar a altura visualmente
@@ -230,9 +230,9 @@ final TextEditingController _buscaController = TextEditingController();
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                //aqui vai entrar a logica da aba que vai abrir depois de clicar no "nova nota". 
+                // aqui vai ser pra de fato salvar a nota e adicionar la embaixo (ainda nao implementado)
               },
-              style: ElevatedButton.styleFrom( // eh um tipo de botao que parece ser clicavel, c uma certa profundidade
+              style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1E3A8A), 
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -249,7 +249,7 @@ final TextEditingController _buscaController = TextEditingController();
       ),
     );
   }
-  // Widget auxiliar para criar os botões de Filtro/Tags
+  // widget auxiliar para criar os botões de Filtro/Tags
   Widget _construirFiltro(String label, bool taSelecionado) {
 
     Color corDoBotao;
@@ -271,13 +271,13 @@ final TextEditingController _buscaController = TextEditingController();
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: corDoBotao, // variavel de cor do fundo aplicada aqui
+        color: corDoBotao, // variavel de cor do fundo q criei antes
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: corDoTexto, // variavel de cor do texto aplicada aqui
+          color: corDoTexto, // variavel de cor do texto q criei antes
           fontWeight: FontWeight.bold,
           fontSize: 14,
         ),
@@ -342,7 +342,7 @@ final TextEditingController _buscaController = TextEditingController();
               ],
             ),
 
-            const SizedBox(height: 8), // espacin de lei
+            const SizedBox(height: 8),
 
             // conteudo
             Text(
