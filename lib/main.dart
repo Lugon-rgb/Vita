@@ -24,7 +24,7 @@ class VitaApp extends StatelessWidget {
           elevation: 0,
           centerTitle: true,
           titleTextStyle: TextStyle(
-            color: Colors.white70,
+            color: Color.fromARGB(179, 255, 255, 255),
             fontSize: 18,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.2,
