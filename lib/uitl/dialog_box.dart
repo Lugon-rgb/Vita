@@ -2,43 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/uitl/my_button.dart';
 
 class DialogBox extends StatelessWidget {
-  final controller;
-  VoidCallback onSave;
-  VoidCallback onCancel;
-  DialogBox({
-    super.key,
-    required this.controller,
-    required this.onSave,
-    required this.onCancel,
-  });
+  VoidCallback galeria;
+  VoidCallback camera;
+  DialogBox({super.key, required this.galeria, required this.camera});
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Colors.yellow[300],
-      content: Container(
-        height: 120,
-        child: Column(
+      title: Center(child: Text("Selecione a fonte")),
+      backgroundColor: const Color.fromARGB(255, 13, 15, 17),
+      content: SizedBox(
+        height: 100,
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: "Add a new task",
-              ),
-            ),
+            MyButton(text: "Galeria", onPressed: galeria),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                MyButton(text: "Save", onPressed: onSave),
+            const SizedBox(width: 8),
 
-                const SizedBox(width: 8),
-
-                MyButton(text: "Cancel", onPressed: onCancel),
-              ],
-            ),
+            MyButton(text: "Camera", onPressed: camera),
           ],
         ),
       ),

@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/pages/pagina_nova_senha.dart';
+import 'package:vita_appprojetos/uitl/dialog_box.dart';
 import 'package:vita_appprojetos/uitl/my_button.dart';
 import 'package:vita_appprojetos/uitl/text_form_field.dart';
-import 'package:image_input/image_input.dart';
+import 'package:image_picker/image_picker.dart';
 
 class PaginaLogin extends StatefulWidget {
   @override
@@ -13,6 +16,38 @@ class _PaginaLoginState extends State<PaginaLogin> {
   bool _isObscured = true;
   bool _isObscuredR = true;
   bool _isLoginMode = true;
+
+  File? _fotoPerfil;
+
+  final picker = ImagePicker();
+
+  Future<void> pickImage(ImageSource source) async {
+    final pickedFile = await picker.pickImage(source: source);
+
+    if (pickedFile != null) {
+      setState(() {
+        _fotoPerfil = File(pickedFile.path);
+      });
+    }
+  }
+
+  void addImage() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return DialogBox(
+          camera: () {
+            pickImage(ImageSource.camera);
+            Navigator.pop(context);
+          },
+          galeria: () {
+            pickImage(ImageSource.gallery);
+            Navigator.pop(context);
+          },
+        );
+      },
+    );
+  }
 
   void onPressed() {}
 
@@ -191,9 +226,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
           Padding(
             padding: const EdgeInsets.only(top: 1.0, bottom: 12),
             child: GestureDetector(
-              onTap: () {
-                ImageInput(allowEdit: true);
-              },
+              onTap: addImage,
               child: Container(
                 height: 250,
                 width: 250,
@@ -201,15 +234,15 @@ class _PaginaLoginState extends State<PaginaLogin> {
                   shape: BoxShape.circle,
                   border: Border.all(color: Color.fromRGBO(255, 255, 255, 1)),
                 ),
-                child: Stack(
-                  alignment: AlignmentGeometry.center,
-                  children: [
-                    Icon(
-                      Icons.camera_alt_outlined,
-                      color: Colors.grey[700],
-                      size: 45,
-                    ),
-                  ],
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(125),
+                  child: _fotoPerfil != null
+                      ? Image.file(_fotoPerfil!, fit: BoxFit.cover)
+                      : Icon(
+                          Icons.camera_alt_outlined,
+                          color: Colors.grey[700],
+                          size: 45,
+                        ),
                 ),
               ),
             ),
@@ -233,7 +266,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
             child: RoundedTextFormField(
               fieldLabel: "Senha",
               hintText: "Senha",
-              obscureText: true,
+              obscureText: _isObscuredR,
               iconDec: IconButton(
                 onPressed: _obscureR,
                 icon: _isObscuredR
@@ -248,7 +281,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
             child: RoundedTextFormField(
               fieldLabel: "Confirmar senha",
               hintText: "Confirmar senha",
-              obscureText: true,
+              obscureText: _isObscuredR,
               iconDec: IconButton(
                 onPressed: _obscureR,
                 icon: _isObscuredR

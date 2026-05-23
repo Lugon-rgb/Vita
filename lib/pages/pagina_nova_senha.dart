@@ -73,6 +73,13 @@ class RedefSenha extends StatefulWidget {
 }
 
 class _RedefSenhaState extends State<RedefSenha> {
+  bool _isObscuredR = true;
+  void _obscureR() {
+    setState(() {
+      _isObscuredR = !_isObscuredR;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,7 +135,14 @@ class _RedefSenhaState extends State<RedefSenha> {
             child: RoundedTextFormField(
               fieldLabel: "Nova Senha",
               hintText: "Nova Senha",
-              obscureText: true,
+              obscureText: _isObscuredR,
+              iconDec: IconButton(
+                onPressed: _obscureR,
+                icon: _isObscuredR
+                    ? Icon(Icons.visibility_off_outlined)
+                    : Icon(Icons.visibility_outlined),
+                iconSize: 35,
+              ),
             ),
           ),
           Padding(
@@ -136,7 +150,14 @@ class _RedefSenhaState extends State<RedefSenha> {
             child: RoundedTextFormField(
               fieldLabel: "Cofirmar Senha",
               hintText: "Confirmar Senha",
-              obscureText: true,
+              obscureText: _isObscuredR,
+              iconDec: IconButton(
+                onPressed: _obscureR,
+                icon: _isObscuredR
+                    ? Icon(Icons.visibility_off_outlined)
+                    : Icon(Icons.visibility_outlined),
+                iconSize: 35,
+              ),
             ),
           ),
         ],
