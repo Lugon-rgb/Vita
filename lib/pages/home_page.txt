@@ -1,28 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:vita_appprojetos/pages/quiz_page.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+class HomePage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(title: "Vita Teste", home: VitaTeste());
-  }
+  State<HomePage> createState() => _HomePageState();
 }
 
-// ---------------- TELA PRINCIPAL ----------------
-
-class VitaTeste extends StatefulWidget {
-  const VitaTeste({super.key});
-
-  @override
-  State<VitaTeste> createState() => _VitaTesteState();
-}
-
-class _VitaTesteState extends State<VitaTeste> {
+class _HomePageState extends State<HomePage> {
   int vida = 100;
   int estamina = 100;
 
@@ -68,43 +52,6 @@ class _VitaTesteState extends State<VitaTeste> {
                 }
               },
               child: Text("Fazer Quiz"),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------- TELA QUIZ ----------------
-
-class TelaQuiz extends StatelessWidget {
-  const TelaQuiz({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Quiz")),
-      body: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Text("Você treinou hoje?", style: TextStyle(fontSize: 22)),
-
-            SizedBox(height: 20),
-
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context, {'vida': 10, 'estamina': 5});
-              },
-              child: Text("Sim"),
-            ),
-
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context, {'vida': -5, 'estamina': -5});
-              },
-              child: Text("Não"),
             ),
           ],
         ),
