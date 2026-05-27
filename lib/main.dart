@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'pages/notas.dart';
 // import 'pages/conquistas.dart';
 // import 'pages/titulos.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+  options: DefaultFirebaseOptions.currentPlatform,
+);
   runApp(const VitaApp());
 }
 

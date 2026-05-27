@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../modelos/modelo_nota.dart';
 
 class NotasPage extends StatefulWidget {
   const NotasPage({super.key});
@@ -14,6 +16,144 @@ final TextEditingController _tituloController = TextEditingController();
 final TextEditingController _conteudoController = TextEditingController();
 final TextEditingController _buscaController = TextEditingController();
 
+// criei uma variavel que aponta pra uma colecao do Firebase das notas
+final CollectionReference _notasCollection = FirebaseFirestore.instance.collection('notas');
+ 
+@override
+  void initState() {
+    super.initState();
+    // serve pra avisar a tela para checar o "if" de cor do botao salvar a cada letra digitada pelo usuario
+    _tituloController.addListener(() { // cria meio q um fiscal pra ficar vigiando o campo de texto do titulo da captura rapida
+      if (mounted) setState(() {}); // o mounted serve pra evitar crash, nesse caso seria tipo um "se a tela ainda existir(ou seja, se o usuario nao tiver trocado de aba), redesenhe ela"
+      });
+    _conteudoController.addListener(() { // mesma coisa, so que com o conteudo, redesenhando a tela a cada letra digitada pelo usuario
+      if (mounted) setState(() {}); // entao caso o usuario mudar de tela ou fechar a pagina antes de fechar o teclado, esse controller poderia tentar atualizar a tela ja morta
+    }); // mas o mounted impede que isso aconteca.
+  }
+
+
+  // salvar a nota da Captura Rápida no Firebase
+  void _salvarNota() async {
+    final String titulo = _tituloController.text.trim();
+    final String conteudo = _conteudoController.text.trim();
+
+    if (titulo.isEmpty || conteudo.isEmpty) { // isEmpty ja vem programado pelo flutter e dart. assim como isnotempty
+        ScaffoldMessenger.of(context).showSnackBar( // olha pra tela atual, identifica onde pode escrever uma mensagem e mostra um aviso 
+          const SnackBar(content: Text('Preencha o título e o conteúdo!')), 
+        ); // obriga o usuario a preencher ambos titulo e conteudo da captura rapida
+        return;
+      }
+
+    // pegar a classe nota e por os valores automáticos de categoria e data
+    final novaNota = Nota(
+      titulo: titulo,
+      conteudo: conteudo,
+      categoria: 'Outros',      // categoria padrão automática para a captura rápida
+      dataHora: DateTime.now(), // pega o horário exato do clique do usuário
+    );
+
+    try { // a partir daqui, vamos testar algumas coisas que dependem de internet
+     
+      await _notasCollection.add(novaNota.toMap()); // esse await eh tipo um pause na execucao enquanto faz o processo de consulta ao firebase
+      // e o .toMap() eh uma funcao q eu criei no outro codigo que transforma o objeto em um mapa p o firebase aceitar
+
+      _tituloController.clear();
+      _conteudoController.clear();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nota rápida salva com sucesso!')),
+      ); // avisa que deu certo! feedback
+    }
+
+     catch (e) { // se a internet cair no processo do await, ele pula direto pra ca e guarda o motivo do erro na variavel 'e'
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao salvar: $e')),
+      ); // avisa que deu errado, feedback do erro em questao enviado pelo firebase
+    }
+  }
+
+      // funcao p deletar a nota usando o ID que veio da memória
+  void _deletarNota(String id) async { // esse async serve pra avisar ao dart 
+  // que a funcao vai usar await la dentro e executar processos demorados de internet
+
+    try {
+      await _notasCollection.doc(id).delete(); // deleta a nota do id especifico
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nota deletada!')), // avisa que deu certo, feedback
+      );
+    } 
+    
+    catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao deletar: $e')), // avisa que deu errado, feedback do erro
+      );
+    }
+  }
+    // funcao auxiliar pra mudar a cor do botao do salvar dependendo do que está digitado nos campos 
+    Color _definirCorBotaoSalvar() {
+      if (_tituloController.text.trim().isNotEmpty && _conteudoController.text.trim().isNotEmpty) { // esse trim eh uma limpeza de texto, removendo espacos em branco inuteis 
+      // do inicio e do fim de um texto. Isso tambem impede o usuario de salvar uma captura rapida apenas digitando '   ', apertando espaco sem digitar nada.
+        return const Color(0xFF2A4BA0); // azul vivo
+      } else {
+        return const Color(0xFF1E3A8A); // azul apagado
+      }
+    }
+    // funcao auxiliar pra mudar o texto do botao salvar dependendo do que está digitado nos campos 
+    Color _definirCorTextoSalvar() {
+      if (_tituloController.text.trim().isNotEmpty && _conteudoController.text.trim().isNotEmpty) {
+        return Colors.white; // branco vivo quando pronto para salvar
+      } else {
+        return const Color.fromARGB(97, 255, 255, 255); // branco meio opaco/cinza quando desativado
+      }
+    }
+
+  //funcao auxiliar pro pop up que aparece quando usuario tenta deletar uma nota, p prevenir erros
+  void _confirmarDeletar(String id) { 
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog( // desenha caixinha no meio da tela com aviso, escurece o fundo e bloqueia cliques na tela de traz 
+          backgroundColor: const Color(0xFF1E1E1E),
+          title: const Text(
+            'Apagar nota? Essa ação não poderá ser desfeita.',
+            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.normal),
+          ),
+          actions: [
+            // criando botao para cancelar acao
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), // fecha o alerta sem apagar a nota
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: Colors.white38, fontWeight: FontWeight.bold),
+              ),
+            ),
+            // botao de confirmar o delete
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop(); // fecha o alerta 
+                
+                try {
+                  await _notasCollection.doc(id).delete(); // espera enquanto deleta do firebase
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Nota deletada!')), // aviso de que foi deletada, feedback
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erro ao deletar: $e')), // aviso de que deu erradom feedback do erro
+                  );
+                }
+              },
+              child: const Text(
+                'Apagar', // mensagem para deletar de fato
+                style: TextStyle(color: Color(0xFFFF5252), fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
 // equivalente ao free() em C, libera a memoria sobre esses controles
 @override
@@ -23,6 +163,8 @@ final TextEditingController _buscaController = TextEditingController();
     _buscaController.dispose();
     super.dispose();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +188,7 @@ final TextEditingController _buscaController = TextEditingController();
                   ),
                 ),
 
-                // botao nova nota 
+                // botao nova nota ainda so estatico
                 ElevatedButton.icon( 
                   onPressed: () {
                     // abrir a tela de criacao do "nova nota" (ainda nao implementado)
@@ -69,12 +211,12 @@ final TextEditingController _buscaController = TextEditingController();
 
             const SizedBox(height: 20),
 
-            // captura rapida
+            // captura rapida implementada perfeitamente!
             _construirCapturaRapida(),
             const SizedBox(height: 24),
             
 
-            // barrinha de busca
+            // barrinha de busca ainda so com textfield
             TextField(
               controller: _buscaController, // aquele controle que le o que veio do textfield
               style: const TextStyle(color: Colors.white),
@@ -102,7 +244,7 @@ final TextEditingController _buscaController = TextEditingController();
 
             const SizedBox(height:16),
 
-            // filtros
+            // filtros ainda estaticos
             SingleChildScrollView( // melhor que o listview para listas pequenas, renderiza tudo de uma vez; 
               scrollDirection: Axis.horizontal, // scrolla pros lados p ver os filtros disponiveis
               child: Row(
@@ -118,31 +260,61 @@ final TextEditingController _buscaController = TextEditingController();
 
             const SizedBox(height:20),
 
-            // cards de notas
-            _construirCardNota(
-              'Trabalho de IHC entrega 28/4',
-              'Estudos',
-              'Entrevistar 4 pessoas para o fluxo de user experience e validar as personas criadas.',
-              '14/04/2026 22:52'
+            // listagem conectada ao firebase 
+            StreamBuilder<QuerySnapshot>( // eh um widget do flutter que atualiza a tela sozinho, redesenhando a lista sempre que algo muda no banco de dados
+              stream: _notasCollection.orderBy('dataHora', descending: true).snapshots(), // pega a colecao de notas do firebase, ordenando elas pela data, deixando as mais recentes em cima. 
+              // o .snapshots() vai monitorar o que acontece la em tempo real, entao ela que diz se algo mudou
+              builder: (context, snapshot) { // ela eh quem desenha o resultado definitivo. o context localiza o bloco na tela e o snapshot guarda os dados que o firebase devolveu
+
+                // ifs de seguranca, caso ocorra algo inesperado
+                if (snapshot.hasError) {
+                  return Center(child: Text('Erro: ${snapshot.error}', style: const TextStyle(color: Colors.white))); // se der erro de internet ou firebase, erro de feedback na tela
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator()); // se tiver carregando, pro usuario saber disso, mostra a bolinha girando na tela
+                }
+                final docs = snapshot.data?.docs ?? [];
+
+                if (docs.isEmpty) { // se a lista de documentos do firebase tiver vazia...
+                  return const Center( 
+                    child: Text('Nenhuma nota por aqui...', style: TextStyle(color: Colors.white54)), // mostra uma mensagem na parte das notas caso nao exista nenhuma nota atualmente
+                  );
+                }
+
+                // gerador de lista automático baseado nos documentos do firebase
+                return ListView.builder( // constroi apenas os cards visiveis na tela do usuario, pra nao travar o celular com telas excessivas
+
+                  shrinkWrap: true, // encolhe essa lista que está dentro da listview principal do codigo, pra nao dar conflito, entao ocupa so o tamanho exato das notas que tao dentro dela.
+
+                  physics: const NeverScrollableScrollPhysics(), // desativa o scroll dessa listview interna que criamos, pro scroll ficar mais suave 
+                  
+                  itemCount: docs.length, // eh oq define a quantidade de notas que existem no total, p saber quantas vezes tem que desenhar o card
+
+                  itemBuilder: (context, index) { // cria o loop pra rodar de nota em nota
+
+                    final nota = Nota.fromDocument(docs[index]); // pega o mapa que o firebase devolve e converte no modelo de Nota que eu criei no outro codigo
+
+                    String dataFormatada = "${nota.dataHora.day.toString().padLeft(2, '0')}/${nota.dataHora.month.toString().padLeft(2, '0')}/${nota.dataHora.year} ${nota.dataHora.hour.toString().padLeft(2, '0')}:${nota.dataHora.minute.toString().padLeft(2, '0')}";
+                     // formata bonitinho o texto da data
+
+                    // renderizacao final do loop, desenhando o card com os dados do banco
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10.0),
+                      child: _construirCardNota(
+                        nota.id!, // passamos o ID do card pro banco saber qual eh, caso queiramos deletar ou editar depois
+                        nota.titulo,
+                        nota.categoria,
+                        nota.conteudo,
+                        dataFormatada,
+                      ),
+                    );
+                  },
+                );
+              },
             ),
 
-            const SizedBox(height:10),
 
-            _construirCardNota(
-              'Trabalho de Calculo entrega 11/06',
-              'Estudos',
-              'Resolver as questoes e apresentar em sala.',
-              '16/05/2026 13:41'
-            ),
-
-            const SizedBox(height:10),
-
-            _construirCardNota(
-              'Psicologa 13 hs',
-              'Pessoal',
-              'Ir pra psicologa amanha as 13:00.',
-              '11/06/2026 15:00'
-            ),
+           
           ],
         ),
       ),
@@ -225,23 +397,21 @@ final TextEditingController _buscaController = TextEditingController();
 
           const SizedBox(height: 16),
 
-          // Botão Salvar
+          // botao salvar
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                // aqui vai ser pra de fato salvar a nota e adicionar la embaixo (ainda nao implementado)
-              },
+                onPressed: _salvarNota, // chama a funcao que salva a nota e adiciona la embaixo
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1E3A8A), 
+                backgroundColor: _definirCorBotaoSalvar(), 
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
-              child: const Text(
+              child: Text(
                 'Salvar',
-                style: TextStyle(color: Color.fromRGBO(255, 255, 255, 0.702), fontWeight: FontWeight.bold),
+                style: TextStyle(color: _definirCorTextoSalvar(), fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -286,6 +456,7 @@ final TextEditingController _buscaController = TextEditingController();
   }
   // funcao auxiliar pra estruturar o card de cada Nota Salva
   Widget _construirCardNota(
+    String id,
     String titulo, 
     String categoria, 
     String conteudo, 
@@ -360,7 +531,7 @@ final TextEditingController _buscaController = TextEditingController();
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
 
-                // data
+                // datas
                 Text(
                   dataHora,
                   style: const TextStyle(
@@ -368,7 +539,7 @@ final TextEditingController _buscaController = TextEditingController();
                   ),
                 ),
 
-                const Row(
+                Row(
                   children: [
 
                   // editar
@@ -377,8 +548,13 @@ final TextEditingController _buscaController = TextEditingController();
                       child: Icon(Icons.edit_outlined, color: Color.fromARGB(97, 255, 255, 255), size: 20),
                     ),
 
-                    // apagar
-                    Icon(Icons.delete_outline, color: Color.fromARGB(255, 255, 82, 82), size: 20),
+                    // apagar funcional
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Color.fromARGB(255, 255, 82, 82), size: 20),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => _confirmarDeletar(id), // quando clicado, o icone apaga a nota em questao com a funcao deletarNota
+                    ),
                   ],
                 ),
               ],
