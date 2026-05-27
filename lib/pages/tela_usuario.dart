@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:vita_appprojetos/pages/auth_page.dart';
 import 'package:vita_appprojetos/pages/pagina_login.dart';
 import 'package:vita_appprojetos/uitl/bottom_nav_bar.dart';
 
@@ -31,6 +33,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   late Map<String, bool> switchStates;
+  late final user = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
@@ -114,15 +117,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 10),
 
           // Nome
-          const Text(
-            "João",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            user?.displayName ?? 'Usuário',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 4),
 
           // Email
-          const Text("user@example.com", style: TextStyle(color: Colors.grey)),
+          Text(user!.email!, style: const TextStyle(color: Colors.grey)),
 
           const SizedBox(height: 12),
 
@@ -203,9 +206,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildLogoutButton() {
     return GestureDetector(
       onTap: () {
+        FirebaseAuth.instance.signOut();
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: ((context) => PaginaLogin())),
+          MaterialPageRoute(builder: (context) => AuthPage()),
         );
       },
       child: Container(

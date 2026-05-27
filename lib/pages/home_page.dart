@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/pages/metas.dart';
 import 'package:vita_appprojetos/pages/tela_usuario.dart';
@@ -11,10 +12,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late final user = FirebaseAuth.instance.currentUser;
+
   int currentPageIndex = 0;
 
   final List _pages = [
-    HomePage(),
+    const Placeholder(),
     GoalsPage(),
     Placeholder(),
     Placeholder(),
@@ -459,10 +462,10 @@ class _HomePageState extends State<HomePage> {
   AppBar appBar() {
     return AppBar(
       title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            'Olá, João!',
+            'Olá, ${user?.displayName ?? 'Usuário'}',
             style: TextStyle(
               color: Colors.white,
               fontSize: 24,
