@@ -129,19 +129,9 @@ final CollectionReference _notasCollection = FirebaseFirestore.instance.collecti
             ),
             // botao de confirmar o delete
             TextButton(
-              onPressed: () async {
+              onPressed: () {
                 Navigator.of(context).pop(); // fecha o alerta 
-                
-                try {
-                  await _notasCollection.doc(id).delete(); // espera enquanto deleta do firebase
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Nota deletada!')), // aviso de que foi deletada, feedback
-                  );
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erro ao deletar: $e')), // aviso de que deu erradom feedback do erro
-                  );
-                }
+                _deletarNota(id);
               },
               child: const Text(
                 'Apagar', // mensagem para deletar de fato
