@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:vita_appprojetos/pages/metas.dart';
-import 'package:vita_appprojetos/pages/tela_usuario.dart';
-import 'package:vita_appprojetos/uitl/bottom_nav_bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:vita_appprojetos/pages/TelaQuiz.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,16 +12,40 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late final user = FirebaseAuth.instance.currentUser;
+  final db = FirebaseFirestore.instance;
 
-  int currentPageIndex = 0;
+  int vida = 100;
+  int estamina = 100;
 
-  final List _pages = [
-    const Placeholder(),
-    GoalsPage(),
-    Placeholder(),
-    Placeholder(),
-    ProfileScreen(),
-  ];
+  void verificarStatus() {
+    vida = vida.clamp(0, 100);
+    estamina = estamina.clamp(0, 100);
+  }
+
+  Future salvarDados() async {
+    await db.collection("usuarios").doc(user?.uid ?? "usuario").set({
+      "vida": vida,
+      "estamina": estamina,
+    }, SetOptions(merge: true));
+  }
+
+  Future carregarDados() async {
+    DocumentSnapshot dados =
+        await db.collection("usuarios").doc(user?.uid ?? "usuario").get();
+
+    if (dados.exists) {
+      setState(() {
+        vida = dados['vida'] ?? 100;
+        estamina = dados['estamina'] ?? 100;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    carregarDados();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,391 +58,434 @@ class _HomePageState extends State<HomePage> {
 
   Center body() {
     return Center(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.all(20.0),
-            margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.0),
-              color: const Color.fromARGB(255, 26, 29, 30),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // CARD PRINCIPAL
+            Container(
+              padding: const EdgeInsets.all(20.0),
+              margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20.0),
+                color: const Color.fromARGB(255, 26, 29, 30),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Nível 18",
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                          ),
+                          Text(
+                            "290 / 500 XP",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 117, 72, 4),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.bolt, color: Colors.orange, size: 16),
+                            Text(
+                              " 7 dias",
+                              style: TextStyle(
+                                color: Colors.orange,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // VIDA
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Vida (HP)',
+                        style: TextStyle(
+                          color: Colors.redAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '$vida / 100',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      value: vida / 100,
+                      minHeight: 8,
+                      backgroundColor: Colors.white,
+                      valueColor:
+                          const AlwaysStoppedAnimation(Colors.redAccent),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+
+                  // ESTAMINA
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Energia (Stamina)',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 33, 207, 178),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '$estamina / 100',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      value: estamina / 100,
+                      minHeight: 8,
+                      backgroundColor: Colors.white,
+                      valueColor: const AlwaysStoppedAnimation(
+                        Color.fromARGB(255, 33, 207, 178),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
 
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            // BOTOES RAPIDOS
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Nível 18",
-                          style: TextStyle(color: Colors.grey, fontSize: 14),
-                        ),
-
-                        Text(
-                          "290 / 500 XP",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                // META
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 30,
+                        horizontal: 8,
+                      ),
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 20,
+                        horizontal: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 117, 72, 4),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(15.0),
+                        color: const Color.fromARGB(255, 26, 29, 30),
                       ),
-
-                      child: Row(
+                      child: const Column(
                         children: [
-                          Icon(Icons.bolt, color: Colors.orange, size: 16),
+                          Icon(
+                            Icons.track_changes,
+                            color: Color.fromARGB(255, 30, 64, 214),
+                          ),
+                          SizedBox(height: 8),
                           Text(
-                            " 7 dias",
+                            'NOVA META',
                             style: TextStyle(
-                              color: Colors.orange,
+                              color: Colors.white,
+                              fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Vida (HP)',
-                      style: TextStyle(
-                        color: Colors.redAccent,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    Text(
-                      '90 / 100',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 4),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: 0.9,
-                    minHeight: 8,
-                    backgroundColor: Colors.white,
-                    valueColor: AlwaysStoppedAnimation(Colors.redAccent),
                   ),
                 ),
 
-                SizedBox(height: 10),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Energia (Stamina)',
-                      style: TextStyle(
-                        color: const Color.fromARGB(255, 33, 207, 178),
-                        fontWeight: FontWeight.bold,
+                // NOTA
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 30,
+                        horizontal: 8,
+                      ),
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 20,
+                        horizontal: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15.0),
+                        color: const Color.fromARGB(255, 26, 29, 30),
+                      ),
+                      child: const Column(
+                        children: [
+                          Icon(
+                            Icons.description_outlined,
+                            color: Color.fromARGB(255, 30, 64, 214),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'NOVA NOTA',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-
-                    Text(
-                      '67 / 100',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                SizedBox(height: 4),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: 0.67,
-                    minHeight: 8,
-                    backgroundColor: Colors.white,
-                    valueColor: AlwaysStoppedAnimation(
-                      const Color.fromARGB(255, 33, 207, 178),
+
+                // QUIZ
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      final resultado = await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const TelaQuiz()),
+                      );
+
+                      if (resultado != null) {
+                        setState(() {
+                          vida += resultado['vida'] as int;
+                          estamina += resultado['estamina'] as int;
+
+                          verificarStatus();
+                        });
+
+                        salvarDados();
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 30,
+                        horizontal: 8,
+                      ),
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 20,
+                        horizontal: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15.0),
+                        color: const Color.fromARGB(255, 26, 29, 30),
+                      ),
+                      child: const Column(
+                        children: [
+                          Icon(
+                            Icons.play_circle_outline_outlined,
+                            color: Color.fromARGB(255, 30, 64, 214),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'QUIZ',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
-          ),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 30, horizontal: 8),
-                    margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15.0),
-                      color: const Color.fromARGB(255, 26, 29, 30),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.track_changes,
-                          color: const Color.fromARGB(255, 30, 64, 214),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'NOVA META',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 30, horizontal: 8),
-                    margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15.0),
-                      color: const Color.fromARGB(255, 26, 29, 30),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.description_outlined,
-                          color: const Color.fromARGB(255, 30, 64, 214),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'NOVA NOTA',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 30, horizontal: 8),
-                    margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15.0),
-                      color: const Color.fromARGB(255, 26, 29, 30),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.play_circle_outline_outlined,
-                          color: const Color.fromARGB(255, 30, 64, 214),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'QUIZ',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    padding: EdgeInsets.all(30.0),
-                    margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15.0),
-                      color: const Color.fromARGB(255, 26, 29, 30),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.track_changes,
-                          color: const Color.fromARGB(255, 30, 64, 214),
-                          size: 32,
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          '3',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          'Metas Ativas',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    padding: EdgeInsets.all(30.0),
-                    margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15.0),
-                      color: const Color.fromARGB(255, 26, 29, 30),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(Icons.auto_awesome, color: Colors.green, size: 32),
-                        SizedBox(height: 6),
-                        Text(
-                          '1',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          'Metas Concluídas',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          Padding(
-            padding: EdgeInsets.only(left: 20, top: 20),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.electric_bolt,
-                  color: const Color.fromARGB(255, 30, 64, 214),
-                ),
-                Text(
-                  'Atividade Recente',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          Container(
-            padding: EdgeInsets.all(30.0),
-            margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.0),
-              color: const Color.fromARGB(255, 26, 29, 30),
-            ),
-            child: Row(
+            // CARDS DE ESTATISTICA
+            Row(
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Meta concluída: Fazer lista de cálculo',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      padding: const EdgeInsets.all(30.0),
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 20,
+                        horizontal: 10,
                       ),
-                      Text(
-                        '14 de abr, 22:50',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                          fontWeight: FontWeight.normal,
-                        ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15.0),
+                        color: const Color.fromARGB(255, 26, 29, 30),
                       ),
-                    ], // children coluna
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6.0),
-                    color: const Color.fromARGB(255, 19, 47, 61),
-                  ),
-                  child: Text(
-                    '+130 XP',
-                    style: TextStyle(
-                      color: const Color.fromARGB(255, 44, 99, 208),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                      child: const Column(
+                        children: [
+                          Icon(
+                            Icons.track_changes,
+                            color: Color.fromARGB(255, 30, 64, 214),
+                            size: 32,
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            '3',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            'Metas Ativas',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ], // children linha
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      padding: const EdgeInsets.all(30.0),
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 20,
+                        horizontal: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15.0),
+                        color: const Color.fromARGB(255, 26, 29, 30),
+                      ),
+                      child: const Column(
+                        children: [
+                          Icon(Icons.auto_awesome,
+                              color: Colors.green, size: 32),
+                          SizedBox(height: 6),
+                          Text(
+                            '1',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            'Metas Concluídas',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+
+            // TITULO
+            const Padding(
+              padding: EdgeInsets.only(left: 20, top: 20),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.electric_bolt,
+                    color: Color.fromARGB(255, 30, 64, 214),
+                  ),
+                  SizedBox(width: 5),
+                  Text(
+                    'Atividade Recente',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // CARD ATIVIDADE
+            Container(
+              padding: const EdgeInsets.all(30.0),
+              margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                color: const Color.fromARGB(255, 26, 29, 30),
+              ),
+              child: const Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Meta concluída: Fazer lista de cálculo',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '14 de abr, 22:50',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Flexible(
+                    child: Text(
+                      '+130 XP',
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 44, 99, 208),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -431,14 +497,13 @@ class _HomePageState extends State<HomePage> {
         children: [
           Text(
             'Olá, ${user?.displayName ?? 'Usuário'}',
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
-
-          Text(
+          const Text(
             'Guerreiro do Foco',
             style: TextStyle(
               color: Colors.grey,
@@ -448,7 +513,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-
       backgroundColor: const Color.fromARGB(255, 13, 15, 17),
       elevation: 0.0,
     );

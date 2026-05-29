@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vita_appprojetos/pages/home_page(2).dart';
+import 'package:vita_appprojetos/pages/home_page.dart';
 import 'package:vita_appprojetos/pages/metas.dart';
 import 'package:vita_appprojetos/pages/tela_usuario.dart';
 
