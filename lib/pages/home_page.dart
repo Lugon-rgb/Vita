@@ -29,430 +29,395 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 13, 15, 17),
       appBar: appBar(),
-      body: body(),
+      body: SingleChildScrollView(child: body()),
     );
   }
 
   Center body() {
     return Center(
-      child: ListView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: EdgeInsets.all(20.0),
-                margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.0),
-                  color: const Color.fromARGB(255, 26, 29, 30),
-                ),
+          Container(
+            padding: EdgeInsets.all(20.0),
+            margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20.0),
+              color: const Color.fromARGB(255, 26, 29, 30),
+            ),
 
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Nível 18",
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 14,
-                              ),
-                            ),
-
-                            Text(
-                              "290 / 500 XP",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 117, 72, 4),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-
-                          child: Row(
-                            children: [
-                              Icon(Icons.bolt, color: Colors.orange, size: 16),
-                              Text(
-                                " 7 dias",
-                                style: TextStyle(
-                                  color: Colors.orange,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Vida (HP)',
-                          style: TextStyle(
-                            color: Colors.redAccent,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          "Nível 18",
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
                         ),
 
                         Text(
-                          '90 / 100',
+                          "290 / 500 XP",
                           style: TextStyle(
                             color: Colors.white,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 4),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: LinearProgressIndicator(
-                        value: 0.9,
-                        minHeight: 8,
-                        backgroundColor: Colors.white,
-                        valueColor: AlwaysStoppedAnimation(Colors.redAccent),
+
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
                       ),
-                    ),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 117, 72, 4),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
 
-                    SizedBox(height: 10),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Energia (Stamina)',
-                          style: TextStyle(
-                            color: const Color.fromARGB(255, 33, 207, 178),
-                            fontWeight: FontWeight.bold,
+                      child: Row(
+                        children: [
+                          Icon(Icons.bolt, color: Colors.orange, size: 16),
+                          Text(
+                            " 7 dias",
+                            style: TextStyle(
+                              color: Colors.orange,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-
-                        Text(
-                          '67 / 100',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 4),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: LinearProgressIndicator(
-                        value: 0.67,
-                        minHeight: 8,
-                        backgroundColor: Colors.white,
-                        valueColor: AlwaysStoppedAnimation(
-                          const Color.fromARGB(255, 33, 207, 178),
-                        ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          vertical: 30,
-                          horizontal: 8,
-                        ),
-                        margin: EdgeInsets.symmetric(
-                          vertical: 20,
-                          horizontal: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15.0),
-                          color: const Color.fromARGB(255, 26, 29, 30),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.track_changes,
-                              color: const Color.fromARGB(255, 30, 64, 214),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'NOVA META',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          vertical: 30,
-                          horizontal: 8,
-                        ),
-                        margin: EdgeInsets.symmetric(
-                          vertical: 20,
-                          horizontal: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15.0),
-                          color: const Color.fromARGB(255, 26, 29, 30),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.description_outlined,
-                              color: const Color.fromARGB(255, 30, 64, 214),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'NOVA NOTA',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          vertical: 30,
-                          horizontal: 8,
-                        ),
-                        margin: EdgeInsets.symmetric(
-                          vertical: 20,
-                          horizontal: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15.0),
-                          color: const Color.fromARGB(255, 26, 29, 30),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.play_circle_outline_outlined,
-                              color: const Color.fromARGB(255, 30, 64, 214),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'QUIZ',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        padding: EdgeInsets.all(30.0),
-                        margin: EdgeInsets.symmetric(
-                          vertical: 20,
-                          horizontal: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15.0),
-                          color: const Color.fromARGB(255, 26, 29, 30),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.track_changes,
-                              color: const Color.fromARGB(255, 30, 64, 214),
-                              size: 32,
-                            ),
-                            SizedBox(height: 6),
-                            Text(
-                              '3',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 6),
-                            Text(
-                              'Metas Ativas',
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 14,
-                                fontWeight: FontWeight.normal,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        padding: EdgeInsets.all(30.0),
-                        margin: EdgeInsets.symmetric(
-                          vertical: 20,
-                          horizontal: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15.0),
-                          color: const Color.fromARGB(255, 26, 29, 30),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.auto_awesome,
-                              color: Colors.green,
-                              size: 32,
-                            ),
-                            SizedBox(height: 6),
-                            Text(
-                              '1',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 6),
-                            Text(
-                              'Metas Concluídas',
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 14,
-                                fontWeight: FontWeight.normal,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              Padding(
-                padding: EdgeInsets.only(left: 20, top: 20),
-                child: Row(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(
-                      Icons.electric_bolt,
-                      color: const Color.fromARGB(255, 30, 64, 214),
-                    ),
                     Text(
-                      'Atividade Recente',
+                      'Vida (HP)',
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    Text(
+                      '90 / 100',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
+                SizedBox(height: 4),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: 0.9,
+                    minHeight: 8,
+                    backgroundColor: Colors.white,
+                    valueColor: AlwaysStoppedAnimation(Colors.redAccent),
+                  ),
+                ),
+
+                SizedBox(height: 10),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Energia (Stamina)',
+                      style: TextStyle(
+                        color: const Color.fromARGB(255, 33, 207, 178),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    Text(
+                      '67 / 100',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: 0.67,
+                    minHeight: 8,
+                    backgroundColor: Colors.white,
+                    valueColor: AlwaysStoppedAnimation(
+                      const Color.fromARGB(255, 33, 207, 178),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 30, horizontal: 8),
+                    margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15.0),
+                      color: const Color.fromARGB(255, 26, 29, 30),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.track_changes,
+                          color: const Color.fromARGB(255, 30, 64, 214),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'NOVA META',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
 
-              Container(
-                padding: EdgeInsets.all(30.0),
-                margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  color: const Color.fromARGB(255, 26, 29, 30),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Meta concluída: Fazer lista de cálculo',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            '14 de abr, 22:50',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 12,
-                              fontWeight: FontWeight.normal,
-                            ),
-                          ),
-                        ], // children coluna
-                      ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 30, horizontal: 8),
+                    margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15.0),
+                      color: const Color.fromARGB(255, 26, 29, 30),
                     ),
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6.0),
-                        color: const Color.fromARGB(255, 19, 47, 61),
-                      ),
-                      child: Text(
-                        '+130 XP',
-                        style: TextStyle(
-                          color: const Color.fromARGB(255, 44, 99, 208),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.description_outlined,
+                          color: const Color.fromARGB(255, 30, 64, 214),
                         ),
-                      ),
+                        SizedBox(height: 8),
+                        Text(
+                          'NOVA NOTA',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
-                  ], // children linha
+                  ),
+                ),
+              ),
+
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 30, horizontal: 8),
+                    margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15.0),
+                      color: const Color.fromARGB(255, 26, 29, 30),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.play_circle_outline_outlined,
+                          color: const Color.fromARGB(255, 30, 64, 214),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'QUIZ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ],
+          ),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    padding: EdgeInsets.all(30.0),
+                    margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15.0),
+                      color: const Color.fromARGB(255, 26, 29, 30),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.track_changes,
+                          color: const Color.fromARGB(255, 30, 64, 214),
+                          size: 32,
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          '3',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          'Metas Ativas',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    padding: EdgeInsets.all(30.0),
+                    margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15.0),
+                      color: const Color.fromARGB(255, 26, 29, 30),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(Icons.auto_awesome, color: Colors.green, size: 32),
+                        SizedBox(height: 6),
+                        Text(
+                          '1',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          'Metas Concluídas',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          Padding(
+            padding: EdgeInsets.only(left: 20, top: 20),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.electric_bolt,
+                  color: const Color.fromARGB(255, 30, 64, 214),
+                ),
+                Text(
+                  'Atividade Recente',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Container(
+            padding: EdgeInsets.all(30.0),
+            margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.0),
+              color: const Color.fromARGB(255, 26, 29, 30),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Meta concluída: Fazer lista de cálculo',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '14 de abr, 22:50',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                    ], // children coluna
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6.0),
+                    color: const Color.fromARGB(255, 19, 47, 61),
+                  ),
+                  child: Text(
+                    '+130 XP',
+                    style: TextStyle(
+                      color: const Color.fromARGB(255, 44, 99, 208),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ], // children linha
+            ),
           ),
         ],
       ),
