@@ -52,7 +52,9 @@ class _GoalsPageState extends State<GoalsPage> {
   final descriptionController = TextEditingController();
 
   String selectedCategory = "Financeiro";
-  String selectedPeriod = "Curto Prazo";
+
+  // FILTRO DOS BOTÕES SUPERIORES
+  String selectedPeriod = "Todas";
 
   final List<String> categories = [
     "Financeiro",
@@ -68,6 +70,33 @@ class _GoalsPageState extends State<GoalsPage> {
 
   String selectedFilter = "Todos";
 
+  // FILTRO DAS METAS
+  List<Goal> get filteredGoals {
+    List<Goal> filtered = goals;
+
+    // FILTRO POR CATEGORIA
+    if (selectedFilter != "Todos") {
+      filtered = filtered
+          .where(
+            (goal) =>
+                goal.category == selectedFilter,
+          )
+          .toList();
+    }
+
+    // FILTRO POR PRAZO
+    if (selectedPeriod != "Todas") {
+      filtered = filtered
+          .where(
+            (goal) =>
+                goal.period == selectedPeriod,
+          )
+          .toList();
+    }
+
+    return filtered;
+  }
+
   void addGoal() {
     if (titleController.text.trim().isEmpty) return;
 
@@ -78,7 +107,11 @@ class _GoalsPageState extends State<GoalsPage> {
           category: selectedCategory,
           deadline: deadlineController.text,
           description: descriptionController.text,
-          period: selectedPeriod,
+
+          // GUARDA O PRAZO DA META
+          period: selectedPeriod == "Todas"
+              ? "Curto Prazo"
+              : selectedPeriod,
         ),
       );
     });
@@ -90,28 +123,22 @@ class _GoalsPageState extends State<GoalsPage> {
     Navigator.pop(context);
   }
 
-  List<Goal> get filteredGoals {
-    if (selectedFilter == "Todos") {
-      return goals;
-    }
-
-    return goals
-        .where((goal) => goal.category == selectedFilter)
-        .toList();
-  }
-
   void showAddGoalPage() {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => Scaffold(
+          resizeToAvoidBottomInset: true,
           backgroundColor: const Color(0xFF0F1117),
 
           body: SafeArea(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
+
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+
                 children: [
                   Row(
                     children: [
@@ -119,7 +146,9 @@ class _GoalsPageState extends State<GoalsPage> {
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        icon: const Icon(Icons.arrow_back),
+
+                        icon:
+                            const Icon(Icons.arrow_back),
                       ),
 
                       const SizedBox(width: 5),
@@ -160,33 +189,48 @@ class _GoalsPageState extends State<GoalsPage> {
                       Expanded(
                         child: Column(
                           crossAxisAlignment:
-                              CrossAxisAlignment.start,
+                              CrossAxisAlignment
+                                  .start,
+
                           children: [
                             const Text(
                               "Categoria",
                               style: TextStyle(
                                 fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                                fontWeight:
+                                    FontWeight.bold,
                               ),
                             ),
 
                             const SizedBox(height: 10),
 
-                            DropdownButtonFormField<String>(
+                            DropdownButtonFormField<
+                                String>(
                               value: selectedCategory,
+
                               dropdownColor:
-                                  const Color(0xFF1A1D26),
+                                  const Color(
+                                      0xFF1A1D26),
+
                               decoration:
-                                  customInput("Selecione"),
-                              items: categories.map((category) {
+                                  customInput(
+                                      "Selecione"),
+
+                              items:
+                                  categories.map((
+                                category,
+                              ) {
                                 return DropdownMenuItem(
                                   value: category,
-                                  child: Text(category),
+                                  child:
+                                      Text(category),
                                 );
                               }).toList(),
+
                               onChanged: (value) {
                                 setState(() {
-                                  selectedCategory = value!;
+                                  selectedCategory =
+                                      value!;
                                 });
                               },
                             ),
@@ -199,33 +243,51 @@ class _GoalsPageState extends State<GoalsPage> {
                       Expanded(
                         child: Column(
                           crossAxisAlignment:
-                              CrossAxisAlignment.start,
+                              CrossAxisAlignment
+                                  .start,
+
                           children: [
                             const Text(
                               "Prazo",
                               style: TextStyle(
                                 fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                                fontWeight:
+                                    FontWeight.bold,
                               ),
                             ),
 
                             const SizedBox(height: 10),
 
-                            DropdownButtonFormField<String>(
-                              value: selectedPeriod,
+                            DropdownButtonFormField<
+                                String>(
+                              value:
+                                  selectedPeriod ==
+                                          "Todas"
+                                      ? "Curto Prazo"
+                                      : selectedPeriod,
+
                               dropdownColor:
-                                  const Color(0xFF1A1D26),
+                                  const Color(
+                                      0xFF1A1D26),
+
                               decoration:
-                                  customInput("Selecione"),
-                              items: periods.map((period) {
+                                  customInput(
+                                      "Selecione"),
+
+                              items: periods.map((
+                                period,
+                              ) {
                                 return DropdownMenuItem(
                                   value: period,
-                                  child: Text(period),
+                                  child:
+                                      Text(period),
                                 );
                               }).toList(),
+
                               onChanged: (value) {
                                 setState(() {
-                                  selectedPeriod = value!;
+                                  selectedPeriod =
+                                      value!;
                                 });
                               },
                             ),
@@ -249,7 +311,8 @@ class _GoalsPageState extends State<GoalsPage> {
 
                   TextField(
                     controller: deadlineController,
-                    decoration: customInput("dd/mm/aaaa"),
+                    decoration:
+                        customInput("dd/mm/aaaa"),
                   ),
 
                   const SizedBox(height: 25),
@@ -267,6 +330,7 @@ class _GoalsPageState extends State<GoalsPage> {
                   TextField(
                     controller: descriptionController,
                     maxLines: 4,
+
                     decoration: customInput(
                       "Detalhes da meta...",
                     ),
@@ -277,23 +341,35 @@ class _GoalsPageState extends State<GoalsPage> {
                   SizedBox(
                     width: double.infinity,
                     height: 55,
+
                     child: ElevatedButton.icon(
                       onPressed: addGoal,
+
                       icon: const Icon(Icons.save),
+
                       label: const Text(
                         "Salvar Meta",
-                        style: TextStyle(fontSize: 18),
+                        style: TextStyle(
+                          fontSize: 18,
+                        ),
                       ),
-                      style: ElevatedButton.styleFrom(
+
+                      style:
+                          ElevatedButton.styleFrom(
                         backgroundColor:
                             const Color(0xFF2563EB),
-                        shape: RoundedRectangleBorder(
+
+                        shape:
+                            RoundedRectangleBorder(
                           borderRadius:
-                              BorderRadius.circular(15),
+                              BorderRadius.circular(
+                                  15),
                         ),
                       ),
                     ),
                   ),
+
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
@@ -308,18 +384,32 @@ class _GoalsPageState extends State<GoalsPage> {
   InputDecoration customInput(String hint) {
     return InputDecoration(
       hintText: hint,
+
       filled: true,
+
       fillColor: const Color(0xFF111827),
+
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
+
         borderSide: BorderSide(
           color: Colors.white.withOpacity(0.1),
         ),
       ),
+
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
+
         borderSide: BorderSide(
           color: Colors.white.withOpacity(0.1),
+        ),
+      ),
+
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+
+        borderSide: const BorderSide(
+          color: Color(0xFF2563EB),
         ),
       ),
     );
@@ -334,18 +424,23 @@ class _GoalsPageState extends State<GoalsPage> {
           selectedFilter = text;
         });
       },
+
       child: Container(
         margin: const EdgeInsets.only(right: 10),
+
         padding: const EdgeInsets.symmetric(
           horizontal: 18,
           vertical: 10,
         ),
+
         decoration: BoxDecoration(
           color: isSelected
               ? const Color(0xFF2563EB)
               : const Color(0xFF1F2430),
+
           borderRadius: BorderRadius.circular(30),
         ),
+
         child: Text(
           text,
           style: TextStyle(
@@ -359,35 +454,90 @@ class _GoalsPageState extends State<GoalsPage> {
     );
   }
 
+  // BOTÕES SUPERIORES
+  Widget buildTab(String text) {
+    bool isSelected = selectedPeriod == text;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            selectedPeriod = text;
+          });
+        },
+
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            vertical: 12,
+          ),
+
+          decoration: BoxDecoration(
+            color: isSelected
+                ? const Color(0xFF0F1117)
+                : Colors.transparent,
+
+            borderRadius:
+                BorderRadius.circular(15),
+          ),
+
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: isSelected
+                    ? Colors.white
+                    : Colors.white54,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   BottomNavigationBar buildBottomBar() {
     return BottomNavigationBar(
       currentIndex: selectedBottomIndex,
+
       backgroundColor: const Color(0xFF111827),
-      selectedItemColor: const Color(0xFF2563EB),
+
+      selectedItemColor:
+          const Color(0xFF2563EB),
+
       unselectedItemColor: Colors.white54,
+
       type: BottomNavigationBarType.fixed,
+
       onTap: (index) {
         setState(() {
           selectedBottomIndex = index;
         });
       },
+
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home_outlined),
           label: "Início",
         ),
+
         BottomNavigationBarItem(
           icon: Icon(Icons.gps_fixed),
           label: "Metas",
         ),
+
         BottomNavigationBarItem(
           icon: Icon(Icons.note_alt_outlined),
           label: "Notas",
         ),
+
         BottomNavigationBarItem(
-          icon: Icon(Icons.account_balance_wallet_outlined),
+          icon: Icon(
+            Icons.account_balance_wallet_outlined,
+          ),
           label: "Finanças",
         ),
+
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
           label: "Perfil",
@@ -404,12 +554,17 @@ class _GoalsPageState extends State<GoalsPage> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
+
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+
             children: [
               Row(
                 mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
+                    MainAxisAlignment
+                        .spaceBetween,
+
                 children: [
                   const Text(
                     "Metas",
@@ -421,18 +576,29 @@ class _GoalsPageState extends State<GoalsPage> {
 
                   ElevatedButton.icon(
                     onPressed: showAddGoalPage,
+
                     icon: const Icon(Icons.add),
-                    label: const Text("Nova Meta"),
-                    style: ElevatedButton.styleFrom(
+
+                    label:
+                        const Text("Nova Meta"),
+
+                    style:
+                        ElevatedButton.styleFrom(
                       backgroundColor:
-                          const Color(0xFF2563EB),
-                      padding: const EdgeInsets.symmetric(
+                          const Color(
+                              0xFF2563EB),
+
+                      padding:
+                          const EdgeInsets.symmetric(
                         horizontal: 18,
                         vertical: 14,
                       ),
-                      shape: RoundedRectangleBorder(
+
+                      shape:
+                          RoundedRectangleBorder(
                         borderRadius:
-                            BorderRadius.circular(15),
+                            BorderRadius.circular(
+                                15),
                       ),
                     ),
                   ),
@@ -441,41 +607,43 @@ class _GoalsPageState extends State<GoalsPage> {
 
               const SizedBox(height: 25),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1A1D26),
-                        borderRadius:
-                            BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.spaceAround,
-                        children: [
-                          buildTab("Todas"),
-                          buildTab("Curto Prazo"),
-                          buildTab("Longo Prazo"),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+              // BOTÕES DE PRAZO
+              Container(
+                padding: const EdgeInsets.all(5),
+
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A1D26),
+
+                  borderRadius:
+                      BorderRadius.circular(20),
+                ),
+
+                child: Row(
+                  children: [
+                    buildTab("Todas"),
+                    buildTab("Curto Prazo"),
+                    buildTab("Longo Prazo"),
+                  ],
+                ),
               ),
 
               const SizedBox(height: 20),
 
+              // CATEGORIAS
               SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
+                scrollDirection:
+                    Axis.horizontal,
+
                 child: Row(
                   children: [
                     buildFilterChip("Todos"),
-                    buildFilterChip("Financeiro"),
+                    buildFilterChip(
+                        "Financeiro"),
                     buildFilterChip("Saúde"),
-                    buildFilterChip("Carreira"),
-                    buildFilterChip("Pessoal"),
+                    buildFilterChip(
+                        "Carreira"),
+                    buildFilterChip(
+                        "Pessoal"),
                   ],
                 ),
               ),
@@ -486,43 +654,59 @@ class _GoalsPageState extends State<GoalsPage> {
                 child: filteredGoals.isEmpty
                     ? Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(30),
+
+                        padding:
+                            const EdgeInsets.all(
+                                30),
+
                         decoration: BoxDecoration(
                           borderRadius:
-                              BorderRadius.circular(25),
+                              BorderRadius
+                                  .circular(25),
+
                           border: Border.all(
-                            color:
-                                Colors.white.withOpacity(0.1),
+                            color: Colors.white
+                                .withOpacity(0.1),
                           ),
                         ),
+
                         child: Column(
                           mainAxisAlignment:
-                              MainAxisAlignment.center,
+                              MainAxisAlignment
+                                  .center,
+
                           children: [
                             const Icon(
                               Icons.gps_fixed,
                               size: 55,
-                              color: Colors.white38,
+                              color:
+                                  Colors.white38,
                             ),
 
-                            const SizedBox(height: 15),
+                            const SizedBox(
+                                height: 15),
 
                             const Text(
                               "Nenhuma meta encontrada.",
                               style: TextStyle(
                                 fontSize: 22,
-                                color: Colors.white60,
+                                color:
+                                    Colors.white60,
                               ),
                             ),
 
-                            const SizedBox(height: 10),
+                            const SizedBox(
+                                height: 10),
 
                             GestureDetector(
-                              onTap: showAddGoalPage,
+                              onTap:
+                                  showAddGoalPage,
+
                               child: const Text(
                                 "Criar uma agora",
                                 style: TextStyle(
-                                  color: Color(0xFF2563EB),
+                                  color: Color(
+                                      0xFF2563EB),
                                   fontSize: 18,
                                 ),
                               ),
@@ -531,68 +715,98 @@ class _GoalsPageState extends State<GoalsPage> {
                         ),
                       )
                     : ListView.builder(
-                        itemCount: filteredGoals.length,
-                        itemBuilder: (context, index) {
+                        itemCount:
+                            filteredGoals.length,
+
+                        itemBuilder:
+                            (context, index) {
                           final goal =
-                              filteredGoals[index];
+                              filteredGoals[
+                                  index];
 
                           return Container(
                             margin:
-                                const EdgeInsets.only(
+                                const EdgeInsets
+                                    .only(
                               bottom: 18,
                             ),
+
                             padding:
-                                const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
+                                const EdgeInsets
+                                    .all(20),
+
+                            decoration:
+                                BoxDecoration(
                               color:
-                                  const Color(0xFF1A1D26),
+                                  const Color(
+                                      0xFF1A1D26),
+
                               borderRadius:
-                                  BorderRadius.circular(
-                                      25),
+                                  BorderRadius
+                                      .circular(
+                                          25),
                             ),
+
                             child: Column(
                               crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                                  CrossAxisAlignment
+                                      .start,
+
                               children: [
                                 Text(
                                   goal.title,
-                                  style: const TextStyle(
+
+                                  style:
+                                      const TextStyle(
                                     fontSize: 22,
                                     fontWeight:
-                                        FontWeight.bold,
+                                        FontWeight
+                                            .bold,
                                   ),
                                 ),
 
-                                const SizedBox(height: 8),
+                                const SizedBox(
+                                    height: 8),
 
                                 Text(
-                                  goal.category,
-                                  style: const TextStyle(
-                                    color: Colors.white60,
+                                  "${goal.category} • ${goal.period}",
+
+                                  style:
+                                      const TextStyle(
+                                    color: Colors
+                                        .white60,
                                   ),
                                 ),
 
-                                const SizedBox(height: 15),
+                                const SizedBox(
+                                    height: 15),
 
                                 ClipRRect(
                                   borderRadius:
                                       BorderRadius
-                                          .circular(10),
+                                          .circular(
+                                              10),
+
                                   child:
                                       LinearProgressIndicator(
-                                    value: goal.progress,
+                                    value:
+                                        goal.progress,
                                     minHeight: 10,
                                   ),
                                 ),
 
-                                const SizedBox(height: 15),
+                                const SizedBox(
+                                    height: 15),
 
                                 Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.end,
+                                      MainAxisAlignment
+                                          .end,
+
                                   children: [
                                     IconButton(
-                                      onPressed: () {
+                                      onPressed:
+                                          () {
                                         setState(() {
                                           goal.progress =
                                               goal.progress ==
@@ -601,27 +815,36 @@ class _GoalsPageState extends State<GoalsPage> {
                                                   : 1;
                                         });
                                       },
+
                                       icon: Icon(
-                                        goal.progress == 1
+                                        goal.progress ==
+                                                1
                                             ? Icons
                                                 .check_circle
                                             : Icons
                                                 .check_circle_outline,
-                                        color:
-                                            Colors.green,
+
+                                        color: Colors
+                                            .green,
                                       ),
                                     ),
 
                                     IconButton(
-                                      onPressed: () {
+                                      onPressed:
+                                          () {
                                         setState(() {
                                           goals.remove(
                                               goal);
                                         });
                                       },
-                                      icon: const Icon(
-                                        Icons.delete,
-                                        color: Colors.red,
+
+                                      icon:
+                                          const Icon(
+                                        Icons
+                                            .delete,
+                                        color:
+                                            Colors
+                                                .red,
                                       ),
                                     ),
                                   ],
@@ -638,31 +861,6 @@ class _GoalsPageState extends State<GoalsPage> {
       ),
 
       bottomNavigationBar: buildBottomBar(),
-    );
-  }
-
-  Widget buildTab(String text) {
-    bool isSelected = text == "Todas";
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 12,
-      ),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? const Color(0xFF0F1117)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color:
-              isSelected ? Colors.white : Colors.white54,
-        ),
-      ),
     );
   }
 }
