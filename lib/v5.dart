@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'Paginas/Financias.dart';
-import 'Paginas/TelaQuiz.dart';
+import 'Paginas/financias.dart';
+import 'Paginas/tela_quiz.dart';
+import 'Paginas/edita_quiz.dart';
+import 'Paginas/carregamento.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -20,7 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: VitaTeste(),
+      home: Carregamentos(),
     );
   }
 }
@@ -37,7 +39,8 @@ class _VitaTesteState extends State<VitaTeste> {
 
   int vida = 100;
   int estamina = 100;
-
+  int xp = 0;
+  int nivel = 1;
   int myIndex = 0;
 
   void verificarStatus() {
@@ -52,6 +55,21 @@ class _VitaTesteState extends State<VitaTeste> {
     }, SetOptions(merge: true));
   }
 
+  Future<void> _ganharXp(int quantidade) async {
+    xp += quantidade;
+    if (xp >= 500) {
+      xp = xp - 500;
+      nivel += 1;
+    }
+
+    setState(() {});
+
+    await db.collection('usuarios').doc('arthur').set({
+      'xp': xp,
+      'nivel': nivel,
+    }, SetOptions(merge: true));
+  }
+
   Future carregarDados() async {
     DocumentSnapshot dados = await db
         .collection("usuarios")
@@ -62,6 +80,8 @@ class _VitaTesteState extends State<VitaTeste> {
       setState(() {
         vida = dados['vida'] ?? 100;
         estamina = dados['estamina'] ?? 100;
+        xp = dados['xp'] ?? 0;
+        nivel = dados['nivel'] ?? 1;
       });
     }
   }
@@ -150,24 +170,23 @@ class _VitaTesteState extends State<VitaTeste> {
 
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
                   children: [
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-
                       children: [
                         Text(
-                          "Nível 18",
-                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                          "Nível $nivel",
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                          ),
                         ),
-
                         Text(
-                          "290 / 500 XP",
-                          style: TextStyle(
+                          "$xp / 500 XP",
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -175,22 +194,18 @@ class _VitaTesteState extends State<VitaTeste> {
                         ),
                       ],
                     ),
-
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 6,
                       ),
-
                       decoration: BoxDecoration(
                         color: const Color.fromARGB(255, 117, 72, 4),
                         borderRadius: BorderRadius.circular(20),
                       ),
-
                       child: const Row(
                         children: [
                           Icon(Icons.bolt, color: Colors.orange, size: 16),
-
                           Text(
                             " 7 dias",
                             style: TextStyle(
@@ -209,7 +224,6 @@ class _VitaTesteState extends State<VitaTeste> {
                 // VIDA
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
                   children: [
                     const Text(
                       'Vida (HP)',
@@ -218,7 +232,6 @@ class _VitaTesteState extends State<VitaTeste> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
                     Text(
                       '$vida / 100',
                       style: const TextStyle(
@@ -228,17 +241,13 @@ class _VitaTesteState extends State<VitaTeste> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 4),
-
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-
                   child: LinearProgressIndicator(
                     value: vida / 100,
                     minHeight: 8,
                     backgroundColor: Colors.white,
-
                     valueColor: const AlwaysStoppedAnimation(Colors.redAccent),
                   ),
                 ),
@@ -248,7 +257,6 @@ class _VitaTesteState extends State<VitaTeste> {
                 // ESTAMINA
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
                   children: [
                     const Text(
                       'Energia (Stamina)',
@@ -257,7 +265,6 @@ class _VitaTesteState extends State<VitaTeste> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
                     Text(
                       '$estamina / 100',
                       style: const TextStyle(
@@ -267,17 +274,13 @@ class _VitaTesteState extends State<VitaTeste> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 4),
-
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-
                   child: LinearProgressIndicator(
                     value: estamina / 100,
                     minHeight: 8,
                     backgroundColor: Colors.white,
-
                     valueColor: const AlwaysStoppedAnimation(
                       Color.fromARGB(255, 33, 207, 178),
                     ),
@@ -286,7 +289,6 @@ class _VitaTesteState extends State<VitaTeste> {
               ],
             ),
           ),
-
           // BOTOES RAPIDOS
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -373,62 +375,107 @@ class _VitaTesteState extends State<VitaTeste> {
               ),
 
               // QUIZ
+              // QUIZ + EDITAR (substitui o Expanded do QUIZ)
               Expanded(
-                child: GestureDetector(
-                  onTap: () async {
-                    final resultado = await Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const TelaQuiz()),
-                    );
-
-                    if (resultado != null) {
-                      setState(() {
-                        vida += resultado['vida'] as int;
-                        estamina += resultado['estamina'] as int;
-
-                        verificarStatus();
-                      });
-
-                      salvarDados();
-                    }
-                  },
-
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 30,
-                      horizontal: 8,
-                    ),
-
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 20,
-                      horizontal: 10,
-                    ),
-
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: const Color.fromARGB(255, 26, 29, 30),
-                    ),
-
-                    child: const Column(
-                      children: [
-                        Icon(
-                          Icons.play_circle_outline_outlined,
-                          color: Color.fromARGB(255, 30, 64, 214),
-                        ),
-
-                        SizedBox(height: 8),
-
-                        Text(
-                          'QUIZ',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                flex: 2, // ocupa mais espaço por ser dois botões
+                child: Row(
+                  children: [
+                    // BOTÃO QUIZ
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          final resultado = await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const TelaQuiz()),
+                          );
+                          if (resultado != null) {
+                            setState(() {
+                              vida += resultado['vida'] as int;
+                              estamina += resultado['estamina'] as int;
+                              verificarStatus();
+                            });
+                            await salvarDados();
+                            await _ganharXp(25);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 30,
+                            horizontal: 8,
+                          ),
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 20,
+                            horizontal: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: const Color.fromARGB(255, 26, 29, 30),
+                          ),
+                          child: const Column(
+                            children: [
+                              Icon(
+                                Icons.play_circle_outline_outlined,
+                                color: Color.fromARGB(255, 30, 64, 214),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                'QUIZ',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                    // BOTÃO EDITAR QUIZ
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const TelaEditarQuiz(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 30,
+                            horizontal: 8,
+                          ),
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 20,
+                            horizontal: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: const Color.fromARGB(255, 26, 29, 30),
+                          ),
+                          child: const Column(
+                            children: [
+                              Icon(
+                                Icons.edit_note,
+                                color: Color.fromARGB(255, 30, 64, 214),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                'EDITAR',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
