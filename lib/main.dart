@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'pages/notas.dart';
+// import 'pages/conquistas.dart';
+// import 'pages/titulos.dart';
 import 'package:vita_appprojetos/pages/auth_page.dart';
 import 'package:vita_appprojetos/pages/home_page.dart';
 import 'package:vita_appprojetos/pages/metas.dart';
@@ -33,13 +36,17 @@ class VitaApp extends StatelessWidget {
           elevation: 0,
           centerTitle: true,
           titleTextStyle: TextStyle(
-            color: Colors.white70,
+            color: Color.fromARGB(179, 255, 255, 255),
             fontSize: 18,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.2,
           ),
         ),
       ),
+      // home: const ConquistasPage()
+      // home: const TitulosPage()
+      // home: const NotasPage()
+      // home: const GoalsPage(),
       home: AuthPage(),
       routes: {
         '/METAS': (context) => const GoalsPage(),
