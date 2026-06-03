@@ -27,6 +27,7 @@ class RoundedTextFormField extends StatelessWidget {
       child: Center(
         child: Container(
           child: TextFormField(
+            controller: controller,
             validator: vali,
             onSaved: onSaved,
             decoration: InputDecoration(

@@ -13,19 +13,19 @@ class OverlayPage extends StatefulWidget {
 class _OverlayPageState extends State<OverlayPage> {
   int currentPageIndex = 0;
 
-  final List _pages = [
-    HomePage(),
-    GoalsPage(),
-    Placeholder(),
-    Placeholder(),
-    ProfileScreen(),
-  ];
+  late final Map<int, Widget> _pages = {
+    0: const HomePage(),
+    1: const GoalsPage(),
+    2: const Placeholder(),
+    3: const Placeholder(),
+    4: const ProfileScreen(),
+  };
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 13, 15, 17),
-      body: _pages[currentPageIndex],
+      body: _pages[currentPageIndex]!,
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
           setState(() {
@@ -34,24 +34,20 @@ class _OverlayPageState extends State<OverlayPage> {
         },
         selectedIndex: currentPageIndex,
         backgroundColor: const Color.fromARGB(255, 26, 29, 30),
-        destinations: [
+        destinations: const [
           NavigationDestination(icon: Icon(Icons.home), label: 'Inicio'),
-
           NavigationDestination(
             icon: Icon(Icons.track_changes),
             label: 'Metas',
           ),
-
           NavigationDestination(
             icon: Icon(Icons.description_outlined),
             label: 'Notas',
           ),
-
           NavigationDestination(
             icon: Icon(Icons.account_balance_wallet_outlined),
             label: 'Finanças',
           ),
-
           NavigationDestination(icon: Icon(Icons.person), label: 'Perfil'),
         ],
       ),

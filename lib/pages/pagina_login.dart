@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/pages/pagina_nova_senha.dart';
+import 'package:vita_appprojetos/uitl/auth_util.dart';
 import 'package:vita_appprojetos/uitl/dialog_box.dart';
 import 'package:vita_appprojetos/uitl/my_button.dart';
 import 'package:vita_appprojetos/uitl/text_form_field.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class PaginaLogin extends StatefulWidget {
   @override
@@ -13,9 +16,17 @@ class PaginaLogin extends StatefulWidget {
 }
 
 class _PaginaLoginState extends State<PaginaLogin> {
+  final _emailUsuario = TextEditingController();
+  final _senhaUsuario = TextEditingController();
+  final _confSenha = TextEditingController();
+  final _nomeUsuario = TextEditingController();
+
+  AuthUtil _auth = AuthUtil();
+
   bool _isObscured = true;
   bool _isObscuredR = true;
   bool _isLoginMode = true;
+  bool _isLoading = false;
 
   File? _fotoPerfil;
 
@@ -50,6 +61,142 @@ class _PaginaLoginState extends State<PaginaLogin> {
   }
 
   void onPressed() {}
+
+  void logUserIn() async {
+    final email = _emailUsuario.text.trim();
+    final senha = _senhaUsuario.text.trim();
+
+    if (email.isEmpty || senha.isEmpty) {
+      if (mounted) {
+        _showError('Por favor, preencha email e senha');
+      }
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _auth.logUserIn(email: email, senha: senha);
+      // Clear form fields
+      _clearFormFields();
+      // Navigation is handled by AuthPage StreamBuilder
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        _showError(_getErrorMessage(e.code));
+      }
+    } catch (e) {
+      if (mounted) {
+        _showError('Erro ao fazer login. Tente novamente.');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void registerUser() async {
+    final email = _emailUsuario.text.trim();
+    final senha = _senhaUsuario.text.trim();
+    final conSenha = _confSenha.text.trim();
+    final nome = _nomeUsuario.text.trim();
+
+    if (email.isEmpty || senha.isEmpty || nome.isEmpty) {
+      if (mounted) {
+        _showError('Por favor, preencha email, nome e senha');
+      }
+      return;
+    }
+
+    if (senha != conSenha) {
+      if (mounted) {
+        _showError('Senhas precisam ser identicas');
+      }
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _auth.registerUser(
+        email: email,
+        senha: senha,
+        nome: nome,
+        // fotoPerfil: _fotoPerfil,
+      );
+      // Clear form fields
+      _clearFormFields();
+      // Navigation is handled by AuthPage StreamBuilder
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        _showError(_getErrorMessage(e.code));
+      }
+    } catch (e) {
+      if (mounted) {
+        _showError('Erro ao criar conta. Tente novamente.');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _clearFormFields() {
+    _emailUsuario.clear();
+    _senhaUsuario.clear();
+    _confSenha.clear();
+    _nomeUsuario.clear();
+    if (mounted) {
+      setState(() {
+        _fotoPerfil = null;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailUsuario.dispose();
+    _senhaUsuario.dispose();
+    _confSenha.dispose();
+    _nomeUsuario.dispose();
+    super.dispose();
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
+  String _getErrorMessage(String code) {
+    switch (code) {
+      case 'invalid-credential':
+        return 'Email ou senha incorretos';
+      case 'too-many-requests':
+        return 'Muitas tentativas. Tente mais tarde';
+      case 'channel-error':
+        return 'Erro de conexão. Verifique sua internet';
+      case 'weak-password':
+        return 'Senha muito fraca';
+      case 'email-already-in-use':
+        return 'Email já está associado a uma conta';
+      default:
+        return 'Erro ao fazer login: $code';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -189,6 +336,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
               child: RoundedTextFormField(
                 fieldLabel: "Email",
                 hintText: "seu@email.com",
+                controller: _emailUsuario,
               ),
             ),
             Padding(
@@ -197,6 +345,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
                 fieldLabel: "Senha",
                 hintText: "Senha",
                 obscureText: _isObscured,
+                controller: _senhaUsuario,
                 iconDec: IconButton(
                   onPressed: _obscure,
                   icon: _isObscured
@@ -252,6 +401,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
             child: RoundedTextFormField(
               fieldLabel: "Nome",
               hintText: "Seu nome",
+              controller: _nomeUsuario,
             ),
           ),
           Padding(
@@ -259,6 +409,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
             child: RoundedTextFormField(
               fieldLabel: "Email",
               hintText: "seu@email.com",
+              controller: _emailUsuario,
             ),
           ),
           Padding(
@@ -266,6 +417,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
             child: RoundedTextFormField(
               fieldLabel: "Senha",
               hintText: "Senha",
+              controller: _senhaUsuario,
               obscureText: _isObscuredR,
               iconDec: IconButton(
                 onPressed: _obscureR,
@@ -281,6 +433,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
             child: RoundedTextFormField(
               fieldLabel: "Confirmar senha",
               hintText: "Confirmar senha",
+              controller: _confSenha,
               obscureText: _isObscuredR,
               iconDec: IconButton(
                 onPressed: _obscureR,
@@ -304,24 +457,39 @@ class _PaginaLoginState extends State<PaginaLogin> {
       );
     }
 
-    void _login() {
-      Navigator.pushReplacementNamed(context, "/HOME");
-    }
-
     return Column(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(
-          child: MyButton(
-            text: "Log In",
-            onPressed: _login,
-            elevation: 0,
-            color: Colors.blue,
-            textColor: Colors.white,
-            buttonSize: Size(420, 52),
-            fontSize: 32,
-          ),
+          child: _isLoading
+              ? SizedBox(
+                  width: 420,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                    ),
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  ),
+                )
+              : MyButton(
+                  text: "Log In",
+                  onPressed: logUserIn,
+                  elevation: 0,
+                  color: Colors.blue,
+                  textColor: Colors.white,
+                  buttonSize: Size(420, 52),
+                  fontSize: 32,
+                ),
         ),
         TextButton(
           onPressed: _redefSenha,
@@ -348,7 +516,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
         SizedBox(
           child: MyButton(
             text: "Criar conta",
-            onPressed: _contaCriada,
+            onPressed: registerUser,
             elevation: 0,
             color: Colors.blue,
             textColor: Colors.white,
