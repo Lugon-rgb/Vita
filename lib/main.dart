@@ -40,8 +40,6 @@ class VitaApp extends StatelessWidget {
           ),
         ),
       ),
-      // home: const ConquistasPage()
-      // home: const GoalsPage(),
       home: AuthPage(),
       routes: {
         '/METAS': (context) => const GoalsPage(),

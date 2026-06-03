@@ -1,31 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:vita_appprojetos/uitl/bottom_nav_bar.dart';
-
-// void main() {
-//   runApp(const MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       home: const GoalsPage(),
-//       theme: ThemeData(
-//         brightness: Brightness.dark,
-//         scaffoldBackgroundColor: const Color(0xFF0F1117),
-//       ),
-//     );
-//   }
-// }
 
 class Goal {
   String title;
-  bool completed;
+  String category;
+  String deadline;
+  String description;
+  String period;
+  double progress;
 
-  Goal({required this.title, this.completed = false});
+  Goal({
+    required this.title,
+    required this.category,
+    required this.deadline,
+    required this.description,
+    required this.period,
+    this.progress = 0,
+  });
 }
 
 class GoalsPage extends StatefulWidget {
@@ -40,137 +30,554 @@ class _GoalsPageState extends State<GoalsPage> {
 
   int selectedBottomIndex = 1;
 
-  final TextEditingController controller = TextEditingController();
+  final titleController = TextEditingController();
+  final deadlineController = TextEditingController();
+  final descriptionController = TextEditingController();
+
+  String selectedCategory = "Financeiro";
+
+  // FILTRO DOS BOTÕES SUPERIORES
+  String selectedPeriod = "Todas";
+
+  final List<String> categories = [
+    "Financeiro",
+    "Saúde",
+    "Carreira",
+    "Pessoal",
+  ];
+
+  final List<String> periods = ["Curto Prazo", "Longo Prazo"];
+
+  String selectedFilter = "Todos";
+
+  // FILTRO DAS METAS
+  List<Goal> get filteredGoals {
+    List<Goal> filtered = goals;
+
+    // FILTRO POR CATEGORIA
+    if (selectedFilter != "Todos") {
+      filtered = filtered
+          .where((goal) => goal.category == selectedFilter)
+          .toList();
+    }
+
+    // FILTRO POR PRAZO
+    if (selectedPeriod != "Todas") {
+      filtered = filtered
+          .where((goal) => goal.period == selectedPeriod)
+          .toList();
+    }
+
+    return filtered;
+  }
 
   void addGoal() {
-    if (controller.text.trim().isEmpty) return;
+    if (titleController.text.trim().isEmpty) return;
 
     setState(() {
-      goals.add(Goal(title: controller.text));
+      goals.add(
+        Goal(
+          title: titleController.text,
+          category: selectedCategory,
+          deadline: deadlineController.text,
+          description: descriptionController.text,
+
+          // GUARDA O PRAZO DA META
+          period: selectedPeriod == "Todas" ? "Curto Prazo" : selectedPeriod,
+        ),
+      );
     });
 
-    controller.clear();
+    titleController.clear();
+    deadlineController.clear();
+    descriptionController.clear();
+
     Navigator.pop(context);
   }
 
-  void showAddGoalModal() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF1A1D26),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Nova Meta",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+  void showAddGoalPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          resizeToAvoidBottomInset: true,
+          backgroundColor: const Color(0xFF0F1117),
 
-              const SizedBox(height: 20),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
 
-              TextField(
-                controller: controller,
-                decoration: InputDecoration(
-                  hintText: "Digite sua meta",
-                  filled: true,
-                  fillColor: const Color(0xFF2A2F3A),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+
+                        icon: const Icon(Icons.arrow_back),
+                      ),
+
+                      const SizedBox(width: 5),
+
+                      const Text(
+                        "Nova Meta",
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
 
-              const SizedBox(height: 20),
+                  const SizedBox(height: 30),
 
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: addGoal,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                  const Text(
+                    "Título",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  TextField(
+                    controller: titleController,
+                    decoration: customInput("Ex: Juntar R\$ 5000"),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+
+                          children: [
+                            const Text(
+                              "Categoria",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            DropdownButtonFormField<String>(
+                              initialValue: selectedCategory,
+
+                              dropdownColor: const Color(0xFF1A1D26),
+
+                              decoration: customInput("Selecione"),
+
+                              items: categories.map((category) {
+                                return DropdownMenuItem(
+                                  value: category,
+                                  child: Text(category),
+                                );
+                              }).toList(),
+
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedCategory = value!;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(width: 15),
+
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+
+                          children: [
+                            const Text(
+                              "Prazo",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            DropdownButtonFormField<String>(
+                              initialValue: selectedPeriod == "Todas"
+                                  ? "Curto Prazo"
+                                  : selectedPeriod,
+
+                              dropdownColor: const Color(0xFF1A1D26),
+
+                              decoration: customInput("Selecione"),
+
+                              items: periods.map((period) {
+                                return DropdownMenuItem(
+                                  value: period,
+                                  child: Text(period),
+                                );
+                              }).toList(),
+
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedPeriod = value!;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  const Text(
+                    "Data Limite (Opcional)",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  TextField(
+                    controller: deadlineController,
+                    decoration: customInput("dd/mm/aaaa"),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  const Text(
+                    "Descrição (Opcional)",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  TextField(
+                    controller: descriptionController,
+                    maxLines: 4,
+
+                    decoration: customInput("Detalhes da meta..."),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+
+                    child: ElevatedButton.icon(
+                      onPressed: addGoal,
+
+                      icon: const Icon(Icons.save),
+
+                      label: const Text(
+                        "Salvar Meta",
+                        style: TextStyle(fontSize: 18),
+                      ),
+
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
                     ),
                   ),
-                  child: const Text("Criar Meta"),
-                ),
+
+                  const SizedBox(height: 40),
+                ],
               ),
-            ],
+            ),
           ),
-        );
+        ),
+      ),
+    );
+  }
+
+  InputDecoration customInput(String hint) {
+    return InputDecoration(
+      hintText: hint,
+
+      filled: true,
+
+      fillColor: const Color(0xFF111827),
+
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+
+        borderSide: const BorderSide(color: Color(0xFF2563EB)),
+      ),
+    );
+  }
+
+  Widget buildFilterChip(String text) {
+    final bool isSelected = selectedFilter == text;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedFilter = text;
+        });
       },
+
+      child: Container(
+        margin: const EdgeInsets.only(right: 10),
+
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF1F2430),
+
+          borderRadius: BorderRadius.circular(30),
+        ),
+
+        child: Text(
+          text,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isSelected ? Colors.white : Colors.white70,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // BOTÕES SUPERIORES
+  Widget buildTab(String text) {
+    bool isSelected = selectedPeriod == text;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            selectedPeriod = text;
+          });
+        },
+
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF0F1117) : Colors.transparent,
+
+            borderRadius: BorderRadius.circular(15),
+          ),
+
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: isSelected ? Colors.white : Colors.white54,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF0F1117),
+
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(20),
+
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+
             children: [
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Metas",
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                children: [
+                  const Text(
+                    "Metas",
+                    style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
+                  ),
+
+                  ElevatedButton.icon(
+                    onPressed: showAddGoalPage,
+
+                    icon: const Icon(Icons.add),
+
+                    label: const Text("Nova Meta"),
+
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB),
+
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 14,
+                      ),
+
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 25),
+
+              // BOTÕES DE PRAZO
+              Container(
+                padding: const EdgeInsets.all(5),
+
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A1D26),
+
+                  borderRadius: BorderRadius.circular(20),
+                ),
+
+                child: Row(
+                  children: [
+                    buildTab("Todas"),
+                    buildTab("Curto Prazo"),
+                    buildTab("Longo Prazo"),
+                  ],
                 ),
               ),
 
               const SizedBox(height: 20),
 
+              // CATEGORIAS
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+
+                child: Row(
+                  children: [
+                    buildFilterChip("Todos"),
+                    buildFilterChip("Financeiro"),
+                    buildFilterChip("Saúde"),
+                    buildFilterChip("Carreira"),
+                    buildFilterChip("Pessoal"),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 25),
+
               Expanded(
-                child: goals.isEmpty
-                    ? const Center(
-                        child: Text(
-                          "Nenhuma meta criada ainda",
-                          style: TextStyle(color: Colors.white54, fontSize: 16),
+                child: filteredGoals.isEmpty
+                    ? Container(
+                        width: double.infinity,
+
+                        padding: const EdgeInsets.all(30),
+
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25),
+
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.1),
+                          ),
+                        ),
+
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+
+                          children: [
+                            const Icon(
+                              Icons.gps_fixed,
+                              size: 55,
+                              color: Colors.white38,
+                            ),
+
+                            const SizedBox(height: 15),
+
+                            const Text(
+                              "Nenhuma meta encontrada.",
+                              style: TextStyle(
+                                fontSize: 22,
+                                color: Colors.white60,
+                              ),
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            GestureDetector(
+                              onTap: showAddGoalPage,
+
+                              child: const Text(
+                                "Criar uma agora",
+                                style: TextStyle(
+                                  color: Color(0xFF2563EB),
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       )
                     : ListView.builder(
-                        itemCount: goals.length,
+                        itemCount: filteredGoals.length,
+
                         itemBuilder: (context, index) {
-                          final goal = goals[index];
+                          final goal = filteredGoals[index];
 
                           return Container(
-                            margin: const EdgeInsets.only(bottom: 15),
-                            padding: const EdgeInsets.all(16),
+                            margin: const EdgeInsets.only(bottom: 18),
+
+                            padding: const EdgeInsets.all(20),
+
                             decoration: BoxDecoration(
                               color: const Color(0xFF1A1D26),
-                              borderRadius: BorderRadius.circular(20),
+
+                              borderRadius: BorderRadius.circular(25),
                             ),
+
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
+
                               children: [
                                 Text(
                                   goal.title,
+
                                   style: const TextStyle(
-                                    fontSize: 18,
+                                    fontSize: 22,
                                     fontWeight: FontWeight.bold,
                                   ),
+                                ),
+
+                                const SizedBox(height: 8),
+
+                                Text(
+                                  "${goal.category} • ${goal.period}",
+
+                                  style: const TextStyle(color: Colors.white60),
                                 ),
 
                                 const SizedBox(height: 15),
 
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(10),
+
                                   child: LinearProgressIndicator(
-                                    value: goal.completed ? 1 : 0,
+                                    value: goal.progress,
                                     minHeight: 10,
-                                    backgroundColor: Colors.white12,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      goal.completed
-                                          ? Colors.green
-                                          : Colors.blue,
-                                    ),
                                   ),
                                 ),
 
@@ -178,29 +585,37 @@ class _GoalsPageState extends State<GoalsPage> {
 
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
+
                                   children: [
                                     IconButton(
                                       onPressed: () {
                                         setState(() {
-                                          goal.completed = !goal.completed;
+                                          goal.progress = goal.progress == 1
+                                              ? 0
+                                              : 1;
                                         });
                                       },
+
                                       icon: Icon(
-                                        goal.completed
+                                        goal.progress == 1
                                             ? Icons.check_circle
                                             : Icons.check_circle_outline,
+
+                                        color: Colors.green,
                                       ),
-                                      color: Colors.green,
                                     ),
 
                                     IconButton(
                                       onPressed: () {
                                         setState(() {
-                                          goals.removeAt(index);
+                                          goals.remove(goal);
                                         });
                                       },
-                                      icon: const Icon(Icons.delete),
-                                      color: Colors.red,
+
+                                      icon: const Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -214,14 +629,6 @@ class _GoalsPageState extends State<GoalsPage> {
           ),
         ),
       ),
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: showAddGoalModal,
-        backgroundColor: Colors.blue,
-        child: const Icon(Icons.add, size: 30, color: Colors.white),
-      ),
-
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
