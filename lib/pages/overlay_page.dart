@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/pages/financias.dart';
 import 'package:vita_appprojetos/pages/home_page.dart';
 import 'package:vita_appprojetos/pages/metas.dart';
+import 'package:vita_appprojetos/pages/notas.dart';
 import 'package:vita_appprojetos/pages/tela_usuario.dart';
 
 class OverlayPage extends StatefulWidget {
@@ -17,7 +18,7 @@ class _OverlayPageState extends State<OverlayPage> {
   late final Map<int, Widget> _pages = {
     0: const HomePage(),
     1: const GoalsPage(),
-    2: const Placeholder(),
+    2: const NotasPage(),
     3: const Financias(),
     4: const ProfileScreen(),
   };
