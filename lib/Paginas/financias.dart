@@ -3,7 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class Financias extends StatefulWidget {
-  const Financias({super.key});
+  final Function(int) onGanharXp;
+
+  const Financias({super.key, required this.onGanharXp});
 
   @override
   State<Financias> createState() => _FinanciasState();
@@ -23,6 +25,27 @@ class _FinanciasState extends State<Financias> {
   double get progresso {
     if (limite == 0) return 0;
     return gastou / limite;
+  }
+
+  // Sistema de recompensa por controle de gastos
+  void verificarRecompensa() {
+    if (limite == 0) return;
+
+    double porcentagem = progresso;
+
+    int xpGanhar = 0;
+
+    if (porcentagem < 0.5) {
+      xpGanhar = 100;
+    } else if (porcentagem >= 0.5 && porcentagem < 1.0) {
+      xpGanhar = 50;
+    } else {
+      xpGanhar = 0;
+    }
+
+    if (xpGanhar > 0) {
+      widget.onGanharXp(xpGanhar);
+    }
   }
 
   Map<String, double> gastosSemana() {
@@ -105,7 +128,7 @@ class _FinanciasState extends State<Financias> {
   }
 
   Future<void> salvarFinancas() async {
-    await db.collection("usuarios").doc("arthur").set({
+    await db.collection("usuarios").doc("João").set({
       "limite": limite,
       "gastou": gastou,
       "gastos": gastos,
@@ -113,10 +136,7 @@ class _FinanciasState extends State<Financias> {
   }
 
   Future<void> carregarFinancas() async {
-    DocumentSnapshot dados = await db
-        .collection("usuarios")
-        .doc("arthur")
-        .get();
+    DocumentSnapshot dados = await db.collection("usuarios").doc("João").get();
     if (dados.exists) {
       Map<String, dynamic> data = dados.data() as Map<String, dynamic>;
 
@@ -317,7 +337,7 @@ class _FinanciasState extends State<Financias> {
                       gastou += valor;
                     });
                     salvarFinancas();
-
+                    verificarRecompensa();
                     gastoController.clear();
                     nomeController.clear();
                   }

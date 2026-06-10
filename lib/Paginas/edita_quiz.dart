@@ -24,7 +24,7 @@ class _TelaEditarQuizState extends State<TelaEditarQuiz> {
   Future<void> _adicionarPergunta() async {
     if (!_formKey.currentState!.validate()) return;
 
-    await db.collection('usuarios').doc('arthur').collection('Quiz').add({
+    await db.collection('usuarios').doc('João').collection('Quiz').add({
       'pergunta': _perguntaController.text.trim(),
       'tipo': _tipoSelecionado,
       'criadoEm': FieldValue.serverTimestamp(),
@@ -46,7 +46,7 @@ class _TelaEditarQuizState extends State<TelaEditarQuiz> {
   Future<void> _removerPergunta(String docId) async {
     await db
         .collection('usuarios')
-        .doc('arthur')
+        .doc('João')
         .collection('Quiz')
         .doc(docId)
         .delete();
@@ -127,7 +127,7 @@ class _TelaEditarQuizState extends State<TelaEditarQuiz> {
                 if (editController.text.trim().isEmpty) return;
                 await db
                     .collection('usuarios')
-                    .doc('arthur')
+                    .doc('João')
                     .collection('Quiz')
                     .doc(docId)
                     .update({
@@ -299,7 +299,7 @@ class _TelaEditarQuizState extends State<TelaEditarQuiz> {
             child: StreamBuilder<QuerySnapshot>(
               stream: db
                   .collection('usuarios')
-                  .doc('arthur')
+                  .doc('João')
                   .collection('Quiz') // ← mesmo nome aqui
                   .orderBy('criadoEm', descending: false)
                   .snapshots(),

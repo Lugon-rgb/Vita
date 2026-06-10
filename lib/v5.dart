@@ -42,16 +42,23 @@ class _VitaTesteState extends State<VitaTeste> {
   int xp = 0;
   int nivel = 1;
   int myIndex = 0;
+  int streak = 1;
+  int melhorStreak = 1;
 
   void verificarStatus() {
     vida = vida.clamp(0, 100);
     estamina = estamina.clamp(0, 100);
   }
 
-  Future salvarDados() async {
-    await db.collection("usuarios").doc("arthur").set({
+  Future<void> salvarDados() async {
+    await db.collection("usuarios").doc("João").set({
       "vida": vida,
       "estamina": estamina,
+      "xp": xp,
+      "nivel": nivel,
+      "streak": streak,
+      "melhorStreak": melhorStreak,
+      "ultimoAcesso": Timestamp.now(),
     }, SetOptions(merge: true));
   }
 
@@ -61,35 +68,117 @@ class _VitaTesteState extends State<VitaTeste> {
       xp = xp - 500;
       nivel += 1;
     }
-
     setState(() {});
-
-    await db.collection('usuarios').doc('arthur').set({
-      'xp': xp,
-      'nivel': nivel,
-    }, SetOptions(merge: true));
+    await salvarDados();
   }
 
-  Future carregarDados() async {
-    DocumentSnapshot dados = await db
-        .collection("usuarios")
-        .doc("arthur")
-        .get();
+  Future<void> carregarDados() async {
+    try {
+      DocumentSnapshot dados = await db
+          .collection("usuarios")
+          .doc("João")
+          .get();
 
-    if (dados.exists) {
-      setState(() {
-        vida = dados['vida'] ?? 100;
-        estamina = dados['estamina'] ?? 100;
-        xp = dados['xp'] ?? 0;
-        nivel = dados['nivel'] ?? 1;
+      if (dados.exists) {
+        final data = dados.data() as Map<String, dynamic>? ?? {};
+
+        setState(() {
+          vida = data['vida'] ?? 100;
+          estamina = data['estamina'] ?? 100;
+          xp = data['xp'] ?? 0;
+          nivel = data['nivel'] ?? 1;
+          streak = data['streak'] ?? 1;
+          melhorStreak = data['melhorStreak'] ?? 1;
+        });
+      } else {
+        await salvarDados();
+      }
+    } catch (e) {
+      debugPrint("Erro ao carregar dados: $e");
+    }
+  }
+
+  Future<void> verificarStreak() async {
+    try {
+      final docRef = db.collection("usuarios").doc("João");
+      DocumentSnapshot dados = await docRef.get();
+
+      DateTime hoje = DateTime.now();
+
+      if (!dados.exists) {
+        streak = 1;
+        melhorStreak = 1;
+        await salvarDados(); // Cria o documento aqui
+        setState(() {});
+        return;
+      }
+
+      final data = dados.data() as Map<String, dynamic>? ?? {};
+
+      DateTime? ultimoAcesso = (data['ultimoAcesso'] as Timestamp?)?.toDate();
+
+      if (ultimoAcesso == null) {
+        streak = 1;
+        melhorStreak = 1;
+      } else {
+        int diferencaDias = hoje.difference(ultimoAcesso).inDays;
+
+        if (diferencaDias == 1) {
+          streak = (data['streak'] ?? 1) + 1;
+          if (streak > (data['melhorStreak'] ?? 1)) {
+            melhorStreak = streak;
+          } else {
+            melhorStreak = data['melhorStreak'] ?? 1;
+          }
+        } else if (diferencaDias > 1) {
+          streak = 1;
+          melhorStreak = data['melhorStreak'] ?? 1;
+        } else {
+          streak = data['streak'] ?? 1;
+          melhorStreak = data['melhorStreak'] ?? 1;
+        }
+      }
+
+      await docRef.set({
+        "streak": streak,
+        "melhorStreak": melhorStreak,
+        "ultimoAcesso": Timestamp.now(),
+      }, SetOptions(merge: true));
+
+      setState(() {});
+    } catch (e) {
+      debugPrint("Erro ao verificar streak: $e");
+    }
+  }
+
+  Future<void> adicionarAtividade({
+    required String titulo,
+    required String descricao,
+    int xp = 0,
+  }) async {
+    try {
+      await db.collection("usuarios").doc("João").collection("atividades").add({
+        "titulo": titulo,
+        "descricao": descricao,
+        "xp": xp,
+        "data": Timestamp.now(),
       });
+
+      debugPrint("Atividade registrada: $titulo");
+    } catch (e) {
+      debugPrint("Erro ao adicionar atividade: $e");
     }
   }
 
   @override
   void initState() {
     super.initState();
-    carregarDados();
+    _inicializarUsuario();
+  }
+
+  Future<void> _inicializarUsuario() async {
+    await carregarDados();
+    await verificarStreak();
   }
 
   @override
@@ -106,7 +195,7 @@ class _VitaTesteState extends State<VitaTeste> {
 
           children: [
             Text(
-              "Olá, Arthur!",
+              "Olá, João!",
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 24,
@@ -124,7 +213,10 @@ class _VitaTesteState extends State<VitaTeste> {
 
       body: IndexedStack(
         index: myIndex,
-        children: [homeNova(context), Financias()],
+        children: [
+          homeNova(context),
+          Financias(onGanharXp: (xp) => setState(() => this.xp += xp)),
+        ],
       ),
 
       bottomNavigationBar: NavigationBar(
@@ -203,11 +295,11 @@ class _VitaTesteState extends State<VitaTeste> {
                         color: const Color.fromARGB(255, 117, 72, 4),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
                           Icon(Icons.bolt, color: Colors.orange, size: 16),
                           Text(
-                            " 7 dias",
+                            "$streak dias",
                             style: TextStyle(
                               color: Colors.orange,
                               fontWeight: FontWeight.bold,
@@ -396,6 +488,11 @@ class _VitaTesteState extends State<VitaTeste> {
                             });
                             await salvarDados();
                             await _ganharXp(25);
+                            await adicionarAtividade(
+                              titulo: "Quiz Concluído",
+                              descricao: "Você completou um quiz",
+                              xp: 25,
+                            );
                           }
                         },
                         child: Container(
@@ -595,64 +692,100 @@ class _VitaTesteState extends State<VitaTeste> {
             ),
           ),
 
-          // CARD ATIVIDADE
+          // Lista Dinâmica
           Container(
-            padding: const EdgeInsets.all(30),
+            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: db
+                  .collection("usuarios")
+                  .doc("João")
+                  .collection("atividades")
+                  .orderBy("data", descending: true)
+                  .limit(5)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-            margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-
-            width: double.infinity,
-
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: const Color.fromARGB(255, 26, 29, 30),
-            ),
-
-            child: Row(
-              children: [
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-
-                    children: [
-                      Text(
-                        'Meta concluída: Fazer lista de cálculo',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Text(
+                        "Nenhuma atividade ainda",
+                        style: TextStyle(color: Colors.grey),
                       ),
-
-                      Text(
-                        '14 de abr, 22:50',
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 4,
-                    horizontal: 8,
-                  ),
-
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6),
-                    color: const Color.fromARGB(255, 19, 47, 61),
-                  ),
-
-                  child: const Text(
-                    '+130 XP',
-                    style: TextStyle(
-                      color: Color.fromARGB(255, 44, 99, 208),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
                     ),
-                  ),
-                ),
-              ],
+                  );
+                }
+
+                final atividades = snapshot.data!.docs;
+
+                return Column(
+                  children: atividades.map((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    final DateTime dataAtv = (data['data'] as Timestamp)
+                        .toDate();
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 26, 29, 30),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.check_circle, color: Colors.green),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  data['titulo'] ?? '',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  data['descricao'] ?? '',
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                "${dataAtv.day}/${dataAtv.month}",
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              if (data['xp'] != null && data['xp'] > 0)
+                                Text(
+                                  "+${data['xp']} XP",
+                                  style: const TextStyle(
+                                    color: Colors.amber,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
             ),
           ),
         ],

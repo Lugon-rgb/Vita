@@ -27,7 +27,7 @@ class _TelaQuizState extends State<TelaQuiz> {
   Future<void> _carregarPerguntas() async {
     final snapshot = await db
         .collection('usuarios')
-        .doc('arthur')
+        .doc('João')
         .collection('Quiz')
         .orderBy('criadoEm', descending: false)
         .get();
