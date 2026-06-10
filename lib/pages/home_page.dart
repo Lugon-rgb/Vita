@@ -33,7 +33,7 @@ class _HomePageState extends State<HomePage> {
     DocumentSnapshot dados =
         await db.collection("usuarios").doc(user?.uid ?? "usuario").get();
 
-    if (dados.exists) {
+    if (mounted && dados.exists) {
       setState(() {
         vida = dados['vida'] ?? 100;
         estamina = dados['estamina'] ?? 100;
