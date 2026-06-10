@@ -1,5 +1,22 @@
 import 'package:flutter/material.dart';
 
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark(),
+      home: const GoalsPage(),
+    );
+  }
+}
+
 class Goal {
   String title;
   String category;
@@ -38,6 +55,7 @@ class _GoalsPageState extends State<GoalsPage> {
 
   // FILTRO DOS BOTÕES SUPERIORES
   String selectedPeriod = "Todas";
+  String selectedGoalPeriod = "Curto Prazo";
 
   final List<String> categories = [
     "Financeiro",
@@ -46,7 +64,10 @@ class _GoalsPageState extends State<GoalsPage> {
     "Pessoal",
   ];
 
-  final List<String> periods = ["Curto Prazo", "Longo Prazo"];
+  final List<String> periods = [
+    "Curto Prazo",
+    "Longo Prazo",
+  ];
 
   String selectedFilter = "Todos";
 
@@ -57,45 +78,67 @@ class _GoalsPageState extends State<GoalsPage> {
     // FILTRO POR CATEGORIA
     if (selectedFilter != "Todos") {
       filtered = filtered
-          .where((goal) => goal.category == selectedFilter)
+          .where(
+            (goal) =>
+                goal.category == selectedFilter,
+          )
           .toList();
     }
 
     // FILTRO POR PRAZO
     if (selectedPeriod != "Todas") {
       filtered = filtered
-          .where((goal) => goal.period == selectedPeriod)
+          .where(
+            (goal) =>
+                goal.period == selectedPeriod,
+          )
           .toList();
     }
 
     return filtered;
   }
 
-  void addGoal() {
-    if (titleController.text.trim().isEmpty) return;
+  void saveGoal({Goal? goal}) {
+  if (titleController.text.trim().isEmpty) return;
 
-    setState(() {
+  setState(() {
+    if (goal == null) {
       goals.add(
         Goal(
           title: titleController.text,
           category: selectedCategory,
           deadline: deadlineController.text,
           description: descriptionController.text,
-
-          // GUARDA O PRAZO DA META
-          period: selectedPeriod == "Todas" ? "Curto Prazo" : selectedPeriod,
+          period: selectedGoalPeriod,
         ),
       );
-    });
+    } else {
+      goal.title = titleController.text;
+      goal.category = selectedCategory;
+      goal.deadline = deadlineController.text;
+      goal.description = descriptionController.text;
+      goal.period = selectedGoalPeriod;
+    }
+  });
 
-    titleController.clear();
-    deadlineController.clear();
-    descriptionController.clear();
+  titleController.clear();
+  deadlineController.clear();
+  descriptionController.clear();
 
-    Navigator.pop(context);
-  }
+  Navigator.pop(context);
+}
+void editGoal(Goal goal) {
+  titleController.text = goal.title;
+  deadlineController.text = goal.deadline;
+  descriptionController.text = goal.description;
 
-  void showAddGoalPage() {
+  selectedCategory = goal.category;
+  selectedGoalPeriod = goal.period;
+
+  showAddGoalPage(editingGoal: goal);
+}
+  
+ void showAddGoalPage({Goal? editingGoal}) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -108,7 +151,8 @@ class _GoalsPageState extends State<GoalsPage> {
               padding: const EdgeInsets.all(20),
 
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
 
                 children: [
                   Row(
@@ -118,13 +162,16 @@ class _GoalsPageState extends State<GoalsPage> {
                           Navigator.pop(context);
                         },
 
-                        icon: const Icon(Icons.arrow_back),
+                        icon:
+                            const Icon(Icons.arrow_back),
                       ),
 
                       const SizedBox(width: 5),
 
-                      const Text(
-                        "Nova Meta",
+                      Text(
+                        editingGoal == null
+                          ? "Nova Meta"
+                          : "Editar Meta",
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
@@ -137,14 +184,19 @@ class _GoalsPageState extends State<GoalsPage> {
 
                   const Text(
                     "Título",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
 
                   const SizedBox(height: 10),
 
                   TextField(
                     controller: titleController,
-                    decoration: customInput("Ex: Juntar R\$ 5000"),
+                    decoration: customInput(
+                      "Ex: Juntar R\$ 5000",
+                    ),
                   ),
 
                   const SizedBox(height: 25),
@@ -153,36 +205,49 @@ class _GoalsPageState extends State<GoalsPage> {
                     children: [
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                              CrossAxisAlignment
+                                  .start,
 
                           children: [
                             const Text(
                               "Categoria",
                               style: TextStyle(
                                 fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                                fontWeight:
+                                    FontWeight.bold,
                               ),
                             ),
 
                             const SizedBox(height: 10),
 
-                            DropdownButtonFormField<String>(
-                              initialValue: selectedCategory,
+                            DropdownButtonFormField<
+                                String>(
+                              value: selectedCategory,
 
-                              dropdownColor: const Color(0xFF1A1D26),
+                              dropdownColor:
+                                  const Color(
+                                      0xFF1A1D26),
 
-                              decoration: customInput("Selecione"),
+                              decoration:
+                                  customInput(
+                                      "Selecione"),
 
-                              items: categories.map((category) {
+                              items:
+                                  categories.map((
+                                category,
+                              ) {
                                 return DropdownMenuItem(
                                   value: category,
-                                  child: Text(category),
+                                  child:
+                                      Text(category),
                                 );
                               }).toList(),
 
                               onChanged: (value) {
                                 setState(() {
-                                  selectedCategory = value!;
+                                  selectedCategory =
+                                      value!;
                                 });
                               },
                             ),
@@ -194,38 +259,47 @@ class _GoalsPageState extends State<GoalsPage> {
 
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                              CrossAxisAlignment
+                                  .start,
 
                           children: [
                             const Text(
                               "Prazo",
                               style: TextStyle(
                                 fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                                fontWeight:
+                                    FontWeight.bold,
                               ),
                             ),
 
                             const SizedBox(height: 10),
 
-                            DropdownButtonFormField<String>(
-                              initialValue: selectedPeriod == "Todas"
-                                  ? "Curto Prazo"
-                                  : selectedPeriod,
+                            DropdownButtonFormField<
+                                String>(
+                              value:
+                                  selectedGoalPeriod,
+                              dropdownColor:
+                                  const Color(
+                                      0xFF1A1D26),
 
-                              dropdownColor: const Color(0xFF1A1D26),
+                              decoration:
+                                  customInput(
+                                      "Selecione"),
 
-                              decoration: customInput("Selecione"),
-
-                              items: periods.map((period) {
+                              items: periods.map((
+                                period,
+                              ) {
                                 return DropdownMenuItem(
                                   value: period,
-                                  child: Text(period),
+                                  child:
+                                      Text(period),
                                 );
                               }).toList(),
 
                               onChanged: (value) {
-                                setState(() {
-                                  selectedPeriod = value!;
+                              setState(() {
+                                selectedGoalPeriod = value!;
                                 });
                               },
                             ),
@@ -239,21 +313,28 @@ class _GoalsPageState extends State<GoalsPage> {
 
                   const Text(
                     "Data Limite (Opcional)",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
 
                   const SizedBox(height: 10),
 
                   TextField(
                     controller: deadlineController,
-                    decoration: customInput("dd/mm/aaaa"),
+                    decoration:
+                        customInput("dd/mm/aaaa"),
                   ),
 
                   const SizedBox(height: 25),
 
                   const Text(
                     "Descrição (Opcional)",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
 
                   const SizedBox(height: 10),
@@ -262,7 +343,9 @@ class _GoalsPageState extends State<GoalsPage> {
                     controller: descriptionController,
                     maxLines: 4,
 
-                    decoration: customInput("Detalhes da meta..."),
+                    decoration: customInput(
+                      "Detalhes da meta...",
+                    ),
                   ),
 
                   const SizedBox(height: 30),
@@ -272,20 +355,29 @@ class _GoalsPageState extends State<GoalsPage> {
                     height: 55,
 
                     child: ElevatedButton.icon(
-                      onPressed: addGoal,
+                      onPressed: () => saveGoal(goal: editingGoal),
 
                       icon: const Icon(Icons.save),
 
-                      label: const Text(
-                        "Salvar Meta",
-                        style: TextStyle(fontSize: 18),
+                      label: Text(
+                      editingGoal == null
+                       ? "Salvar Meta"
+                        : "Salvar Alterações",
+                        style: TextStyle(
+                          fontSize: 18,
+                        ),
                       ),
 
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
+                      style:
+                          ElevatedButton.styleFrom(
+                        backgroundColor:
+                            const Color(0xFF2563EB),
 
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
+                        shape:
+                            RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(
+                                  15),
                         ),
                       ),
                     ),
@@ -296,6 +388,8 @@ class _GoalsPageState extends State<GoalsPage> {
               ),
             ),
           ),
+
+          bottomNavigationBar: buildBottomBar(),
         ),
       ),
     );
@@ -312,19 +406,25 @@ class _GoalsPageState extends State<GoalsPage> {
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
 
-        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+        borderSide: BorderSide(
+          color: Colors.white.withOpacity(0.1),
+        ),
       ),
 
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
 
-        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+        borderSide: BorderSide(
+          color: Colors.white.withOpacity(0.1),
+        ),
       ),
 
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
 
-        borderSide: const BorderSide(color: Color(0xFF2563EB)),
+        borderSide: const BorderSide(
+          color: Color(0xFF2563EB),
+        ),
       ),
     );
   }
@@ -342,10 +442,15 @@ class _GoalsPageState extends State<GoalsPage> {
       child: Container(
         margin: const EdgeInsets.only(right: 10),
 
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 10,
+        ),
 
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF1F2430),
+          color: isSelected
+              ? const Color(0xFF2563EB)
+              : const Color(0xFF1F2430),
 
           borderRadius: BorderRadius.circular(30),
         ),
@@ -354,7 +459,9 @@ class _GoalsPageState extends State<GoalsPage> {
           text,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: isSelected ? Colors.white : Colors.white70,
+            color: isSelected
+                ? Colors.white
+                : Colors.white70,
           ),
         ),
       ),
@@ -374,12 +481,17 @@ class _GoalsPageState extends State<GoalsPage> {
         },
 
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(
+            vertical: 12,
+          ),
 
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF0F1117) : Colors.transparent,
+            color: isSelected
+                ? const Color(0xFF0F1117)
+                : Colors.transparent,
 
-            borderRadius: BorderRadius.circular(15),
+            borderRadius:
+                BorderRadius.circular(15),
           ),
 
           child: Center(
@@ -387,12 +499,64 @@ class _GoalsPageState extends State<GoalsPage> {
               text,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : Colors.white54,
+                color: isSelected
+                    ? Colors.white
+                    : Colors.white54,
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  BottomNavigationBar buildBottomBar() {
+    return BottomNavigationBar(
+      currentIndex: selectedBottomIndex,
+
+      backgroundColor: const Color(0xFF111827),
+
+      selectedItemColor:
+          const Color(0xFF2563EB),
+
+      unselectedItemColor: Colors.white54,
+
+      type: BottomNavigationBarType.fixed,
+
+      onTap: (index) {
+        setState(() {
+          selectedBottomIndex = index;
+        });
+      },
+
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home_outlined),
+          label: "Início",
+        ),
+
+        BottomNavigationBarItem(
+          icon: Icon(Icons.gps_fixed),
+          label: "Metas",
+        ),
+
+        BottomNavigationBarItem(
+          icon: Icon(Icons.note_alt_outlined),
+          label: "Notas",
+        ),
+
+        BottomNavigationBarItem(
+          icon: Icon(
+            Icons.account_balance_wallet_outlined,
+          ),
+          label: "Finanças",
+        ),
+
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person_outline),
+          label: "Perfil",
+        ),
+      ],
     );
   }
 
@@ -406,16 +570,22 @@ class _GoalsPageState extends State<GoalsPage> {
           padding: const EdgeInsets.all(20),
 
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
 
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment:
+                    MainAxisAlignment
+                        .spaceBetween,
 
                 children: [
                   const Text(
                     "Metas",
-                    style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 38,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
 
                   ElevatedButton.icon(
@@ -423,18 +593,26 @@ class _GoalsPageState extends State<GoalsPage> {
 
                     icon: const Icon(Icons.add),
 
-                    label: const Text("Nova Meta"),
+                    label:
+                        const Text("Nova Meta"),
 
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
+                    style:
+                        ElevatedButton.styleFrom(
+                      backgroundColor:
+                          const Color(
+                              0xFF2563EB),
 
-                      padding: const EdgeInsets.symmetric(
+                      padding:
+                          const EdgeInsets.symmetric(
                         horizontal: 18,
                         vertical: 14,
                       ),
 
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
+                      shape:
+                          RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(
+                                15),
                       ),
                     ),
                   ),
@@ -450,7 +628,8 @@ class _GoalsPageState extends State<GoalsPage> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF1A1D26),
 
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius:
+                      BorderRadius.circular(20),
                 ),
 
                 child: Row(
@@ -466,15 +645,19 @@ class _GoalsPageState extends State<GoalsPage> {
 
               // CATEGORIAS
               SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
+                scrollDirection:
+                    Axis.horizontal,
 
                 child: Row(
                   children: [
                     buildFilterChip("Todos"),
-                    buildFilterChip("Financeiro"),
+                    buildFilterChip(
+                        "Financeiro"),
                     buildFilterChip("Saúde"),
-                    buildFilterChip("Carreira"),
-                    buildFilterChip("Pessoal"),
+                    buildFilterChip(
+                        "Carreira"),
+                    buildFilterChip(
+                        "Pessoal"),
                   ],
                 ),
               ),
@@ -486,45 +669,58 @@ class _GoalsPageState extends State<GoalsPage> {
                     ? Container(
                         width: double.infinity,
 
-                        padding: const EdgeInsets.all(30),
+                        padding:
+                            const EdgeInsets.all(
+                                30),
 
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(25),
+                          borderRadius:
+                              BorderRadius
+                                  .circular(25),
 
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.1),
+                            color: Colors.white
+                                .withOpacity(0.1),
                           ),
                         ),
 
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment:
+                              MainAxisAlignment
+                                  .center,
 
                           children: [
                             const Icon(
                               Icons.gps_fixed,
                               size: 55,
-                              color: Colors.white38,
+                              color:
+                                  Colors.white38,
                             ),
 
-                            const SizedBox(height: 15),
+                            const SizedBox(
+                                height: 15),
 
                             const Text(
                               "Nenhuma meta encontrada.",
                               style: TextStyle(
                                 fontSize: 22,
-                                color: Colors.white60,
+                                color:
+                                    Colors.white60,
                               ),
                             ),
 
-                            const SizedBox(height: 10),
+                            const SizedBox(
+                                height: 10),
 
                             GestureDetector(
-                              onTap: showAddGoalPage,
+                              onTap:
+                                  showAddGoalPage,
 
                               child: const Text(
                                 "Criar uma agora",
                                 style: TextStyle(
-                                  color: Color(0xFF2563EB),
+                                  color: Color(
+                                      0xFF2563EB),
                                   fontSize: 18,
                                 ),
                               ),
@@ -533,88 +729,143 @@ class _GoalsPageState extends State<GoalsPage> {
                         ),
                       )
                     : ListView.builder(
-                        itemCount: filteredGoals.length,
+                        itemCount:
+                            filteredGoals.length,
 
-                        itemBuilder: (context, index) {
-                          final goal = filteredGoals[index];
+                        itemBuilder:
+                            (context, index) {
+                          final goal =
+                              filteredGoals[
+                                  index];
 
                           return Container(
-                            margin: const EdgeInsets.only(bottom: 18),
+                            margin:
+                                const EdgeInsets
+                                    .only(
+                              bottom: 18,
+                            ),
 
-                            padding: const EdgeInsets.all(20),
+                            padding:
+                                const EdgeInsets
+                                    .all(20),
 
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF1A1D26),
+                            decoration:
+                                BoxDecoration(
+                              color:
+                                  const Color(
+                                      0xFF1A1D26),
 
-                              borderRadius: BorderRadius.circular(25),
+                              borderRadius:
+                                  BorderRadius
+                                      .circular(
+                                          25),
                             ),
 
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment:
+                                  CrossAxisAlignment
+                                      .start,
 
                               children: [
                                 Text(
                                   goal.title,
 
-                                  style: const TextStyle(
+                                  style:
+                                      const TextStyle(
                                     fontSize: 22,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight:
+                                        FontWeight
+                                            .bold,
                                   ),
                                 ),
 
-                                const SizedBox(height: 8),
+                                const SizedBox(
+                                    height: 8),
 
                                 Text(
                                   "${goal.category} • ${goal.period}",
 
-                                  style: const TextStyle(color: Colors.white60),
+                                  style:
+                                      const TextStyle(
+                                    color: Colors
+                                        .white60,
+                                  ),
                                 ),
 
-                                const SizedBox(height: 15),
+                                const SizedBox(
+                                    height: 15),
 
                                 ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius:
+                                      BorderRadius
+                                          .circular(
+                                              10),
 
-                                  child: LinearProgressIndicator(
-                                    value: goal.progress,
+                                  child:
+                                      LinearProgressIndicator(
+                                    value:
+                                        goal.progress,
                                     minHeight: 10,
                                   ),
                                 ),
 
-                                const SizedBox(height: 15),
+                                const SizedBox(
+                                    height: 15),
 
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment
+                                          .end,
 
                                   children: [
                                     IconButton(
-                                      onPressed: () {
+                                    onPressed: () => editGoal(goal),
+                                    icon: const Icon(
+                                     Icons.edit,
+                                    color: Colors.amber,
+                               ),
+                                  ),
+                                    IconButton(
+                                      onPressed:
+                                          () {
                                         setState(() {
-                                          goal.progress = goal.progress == 1
-                                              ? 0
-                                              : 1;
+                                          goal.progress =
+                                              goal.progress ==
+                                                      1
+                                                  ? 0
+                                                  : 1;
                                         });
                                       },
 
                                       icon: Icon(
-                                        goal.progress == 1
-                                            ? Icons.check_circle
-                                            : Icons.check_circle_outline,
+                                        goal.progress ==
+                                                1
+                                            ? Icons
+                                                .check_circle
+                                            : Icons
+                                                .check_circle_outline,
 
-                                        color: Colors.green,
+                                        color: Colors
+                                            .green,
                                       ),
                                     ),
 
                                     IconButton(
-                                      onPressed: () {
+                                      onPressed:
+                                          () {
                                         setState(() {
-                                          goals.remove(goal);
+                                          goals.remove(
+                                              goal);
                                         });
                                       },
 
-                                      icon: const Icon(
-                                        Icons.delete,
-                                        color: Colors.red,
+                                      icon:
+                                          const Icon(
+                                        Icons
+                                            .delete,
+                                        color:
+                                            Colors
+                                                .red,
                                       ),
                                     ),
                                   ],
@@ -629,6 +880,8 @@ class _GoalsPageState extends State<GoalsPage> {
           ),
         ),
       ),
+
+      bottomNavigationBar: buildBottomBar(),
     );
   }
 }
