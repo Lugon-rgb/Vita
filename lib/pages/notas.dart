@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../modelos/modelo_nota.dart';
+import 'nova_nota.dart';
 
 class NotasPage extends StatefulWidget {
   const NotasPage({super.key});
@@ -18,7 +19,13 @@ final TextEditingController _buscaController = TextEditingController();
 
 // criei uma variavel que aponta pra uma colecao do Firebase das notas
 final CollectionReference _notasCollection = FirebaseFirestore.instance.collection('notas');
+
+String _filtroCategoria = 'Todas'; // variavel para guardar o filtro de categoria selecionado, comeca com "todas" por padrao
  
+final Stream<QuerySnapshot> _notasStream = FirebaseFirestore.instance.collection('notas').orderBy('dataHora', descending: true).snapshots();// conecta ao firebase uma unica vez, quando abrir a tela,
+      // pegando a colecao de notas, ordenando pela data e monitorando em tempo real com esse snapshots. dai toda vez que algo mudar la no firebase, o StreamBuilder que ta mais pra baixo
+      // vai receber a nova lista de notas atualizada e redesenhar a tela automaticamente 
+
 @override
   void initState() {
     super.initState();
@@ -29,12 +36,15 @@ final CollectionReference _notasCollection = FirebaseFirestore.instance.collecti
     _conteudoController.addListener(() { // mesma coisa, so que com o conteudo, redesenhando a tela a cada letra digitada pelo usuario
       if (mounted) setState(() {}); // entao caso o usuario mudar de tela ou fechar a pagina antes de fechar o teclado, esse controller poderia tentar atualizar a tela ja morta
     }); // mas o mounted impede que isso aconteca.
+      _buscaController.addListener(() { // mesmo processo, so que com o campo de busca, pra atualizar a lista de notas em tempo real conforme o usuario digita
+        if (mounted) setState(() {}); // entao a cada letra digitada na busca, a tela vai ser redesenhada e a lista de notas vai ser filtrada de novo, mostrando apenas as notas que batem com o texto da busca
+      });
   }
 
 
   // salvar a nota da Captura Rápida no Firebase
-  void _salvarNota() async {
-    final String titulo = _tituloController.text.trim();
+  void _salvarNota() async { // async permite o uso do await
+    final String titulo = _tituloController.text.trim(); 
     final String conteudo = _conteudoController.text.trim();
 
     if (titulo.isEmpty || conteudo.isEmpty) { // isEmpty ja vem programado pelo flutter e dart. assim como isnotempty
@@ -181,7 +191,9 @@ final CollectionReference _notasCollection = FirebaseFirestore.instance.collecti
                 // botao nova nota ainda so estatico
                 ElevatedButton.icon( 
                   onPressed: () {
-                    // abrir a tela de criacao do "nova nota" (ainda nao implementado)
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => const NovaNotaPage()),
+                    );
                   },
                   icon: const Icon(Icons.add, color: Colors.white, size: 18),
                   label: const Text(  
@@ -239,11 +251,30 @@ final CollectionReference _notasCollection = FirebaseFirestore.instance.collecti
               scrollDirection: Axis.horizontal, // scrolla pros lados p ver os filtros disponiveis
               child: Row(
                 children: [
-                  _construirFiltro('Todas', true),
-                  _construirFiltro('Estudos', false),
-                  _construirFiltro('Saúde', false),
-                  _construirFiltro('Pessoal', false),
-                  _construirFiltro('Outros', false),
+                  GestureDetector(
+                    onTap: () => setState(() => _filtroCategoria = 'Todas'),
+                    child: _construirFiltro('Todas', _filtroCategoria == 'Todas'),
+                  ),
+                  GestureDetector(
+                    onTap: () => setState(() => _filtroCategoria = 'Estudos'),
+                    child: _construirFiltro('Estudos', _filtroCategoria == 'Estudos'),
+                  ),
+                  GestureDetector(
+                    onTap: () => setState(() => _filtroCategoria = 'Saúde'),
+                    child: _construirFiltro('Saúde', _filtroCategoria == 'Saúde'),
+                  ),
+                  GestureDetector(
+                    onTap: () => setState(() => _filtroCategoria = 'Finanças'),
+                    child: _construirFiltro('Finanças', _filtroCategoria == 'Finanças'),
+                  ),
+                  GestureDetector(
+                    onTap: () => setState(() => _filtroCategoria = 'Pessoal'),
+                    child: _construirFiltro('Pessoal', _filtroCategoria == 'Pessoal'),
+                  ),
+                  GestureDetector(
+                    onTap: () => setState(() => _filtroCategoria = 'Outros'),
+                    child: _construirFiltro('Outros', _filtroCategoria == 'Outros'),
+                  ),
                 ],
               ),
             ),
@@ -252,8 +283,8 @@ final CollectionReference _notasCollection = FirebaseFirestore.instance.collecti
 
             // listagem conectada ao firebase 
             StreamBuilder<QuerySnapshot>( // eh um widget do flutter que atualiza a tela sozinho, redesenhando a lista sempre que algo muda no banco de dados
-              stream: _notasCollection.orderBy('dataHora', descending: true).snapshots(), // pega a colecao de notas do firebase, ordenando elas pela data, deixando as mais recentes em cima. 
-              // o .snapshots() vai monitorar o que acontece la em tempo real, entao ela que diz se algo mudou
+              stream: _notasStream, // pega a colecao de notas do firebase, ordenando elas pela data, deixando as mais recentes em cima
+              // o .snapshots() vai monitorar o que acontece la em tempo real, entao ela que diz se algo mudou // eu ja expliquei isso la em cima, mas vou deixar aqui tb
               builder: (context, snapshot) { // ela eh quem desenha o resultado definitivo. o context localiza o bloco na tela e o snapshot guarda os dados que o firebase devolveu
 
                 // ifs de seguranca, caso ocorra algo inesperado
@@ -263,11 +294,29 @@ final CollectionReference _notasCollection = FirebaseFirestore.instance.collecti
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator()); // se tiver carregando, pro usuario saber disso, mostra a bolinha girando na tela
                 }
-                final docs = snapshot.data?.docs ?? [];
+                final docs = snapshot.data?.docs ?? []; // se o snapshot tiver dados, pega os documentos, se nao tiver, deixa como lista vazia, pra evitar crash
 
-                if (docs.isEmpty) { // se a lista de documentos do firebase tiver vazia...
+                final notasFiltradas = docs.map((doc) => Nota.fromDocument(doc)).where((nota) { // converte de volta o doc do firebase pro objeto nota
+                  // esse .where eh quem faz a filtragem a partir dos True e False recebidos das condicoes abaixo.
+                  final termoBusca = _buscaController.text.toLowerCase().trim(); // pega o que o usuario digitou na busca, deixa tudo minusculo pra comparar sem erro de maiusculo/minusculo, e tira os espacos em branco desnecessarios com o trim()
+                  final bateNoTitulo = nota.titulo.toLowerCase().contains(termoBusca); // verifica se o titulo da nota, transformado em minusculo, contem o texto da busca. se tiver, bate com o titulo
+                  final bateNoConteudo = nota.conteudo.toLowerCase().contains(termoBusca); // mesma coisa, so que com o conteudo da nota. se tiver, bate no conteudo, bate com o conteudo
+                  final bateNaBusca = termoBusca.isEmpty || bateNoTitulo || bateNoConteudo; // a busca só bate se o termo de busca estiver vazio (ou seja, o usuario nao digitou nada, entao todas as notas passam) ou se bater no titulo ou se bater no conteudo.
+
+                  // verifica a categoria clicada nas tags
+                  final bateNaCategoria = _filtroCategoria == 'Todas' || nota.categoria == _filtroCategoria; // a categoria só bate se o filtro selecionado for "todas" ou se a categoria da nota for igual ao filtro selecionado
+                  
+
+                  
+                  return bateNaBusca && bateNaCategoria; // ou seja, a nota so passa pelo .where se for aprovada em ambos os testes
+                }).toList();
+
+                if (notasFiltradas.isEmpty) {   // se nao aparecer nenhuma nota, mostra uma mensagem avisando
                   return const Center( 
-                    child: Text('Nenhuma nota por aqui...', style: TextStyle(color: Colors.white54)), // mostra uma mensagem na parte das notas caso nao exista nenhuma nota atualmente
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Text('Nenhuma nota encontrada...', style: TextStyle(color: Colors.white54)),
+                    ),
                   );
                 }
 
@@ -278,11 +327,11 @@ final CollectionReference _notasCollection = FirebaseFirestore.instance.collecti
 
                   physics: const NeverScrollableScrollPhysics(), // desativa o scroll dessa listview interna que criamos, pro scroll ficar mais suave 
                   
-                  itemCount: docs.length, // eh oq define a quantidade de notas que existem no total, p saber quantas vezes tem que desenhar o card
+                  itemCount: notasFiltradas.length, // quantidade de itens que o listview vai criar, baseado na quantidade de notas filtradas que tem pra mostrar
 
                   itemBuilder: (context, index) { // cria o loop pra rodar de nota em nota
 
-                    final nota = Nota.fromDocument(docs[index]); // pega o mapa que o firebase devolve e converte no modelo de Nota que eu criei no outro codigo
+                    final nota = notasFiltradas[index]; // pega a nota atual do loop, baseado no index que o listview passa
 
                     String dataFormatada = "${nota.dataHora.day.toString().padLeft(2, '0')}/${nota.dataHora.month.toString().padLeft(2, '0')}/${nota.dataHora.year} ${nota.dataHora.hour.toString().padLeft(2, '0')}:${nota.dataHora.minute.toString().padLeft(2, '0')}";
                      // formata bonitinho o texto da data
@@ -532,17 +581,41 @@ final CollectionReference _notasCollection = FirebaseFirestore.instance.collecti
                 Row(
                   children: [
 
-                  // editar
-                    Padding(
-                      padding: EdgeInsets.only(right: 12.0), 
-                      child: Icon(Icons.edit_outlined, color: Color.fromARGB(97, 255, 255, 255), size: 20),
+                  // editar funcional
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, color: Color.fromARGB(97, 255, 255, 255), size: 20),
+                      padding: const EdgeInsets.only(right: 12.0),
+                      constraints: const BoxConstraints(),
+                      onPressed: () {
+                        List<String> partesData = dataHora.split(' ')[0].split('/'); // pega a parte da data (oq vem antes do espaco) com split(' ') e depois separa dia, mes e ano com outro split
+                        // dessa vez usando barra p separar. devolve entao uma lista com 3 textos, sendo eles dia, mes e ano
+                        int dia = int.parse(partesData[0]);
+                        int mes = int.parse(partesData[1]); // o int() nao funcionou n sei pq, ent tive que usar o parse()
+                        int ano = int.parse(partesData[2]);
+                        DateTime dataDoCard = DateTime(ano, mes, dia);
+
+                        final notaPreenchida = Nota( // cria o modelo nota preenchido com os dados atuais, p poder enviar p tela de editar
+                          id: id,
+                          titulo: titulo,
+                          categoria: categoria,
+                          conteudo: conteudo,
+                          dataHora: dataDoCard,
+                        );
+
+                        // leva p tela de nova nota, so que vez preenchida com os dados atuais da nota, p poder editar
+                        Navigator.of(context).push( 
+                          MaterialPageRoute(
+                            builder: (context) => NovaNotaPage(notaParaEditar: notaPreenchida), // manda a nota preenchida p variavel notaParaEditar da tela de nova nota
+                          ),
+                        );
+                      },
                     ),
 
                     // apagar funcional
                     IconButton(
                       icon: const Icon(Icons.delete_outline, color: Color.fromARGB(255, 255, 82, 82), size: 20),
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                      constraints: const BoxConstraints(), // tira o padding padrao do IconButton, que eh meio grande, 
                       onPressed: () => _confirmarDeletar(id), // quando clicado, o icone apaga a nota em questao com a funcao deletarNota
                     ),
                   ],
