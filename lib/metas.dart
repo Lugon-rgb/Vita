@@ -589,7 +589,14 @@ void editGoal(Goal goal) {
                   ),
 
                   ElevatedButton.icon(
-                    onPressed: showAddGoalPage,
+                    onPressed: () {
+                    titleController.clear();
+                    deadlineController.clear();
+                    descriptionController.clear();
+                    selectedCategory = "Financeiro";
+                    selectedGoalPeriod = "Curto Prazo";
+                    showAddGoalPage();
+                    },
 
                     icon: const Icon(Icons.add),
 
@@ -713,8 +720,15 @@ void editGoal(Goal goal) {
                                 height: 10),
 
                             GestureDetector(
-                              onTap:
-                                  showAddGoalPage,
+                              onTap: () {
+                              titleController.clear();
+                              deadlineController.clear();
+                              descriptionController.clear();                                                                    
+                              selectedCategory = "Financeiro";
+                              selectedGoalPeriod = "Curto Prazo";
+
+                              showAddGoalPage();
+                              },
 
                               child: const Text(
                                 "Criar uma agora",
