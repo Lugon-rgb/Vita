@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/pages/auth_page.dart';
-import 'package:vita_appprojetos/pages/home_page.dart';
 import 'package:vita_appprojetos/pages/metas.dart';
 import 'package:vita_appprojetos/pages/overlay_page.dart';
-import 'package:vita_appprojetos/pages/pagina_login.dart';
 import 'package:vita_appprojetos/pages/tela_usuario.dart';
-import 'pages/conquistas.dart';
-import 'pages/titulos.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -33,15 +29,13 @@ class VitaApp extends StatelessWidget {
           elevation: 0,
           centerTitle: true,
           titleTextStyle: TextStyle(
-            color: Colors.white70,
+            color: Color.fromARGB(179, 255, 255, 255),
             fontSize: 18,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.2,
           ),
         ),
       ),
-      // home: const ConquistasPage()
-      // home: const GoalsPage(),
       home: AuthPage(),
       routes: {
         '/METAS': (context) => const GoalsPage(),
