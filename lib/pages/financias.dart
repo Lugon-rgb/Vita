@@ -117,7 +117,7 @@ class _FinanciasState extends State<Financias> {
         .collection("usuarios")
         .doc("arthur")
         .get();
-    if (dados.exists) {
+    if (mounted && dados.exists) {
       Map<String, dynamic> data = dados.data() as Map<String, dynamic>;
 
       setState(() {

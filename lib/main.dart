@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'pages/notas.dart';
+// import 'pages/conquistas.dart';
+// import 'pages/titulos.dart';
 import 'package:vita_appprojetos/pages/auth_page.dart';
 import 'package:vita_appprojetos/pages/metas.dart';
 import 'package:vita_appprojetos/pages/overlay_page.dart';
@@ -36,6 +39,10 @@ class VitaApp extends StatelessWidget {
           ),
         ),
       ),
+      // home: const ConquistasPage()
+      // home: const TitulosPage()
+      // home: const NotasPage()
+      // home: const GoalsPage(),
       home: AuthPage(),
       routes: {
         '/METAS': (context) => const GoalsPage(),
