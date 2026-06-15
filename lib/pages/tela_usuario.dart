@@ -121,7 +121,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildNavigationCard({ // widget dos cards que vao navegar p conquistas e titulos, recebe como parametro o titulo do card, icone e oq acontece quando clica
+  Widget _buildNavigationCard({ 
+  // widget dos cards que vao navegar p conquistas e titulos, recebe como parametro o titulo do card, icone e oq acontece quando clica
+  // pode ser usado futuramente para outros cards que navegam pra outras telas, só passar o titulo, icone e o onTap desejado
   required String title,
   required IconData icon,
   required VoidCallback onTap,
@@ -137,8 +139,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.blueAccent, size: 22),
+          Icon(icon, color: const Color.fromARGB(255, 68, 138, 255), size: 22),
+
           const SizedBox(width: 12),
+
           Expanded(
             child: Text(
               title,
@@ -210,7 +214,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title,
         style: const TextStyle(
           color: Colors.grey,
-          fontSize: 14,
+          fontSize: 15,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -236,7 +240,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               switchStates[title] = newValue;
             });
           },
-          title: Text(title),
+          title: Text(title, style: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600),
+          ),
           activeThumbColor: Colors.blueAccent,
         ),
       ),
@@ -254,7 +261,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         color: const Color(0xFF1A1D24),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(title),
+      child: Text(title, style: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600),
+      ),
     );
   }
 
@@ -279,10 +289,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: const Center(
           child: Text(
             "Sair da Conta",
-            style: TextStyle(color: Colors.redAccent),
+            style: TextStyle(color: Colors.redAccent, fontSize: 15,
+          fontWeight: FontWeight.w600),
+          ),
           ),
         ),
-      ),
     );
   }
 }
