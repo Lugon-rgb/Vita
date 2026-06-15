@@ -1,9 +1,11 @@
+// ignore: unused_import
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthUtil {
-  FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final db = FirebaseFirestore.instance;
   Future<void> registerUser({
     required String email,
     required String nome,
@@ -28,5 +30,14 @@ class AuthUtil {
       email: email,
       password: senha,
     );
+  }
+
+  Future<String> emailRedefSenha(String email) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+      return "Email de mudança de senha enviado, cheque sua caixa de entrada";
+    } catch (e) {
+      return "Acorreu um erro $e";
+    }
   }
 }

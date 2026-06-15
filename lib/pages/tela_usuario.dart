@@ -1,27 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/pages/auth_page.dart';
-import 'package:vita_appprojetos/pages/pagina_login.dart';
-import 'package:vita_appprojetos/uitl/bottom_nav_bar.dart';
-
-// Função principal que inicia o app
-/* void main() {
-  runApp(const MyApp());
-}
-
-// Widget raiz do aplicativo
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false, // remove a faixa "debug"
-      theme: ThemeData.dark(), // ativa tema escuro padrão
-      home: const ProfileScreen(), // tela inicial
-    );
-  }
-} */
 
 // Tela principal (perfil)
 class ProfileScreen extends StatefulWidget {
