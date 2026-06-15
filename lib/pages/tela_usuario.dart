@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/pages/auth_page.dart';
 import 'package:vita_appprojetos/pages/pagina_login.dart';
 import 'package:vita_appprojetos/uitl/bottom_nav_bar.dart';
+import 'package:vita_appprojetos/pages/conquistas.dart';
+import 'package:vita_appprojetos/pages/titulos.dart';
 
 // Função principal que inicia o app
 /* void main() {
@@ -86,6 +88,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildInfoCard("Refazer Guia de Semana"),
             _buildInfoCard("Limpar Atividade Recente"),
 
+            // cards funcionais (navegam para conquistas e títulos)
+
+            _buildNavigationCard(
+              title: "Conquistas",
+              icon: Icons.emoji_events_outlined,
+              onTap: () {
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(builder: (context) => const ConquistasPage()),
+                );
+              },
+            ),
+            _buildNavigationCard(
+              title: "Títulos",
+              icon: Icons.military_tech_outlined,
+              onTap: () {
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(builder: (context) => const TitulosPage()),
+                );
+              },
+            ),
+            
+
             const SizedBox(height: 20),
 
             _buildLogoutButton(), // "botão" sair (visual)
@@ -94,6 +120,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+  Widget _buildNavigationCard({ // widget dos cards que vao navegar p conquistas e titulos, recebe como parametro o titulo do card, icone e oq acontece quando clica
+  required String title,
+  required IconData icon,
+  required VoidCallback onTap,
+}) {
+  return GestureDetector(
+    onTap: onTap, // detecta o clique pra ativar o ontap passado como parametro
+    child: Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1D24),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.blueAccent, size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            ),
+          ),
+          const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 14),
+        ],
+      ),
+    ),
+  );
+}
+
 
   // =========================
   // CARD DE PERFIL
