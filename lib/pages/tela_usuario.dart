@@ -1,28 +1,9 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttermoji/fluttermoji.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vita_appprojetos/pages/auth_page.dart';
-// Função principal que inicia o app
-/* void main() {
-  runApp(const MyApp());
-}
 
-// Widget raiz do aplicativo
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false, // remove a faixa "debug"
-      theme: ThemeData.dark(), // ativa tema escuro padrão
-      home: const ProfileScreen(), // tela inicial
-    );
-  }
-} */
-
-// Tela principal (perfil)
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -38,12 +19,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+
     switchStates = {
       "Notificações Push": true,
       "Quizzes Semanais": true,
       "Mostrar Nível XP": false,
       "Mostrar Status do Streak": true,
     };
+
+    carregarAvatar();
+  }
+
+  // CARREGAR AVATAR DO FIREBASE
+  Future<void> carregarAvatar() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final doc = await FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(user.uid)
+        .get();
+
+    final avatar = doc.data()?['avatar'];
+
+    if (avatar != null) {
+      // Fluttermoji salva automaticamente internamente no widget
+      // então só precisamos forçar rebuild
+      setState(() {});
+    }
+  }
+
+  // SALVAR AVATAR NO FIREBASE
+  Future<void> salvarAvatar() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final avatar = FluttermojiController().getFluttermojiOptions();
+
+    await FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(user.uid)
+        .set({
+      'avatar': avatar,
+    }, SetOptions(merge: true));
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Avatar salvo com sucesso!")),
+      );
+    }
   }
 
   void _openAvatarCustomizer() {
@@ -52,16 +76,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       isScrollControlled: true,
       backgroundColor: const Color(0xFF1A1D24),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (_) => SizedBox(
         height: MediaQuery.of(context).size.height * 0.75,
         child: Column(
           children: [
+            const SizedBox(height: 12),
             Container(
-              margin: const EdgeInsets.only(top: 12),
               width: 40,
               height: 4,
               decoration: BoxDecoration(
@@ -70,20 +92,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 16),
+
             const Text(
               "Personalizar Avatar",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
+
             const SizedBox(height: 16),
+
             FluttermojiCircleAvatar(radius: 50),
+
             const SizedBox(height: 16),
+
             Expanded(
-              child: FluttermojiCustomizer(
-                scaffoldWidth: MediaQuery.of(context).size.width,
-                autosave: true,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: FluttermojiCustomizer(
+                      scaffoldWidth: MediaQuery.of(context).size.width,
+                      autosave: true,
+                    ),
+                  ),
+
+                  ElevatedButton(
+                    onPressed: salvarAvatar,
+                    child: const Text("Salvar avatar"),
+                  ),
+
+                  const SizedBox(height: 10),
+                ],
               ),
             ),
           ],
@@ -107,16 +144,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             _buildProfileCard(),
             const SizedBox(height: 20),
+
             _buildSectionTitle("Configurações"),
             _buildSwitchTile("Notificações Push"),
             _buildSwitchTile("Quizzes Semanais"),
             _buildSwitchTile("Mostrar Nível XP"),
             _buildSwitchTile("Mostrar Status do Streak"),
+
             const SizedBox(height: 20),
-            _buildSectionTitle("Dados e Progresso"),
-            _buildInfoCard("Refazer Guia de Semana"),
-            _buildInfoCard("Limpar Atividade Recente"),
-            const SizedBox(height: 20),
+
             _buildLogoutButton(),
           ],
         ),
@@ -139,47 +175,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           TextButton.icon(
             onPressed: _openAvatarCustomizer,
-            icon: const Icon(
-              Icons.edit,
-              size: 16,
-              color: Colors.blueAccent,
-            ),
+            icon: const Icon(Icons.edit, color: Colors.blueAccent),
             label: const Text(
               "Personalizar avatar",
-              style: TextStyle(
-                color: Colors.blueAccent,
-                fontSize: 13,
-              ),
+              style: TextStyle(color: Colors.blueAccent),
             ),
           ),
 
           const SizedBox(height: 6),
 
           Text(
-            user?.displayName?.isNotEmpty == true
-                ? user!.displayName!
-                : "Usuário",
+            user?.displayName ?? "Usuário",
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
 
-          const SizedBox(height: 4),
-
           Text(
-            user?.email ?? "Sem e-mail",
+            user?.email ?? "",
             style: const TextStyle(color: Colors.grey),
-          ),
-
-          const SizedBox(height: 12),
-
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _StatItem(label: "Nível", value: "18"),
-              _StatItem(label: "Streak", value: "7"),
-            ],
           ),
         ],
       ),
@@ -191,11 +206,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Text(
         title,
-        style: const TextStyle(
-          color: Colors.grey,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
+        style: const TextStyle(color: Colors.grey),
       ),
     );
   }
@@ -209,26 +220,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: SwitchListTile(
         value: switchStates[title]!,
-        onChanged: (bool value) {
+        onChanged: (value) {
           setState(() {
             switchStates[title] = value;
           });
         },
         title: Text(title),
-        activeThumbColor: Colors.blueAccent,
       ),
-    );
-  }
-
-  Widget _buildInfoCard(String title) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1D24),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(title),
     );
   }
 
@@ -240,9 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (mounted) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (context) => AuthPage(),
-            ),
+            MaterialPageRoute(builder: (_) => AuthPage()),
           );
         }
       },
@@ -255,45 +251,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: const Center(
           child: Text(
             "Sair da Conta",
-            style: TextStyle(
-              color: Colors.redAccent,
-            ),
+            style: TextStyle(color: Colors.redAccent),
           ),
         ),
       ),
     );
   }
 }
-
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.blueAccent,
-          ),
-        ),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.grey,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
