@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
-import 'pages/notas.dart';
-// import 'pages/conquistas.dart';
-// import 'pages/titulos.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+import 'firebase_options.dart';
+
 import 'package:vita_appprojetos/pages/auth_page.dart';
 import 'package:vita_appprojetos/pages/home_page.dart';
 import 'package:vita_appprojetos/pages/metas.dart';
 import 'package:vita_appprojetos/pages/overlay_page.dart';
-import 'package:vita_appprojetos/pages/pagina_login.dart';
 import 'package:vita_appprojetos/pages/tela_usuario.dart';
-import 'pages/conquistas.dart';
-import 'pages/titulos.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+
+  runApp(const VitaApp());
 }
 
 class VitaApp extends StatelessWidget {
@@ -29,6 +26,7 @@ class VitaApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Vita',
+
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF121212),
@@ -44,15 +42,14 @@ class VitaApp extends StatelessWidget {
           ),
         ),
       ),
-      // home: const ConquistasPage()
-      // home: const TitulosPage()
-      // home: const NotasPage()
-      // home: const GoalsPage(),
-      home: AuthPage(),
+
+      // LOGIN PRIMEIRO
+      home: const AuthPage(),
+
       routes: {
+        '/HOME': (context) => const OverlayPage(),
         '/METAS': (context) => const GoalsPage(),
         '/PERFIL': (context) => const ProfileScreen(),
-        '/HOME': (context) => const OverlayPage(),
       },
     );
   }
