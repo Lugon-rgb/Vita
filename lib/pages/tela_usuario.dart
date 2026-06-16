@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/pages/auth_page.dart';
-import 'package:vita_appprojetos/pages/pagina_login.dart';
+// import 'package:vita_appprojetos/pages/pagina_login.dart';
 import 'package:vita_appprojetos/pages/conquistas.dart';
-import 'package:vita_appprojetos/pages/titulos.dart';
+// import 'package:vita_appprojetos/pages/titulos.dart';
 
 // Função principal que inicia o app
 /* void main() {
