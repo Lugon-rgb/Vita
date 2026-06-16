@@ -50,7 +50,7 @@ class VitaApp extends StatelessWidget {
       home: AuthPage(),
       routes: {
         '/METAS': (context) => const GoalsPage(),
-        '/PERFIL': (context) => const ProfileScreen(),
+        '/PERFIL': (context) => ProfileScreen(aoClicarNoSeletorDeTitulos: () => {}),
         '/HOME': (context) => const OverlayPage(),
       },
     );

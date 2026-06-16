@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/pages/auth_page.dart';
 import 'package:vita_appprojetos/pages/pagina_login.dart';
-import 'package:vita_appprojetos/uitl/bottom_nav_bar.dart';
 import 'package:vita_appprojetos/pages/conquistas.dart';
 import 'package:vita_appprojetos/pages/titulos.dart';
 
@@ -27,7 +26,14 @@ class MyApp extends StatelessWidget {
 
 // Tela principal (perfil)
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+
+  final VoidCallback aoClicarNoSeletorDeTitulos; // funcao passada como parametro do overlay p ser usada aqui, vai abrir a tela de titulos
+
+
+  const ProfileScreen({
+    super.key,
+    required this.aoClicarNoSeletorDeTitulos, // obrigatoria como parametro
+  });
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -103,12 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildNavigationCard(
               title: "Títulos",
               icon: Icons.military_tech_outlined,
-              onTap: () {
-                Navigator.push(
-                  context, 
-                  MaterialPageRoute(builder: (context) => const TitulosPage()),
-                );
-              },
+              onTap: widget.aoClicarNoSeletorDeTitulos, // usa a funcao que veio do overlay como parametro pra abrir a tela de titulos
             ),
             
 
