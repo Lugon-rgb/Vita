@@ -719,7 +719,7 @@ class _GoalsPageState extends State<GoalsPage> {
         ),
       ),
 
-      bottomNavigationBar: buildBottomBar(),
+      
     );
   }
 }
