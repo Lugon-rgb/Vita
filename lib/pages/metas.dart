@@ -349,7 +349,7 @@ class _GoalsPageState extends State<GoalsPage> {
             ),
           ),
 
-          bottomNavigationBar: buildBottomBar(),
+        
         ),
       ),
     );
@@ -446,45 +446,7 @@ class _GoalsPageState extends State<GoalsPage> {
     );
   }
 
-  BottomNavigationBar buildBottomBar() {
-    return BottomNavigationBar(
-      currentIndex: selectedBottomIndex,
-      backgroundColor: const Color(0xFF111827),
-      selectedItemColor: const Color(0xFF2563EB),
-      unselectedItemColor: Colors.white54,
-      type: BottomNavigationBarType.fixed,
-
-      onTap: (index) {
-        setState(() {
-          selectedBottomIndex = index;
-        });
-      },
-
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          label: "Início",
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.gps_fixed),
-          label: "Metas",
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.note_alt_outlined),
-          label: "Notas",
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.account_balance_wallet_outlined),
-          label: "Finanças",
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          label: "Perfil",
-        ),
-      ],
-    );
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
