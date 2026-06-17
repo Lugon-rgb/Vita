@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Financias extends StatefulWidget {
   const Financias({super.key});
@@ -11,7 +12,7 @@ class Financias extends StatefulWidget {
 
 class _FinanciasState extends State<Financias> {
   final db = FirebaseFirestore.instance;
-
+  late final String _uid = FirebaseAuth.instance.currentUser?.uid ?? 'anonimo';
   int limite = 0;
   int gastou = 0;
   List<Map<String, dynamic>> gastos = [];
@@ -104,8 +105,53 @@ class _FinanciasState extends State<Financias> {
     return groups;
   }
 
+  Future<void> _ganharXpFinancas() async {
+    final docRef = db.collection("users").doc(_uid);
+    final dados = await docRef.get();
+    final data = dados.data() as Map<String, dynamic>? ?? {};
+
+    // Verifica se já ganhou XP hoje
+    final DateTime? ultimoXp = (data['ultimoXpFinancas'] as Timestamp?)
+        ?.toDate();
+    final DateTime agora = DateTime.now();
+
+    if (ultimoXp != null &&
+        ultimoXp.day == agora.day &&
+        ultimoXp.month == agora.month &&
+        ultimoXp.year == agora.year) {
+      return; // já ganhou XP hoje, não faz nada
+    }
+
+    // Calcula XP baseado no progresso de gastos
+    int xpGanho;
+    if (progresso < 0.5) {
+      xpGanho = 50;
+    } else if (progresso < 1.0) {
+      xpGanho = 25;
+    } else {
+      xpGanho = 0;
+    }
+
+    if (xpGanho == 0) return;
+
+    int xpAtual = data['xp'] ?? 0;
+    int nivelAtual = data['nivel'] ?? 1;
+
+    xpAtual += xpGanho;
+    if (xpAtual >= 500) {
+      xpAtual -= 500;
+      nivelAtual += 1;
+    }
+
+    await docRef.set({
+      'xp': xpAtual,
+      'nivel': nivelAtual,
+      'ultimoXpFinancas': Timestamp.now(),
+    }, SetOptions(merge: true));
+  }
+
   Future<void> salvarFinancas() async {
-    await db.collection("usuarios").doc("arthur").set({
+    await db.collection("users").doc(_uid).set({
       "limite": limite,
       "gastou": gastou,
       "gastos": gastos,
@@ -113,10 +159,7 @@ class _FinanciasState extends State<Financias> {
   }
 
   Future<void> carregarFinancas() async {
-    DocumentSnapshot dados = await db
-        .collection("usuarios")
-        .doc("arthur")
-        .get();
+    DocumentSnapshot dados = await db.collection("users").doc(_uid).get();
     if (mounted && dados.exists) {
       Map<String, dynamic> data = dados.data() as Map<String, dynamic>;
 
