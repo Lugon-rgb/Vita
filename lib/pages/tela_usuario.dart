@@ -9,6 +9,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
+// Tela principal (perfil)
+class ProfileScreen extends StatefulWidget {
+
+  final VoidCallback aoClicarNoSeletorDeTitulos; // funcao passada como parametro do overlay p ser usada aqui, vai abrir a tela de titulos
+
+
+  const ProfileScreen({
+    super.key,
+    required this.aoClicarNoSeletorDeTitulos, // obrigatoria como parametro
+  });
+
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
@@ -163,6 +174,79 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+            _buildSectionTitle("Dados e Progresso"),
+
+            // Cards informativos (sem ação)
+            _buildInfoCard("Refazer Guia de Semana"),
+            _buildInfoCard("Limpar Atividade Recente"),
+
+            // cards funcionais (navegam para conquistas e títulos)
+
+            _buildNavigationCard(
+              title: "Conquistas",
+              icon: Icons.emoji_events_outlined,
+              onTap: () {
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(builder: (context) => const ConquistasPage()),
+                );
+              },
+            ),
+            _buildNavigationCard(
+              title: "Títulos",
+              icon: Icons.military_tech_outlined,
+              onTap: widget.aoClicarNoSeletorDeTitulos, // usa a funcao que veio do overlay como parametro pra abrir a tela de titulos
+            ),
+            
+
+            const SizedBox(height: 20),
+
+            _buildLogoutButton(), // "botão" sair (visual)
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavigationCard({ 
+  // widget dos cards que vao navegar p conquistas e titulos, recebe como parametro o titulo do card, icone e oq acontece quando clica
+  // pode ser usado futuramente para outros cards que navegam pra outras telas, só passar o titulo, icone e o onTap desejado
+  required String title,
+  required IconData icon,
+  required VoidCallback onTap,
+}) {
+  return GestureDetector(
+    onTap: onTap, // detecta o clique pra ativar o ontap passado como parametro
+    child: Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1D24),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color.fromARGB(255, 68, 138, 255), size: 22),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            ),
+          ),
+          const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 14),
+        ],
+      ),
+    ),
+  );
+}
+
+
+  // =========================
+  // CARD DE PERFIL
+  // =========================
   Widget _buildProfileCard() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -209,7 +293,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Text(
         title,
-        style: const TextStyle(color: Colors.grey),
+        style: const TextStyle(
+          color: Colors.grey,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -233,6 +321,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+      child: Material(
+        type: MaterialType.transparency,
+        child: SwitchListTile(
+          value: switchStates[title]!,
+          onChanged: (bool newValue) {
+            setState(() {
+              switchStates[title] = newValue;
+            });
+          },
+          title: Text(title, style: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600),
+          ),
+          activeThumbColor: Colors.blueAccent,
+        ),
+      ),
+    );
+  }
+
+  // =========================
+  // CARD SIMPLES DE TEXTO
+  // =========================
+  Widget _buildInfoCard(String title) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1D24),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(title, style: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+
+  // =========================
+  // "BOTÃO" SAIR (VISUAL)
+  // =========================
   Widget _buildLogoutButton() {
     return GestureDetector(
       onTap: () async {
@@ -254,10 +382,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: const Center(
           child: Text(
             "Sair da Conta",
-            style: TextStyle(color: Colors.redAccent),
+            style: TextStyle(color: Colors.redAccent, fontSize: 15,
+          fontWeight: FontWeight.w600),
+          ),
           ),
         ),
-      ),
     );
   }
 }

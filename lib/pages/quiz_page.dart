@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class TelaQuiz extends StatelessWidget {
+  const TelaQuiz({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

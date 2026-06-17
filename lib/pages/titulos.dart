@@ -1,18 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:vita_appprojetos/data/dicionario_titulos.dart';
 
 class TitulosPage extends StatelessWidget {
   const TitulosPage({super.key});
 
-static const Color comum = Color.fromRGBO(255, 255, 255, 0.702);
-static const Color incomum = Colors.green;
-static const Color raro = Colors.blue;
-static const Color epico = Colors.purple;
-static const Color lendario = Colors.orange;
-static const Color misterioso = Color.fromARGB(255, 218, 32, 32);
-
-
   @override
   Widget build(BuildContext context) {
+    // lista q simula temporariamente como os titulos mudariam com base nos dados la do firebase
+    final List<String> titulosLiberadosNoFirebase = [
+          't_novato',
+          't_novato_determinado',
+          't_vigia_moedas',
+          't_andarilho',
+          't_guerreiro_foco',
+          't_sabio_resistente',
+          't_veterano_batalhas',
+          't_mestre_tesouro',
+          't_guardiao_experiente',
+          't_governador_destino',
+          't_magnata',
+          't_campeao_implacavel',
+          't_demiurgo',
+          't_imortalizado',
+          't_inominavel',
+          't_minimalista_absoluto',
+          't_immortalis_vita',
+        ];
+
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
@@ -23,95 +37,94 @@ static const Color misterioso = Color.fromARGB(255, 218, 32, 32);
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         children: [
           
-          // chamada da funcao ddo rank dos TÍTULOS 
+          // TÍTULOS COMUNS:
           rankTitulos('Títulos Comuns', comum),
 
-          // TÍTULOS COMUNS:
-          titulo('Novato', 
-          'Título default, concedido ao ingressar no Vita.', Icons.check_circle, comum),
-          titulo('Novato Determinado', 
-          'Atingir a conquista “Primeira Vitória”.', Icons.check_circle, comum),
-          titulo('Escrivão', 
-          'Atingir a conquista “Anotação de Campo”.', Icons.lock_outline, comum),
-          titulo('Vigia das Moedas', 
-          'Atingir as conquistas “Pilar de Finanças” e “Registro de Ouro”.', Icons.check_circle, comum),
-          titulo('Andarilho', 
-          'Atingir o nível 5.', Icons.check_circle, comum),
+          ...listaDeTitulosDoApp.where((tituloAtual) => tituloAtual.corRaridade == comum).map((dados) {
+            final bool estaDesbloqueado = titulosLiberadosNoFirebase.contains(dados.id);
+            return titulo(
+              context,
+              dados.nome,
+              dados.descricao,
+              estaDesbloqueado ? Icons.check_circle : Icons.lock_outline,
+              dados.corRaridade,
+            );
+          }),
 
-
-          rankTitulos('Títulos Incomuns', incomum),
 
           // TÍTULOS INCOMUNS:
-          titulo('Guerreiro do Foco', 
-          'Atingir a conquista “Ritmo Semanal”.', Icons.check_circle, incomum),
-          titulo('Sábio Resistente', 
-          'Atingir as conquistas “Sede de Conhecimento” e “Elixir da Vida”.', Icons.check_circle, incomum),
-          titulo('Guardião das Memórias', 
-          'Atingir a conquista “Mosaico de Ideias”.', Icons.lock_outline, incomum),
-          titulo('Guardião das Moedas', 
-          'Atingir a conquista “Disciplina Financeira”.', Icons.lock_outline, incomum),
-          titulo('Veterano de Batalhas', 
-          'Atingir o nível 15.', Icons.check_circle, incomum),
+          rankTitulos('Títulos Incomuns', incomum),
 
+         ...listaDeTitulosDoApp.where((tituloAtual) => tituloAtual.corRaridade == incomum).map((dados) {
+            final bool estaDesbloqueado = titulosLiberadosNoFirebase.contains(dados.id);
+            return titulo(
+              context,
+              dados.nome,
+              dados.descricao,
+              estaDesbloqueado ? Icons.check_circle : Icons.lock_outline,
+              dados.corRaridade,
+            );
+          }),
 
-          rankTitulos('Títulos Raros', raro),
 
           // TÍTULOS RAROS:
-          titulo('Invulnerável', 
-          'Atingir as conquistas “Armadura de Ouro” e “Vigor Pleno”.', Icons.lock_outline, raro),
-          titulo('Mestre do Tesouro', 
-          'Atingir as conquistas “Superávit” e “Muralha financeira”.', Icons.check_circle, raro),
-          titulo('Sentinela do Tempo', 
-          'Atingir a conquista “Sequência de Guerreiro”.', Icons.lock_outline, raro),
-          titulo('Guardião Experiente', 
-          'Atingir o nível 30.', Icons.check_circle, raro),
-      
+          rankTitulos('Títulos Raros', raro),
 
-          rankTitulos('Títulos Épicos', epico),
+          ...listaDeTitulosDoApp.where((tituloAtual) => tituloAtual.corRaridade == raro).map((dados) {
+            final bool estaDesbloqueado = titulosLiberadosNoFirebase.contains(dados.id);
+            return titulo(
+              context,
+              dados.nome,
+              dados.descricao,
+              estaDesbloqueado ? Icons.check_circle : Icons.lock_outline,
+              dados.corRaridade,
+            );
+          }),
+
 
           // TÍTULOS ÉPICOS:
-          titulo('Imaculado', 
-          'Atingir as conquistas “Fortaleza Pessoal” e “Jornada da Perfeição”.', Icons.lock_outline, epico),
-          titulo('Governador do Destino', 
-          'Atingir as conquistas “Caminho Estruturado” e “Mapa Completo”', Icons.check_circle, epico),
-          titulo('Clarividente', 
-          'Atingir a conquista “Mente de Cristal”.', Icons.lock_outline, epico),
-          titulo('Magnata', 
-          'Atingir a conquista “Sonho Realizado”.', Icons.check_circle, epico),
-          titulo('Campeão Implacável', 
-          'Atingir o nível 50.', Icons.check_circle, epico),
+          rankTitulos('Títulos Épicos', epico),
 
+          ...listaDeTitulosDoApp.where((tituloAtual) => tituloAtual.corRaridade == epico).map((dados) {
+            final bool estaDesbloqueado = titulosLiberadosNoFirebase.contains(dados.id);
+            return titulo(
+              context,
+              dados.nome,
+              dados.descricao,
+              estaDesbloqueado ? Icons.check_circle : Icons.lock_outline,
+              dados.corRaridade,
+            );
+          }),
 
-          rankTitulos('Títulos Lendários', lendario),
 
           // TÍTULOS LENDÁRIOS:
-          titulo('Espartano', 
-          'Atingir a conquista “Eternidade Vita”.', Icons.lock_outline, lendario),
-          titulo('Uzumaki', 
-          'Atingir a conquista “Ciclo Perfeito”.', Icons.lock_outline, lendario),
-          titulo('Demiurgo', 
-          'Atingir as conquistas “Plano de Uma Era” e “Atlas Universal”.', Icons.check_circle, lendario),
-          titulo('Midas', 
-          'Atingir as conquistas “Cofre de ferro” e “Atlas Universal”.', Icons.lock_outline, lendario),
-          titulo('O Imortalizado', 
-          'Atingir o nível 75.', Icons.check_circle, lendario),
+          rankTitulos('Títulos Lendários', lendario),
 
+          ...listaDeTitulosDoApp.where((tituloAtual) => tituloAtual.corRaridade == lendario).map((dados) {
+            final bool estaDesbloqueado = titulosLiberadosNoFirebase.contains(dados.id);
+            return titulo(
+              context,
+              dados.nome,
+              dados.descricao,
+              estaDesbloqueado ? Icons.check_circle : Icons.lock_outline,
+              dados.corRaridade,
+            );
+          }),
 
-          rankTitulos('???',misterioso),
 
           // TÍTULOS OCULTOS: 
-          titulo('O Inominável', 
-          'Atinge ao salvar uma nota sem preencher o título.', Icons.check_circle, misterioso),
-          titulo('Mestre do Centavo', 
-          '???', Icons.lock_outline, misterioso),
-          titulo('Alma Gêmea', 
-          '???', Icons.lock_outline, misterioso),
-          titulo('Minimalista absoluto', 
-          'Atinge ao ter 0 metas ativas, 0 notas, 0 gastos, mas entrar no app por 7 dias seguidos.', Icons.check_circle, misterioso),
-          titulo('Sobrevivente do Caos', 
-          '???', Icons.lock_outline, misterioso),
-          titulo('Immortalis Vita', 
-          'Alcançar o nível 100', Icons.check_circle, misterioso),
+          rankTitulos('???',misterioso),
+
+          ...listaDeTitulosDoApp.where((tituloAtual) => tituloAtual.corRaridade == misterioso).map((dados) {
+            final bool estaDesbloqueado = titulosLiberadosNoFirebase.contains(dados.id);
+            return titulo(
+              context,
+              dados.nome,
+              estaDesbloqueado ? dados.descricao : '???',
+              estaDesbloqueado ? Icons.check_circle : Icons.lock_outline,
+              dados.corRaridade,
+            );
+          }),
 
         ],
       ),
@@ -137,7 +150,7 @@ static const Color misterioso = Color.fromARGB(255, 218, 32, 32);
 
 
 // criando função para criar cada conquista + descrição + ícone + cor da raridade p colorir o circulo do icone
-  Widget titulo (String nome, String descricao, IconData icone, Color corRaridade) {
+  Widget titulo (BuildContext context, String nome, String descricao, IconData icone, Color corRaridade) {
 
     final bool ehDesbloqueado = icone == Icons.check_circle;
 
@@ -168,25 +181,41 @@ static const Color misterioso = Color.fromARGB(255, 218, 32, 32);
       valorOpacidade = 0.6;
     }
     
+    return GestureDetector(
+          onTap: () {
+            if (ehDesbloqueado) {
+              // Se estiver liberado, fecha a tela e devolve o nome do título para a OverlayPage
+              Navigator.pop(context, nome);
+            } else {
+              // Se estiver bloqueado, avisa o jogador com a SnackBar
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Este título ainda está bloqueado! Continue focando para liberá-lo.'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
+          },
 
-    return Card(
-      color: const Color(0xFF1E1E1E),
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      child: ListTile(
-        leading: Container( // container envolta do icone pra colorir com a cor da raridade
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: corFundoCirculo,
-            shape: BoxShape.circle, // transformei o container num circulo p ficar mais bonitinho
-            border: Border.all(color: corBordaCirculo, width: 1), 
+      child: Card(
+        color: const Color(0xFF1E1E1E),
+        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        child: ListTile(
+          leading: Container( // container envolta do icone pra colorir com a cor da raridade
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: corFundoCirculo,
+              shape: BoxShape.circle, // transformei o container num circulo p ficar mais bonitinho
+              border: Border.all(color: corBordaCirculo, width: 1), 
+            ),
+            child: Opacity(
+              opacity: valorOpacidade,
+              child: Icon(icone, color: corIcone),
+            ),
           ),
-          child: Opacity(
-            opacity: valorOpacidade,
-            child: Icon(icone, color: corIcone),
-          ),
+          title: Text(nome, style: TextStyle(color: corTextoTitulo, fontSize: 16, fontWeight: FontWeight.bold)),
+          subtitle: Text(descricao, style: TextStyle(color: corTextoDescricao, fontSize: 14)),
         ),
-        title: Text(nome, style: TextStyle(color: corTextoTitulo, fontSize: 16, fontWeight: FontWeight.bold)),
-        subtitle: Text(descricao, style: TextStyle(color: corTextoDescricao, fontSize: 14)),
       ),
     );
   }

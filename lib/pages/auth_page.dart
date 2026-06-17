@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:vita_appprojetos/pages/overlay_page.dart';
+import 'package:vita_appprojetos/pages/carregamento.dart';
 import 'package:vita_appprojetos/pages/pagina_login.dart';
 
 class AuthPage extends StatelessWidget {
@@ -13,7 +13,7 @@ class AuthPage extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return OverlayPage();
+            return Carregamentos();
           } else {
             return PaginaLogin();
           }

@@ -22,25 +22,21 @@ class RoundedTextFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width - 30,
       child: Center(
-        child: Container(
-          child: TextFormField(
-            controller: controller,
-            validator: vali,
-            onSaved: onSaved,
-            decoration: InputDecoration(
-              suffixIcon: iconDec,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              labelText: fieldLabel,
-              floatingLabelAlignment: FloatingLabelAlignment.start,
-              hintText: hintText,
-            ),
-            obscureText: obscureText,
+        child: TextFormField(
+          controller: controller,
+          validator: vali,
+          onSaved: onSaved,
+          decoration: InputDecoration(
+            suffixIcon: iconDec,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            labelText: fieldLabel,
+            floatingLabelAlignment: FloatingLabelAlignment.start,
+            hintText: hintText,
           ),
+          obscureText: obscureText,
         ),
       ),
     );
