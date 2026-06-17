@@ -1,5 +1,3 @@
-// ignore_for_file: no_leading_underscores_for_local_identifiers
-
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,11 +8,9 @@ import 'package:vita_appprojetos/uitl/dialog_box.dart';
 import 'package:vita_appprojetos/uitl/my_button.dart';
 import 'package:vita_appprojetos/uitl/text_form_field.dart';
 import 'package:image_picker/image_picker.dart';
-// import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class PaginaLogin extends StatefulWidget {
-  const PaginaLogin({super.key});
-
   @override
   State<PaginaLogin> createState() => _PaginaLoginState();
 }
@@ -25,7 +21,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
   final _confSenha = TextEditingController();
   final _nomeUsuario = TextEditingController();
 
-  final AuthUtil _auth = AuthUtil();
+  AuthUtil _auth = AuthUtil();
 
   bool _isObscured = true;
   bool _isObscuredR = true;
@@ -507,6 +503,12 @@ class _PaginaLoginState extends State<PaginaLogin> {
   }
 
   Widget _bottombuttonsRegister(BuildContext context) {
+    void _contaCriada() {
+      setState(() {
+        _isLoginMode = true;
+      });
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,

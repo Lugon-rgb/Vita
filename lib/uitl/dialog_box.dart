@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/uitl/my_button.dart';
 
-// ignore: must_be_immutable
 class DialogBox extends StatelessWidget {
   VoidCallback galeria;
   VoidCallback camera;

@@ -1,26 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:vita_appprojetos/data/dicionario_conquista.dart';
 
 
 class ConquistasPage extends StatelessWidget {
   const ConquistasPage({super.key});
 
+static const Color comum = Color.fromRGBO(255, 255, 255, 0.702);
+static const Color incomum = Colors.green;
+static const Color raro = Colors.blue;
+static const Color epico = Colors.purple;
+static const Color lendario = Colors.orange;
+
   @override
   Widget build(BuildContext context) {
-    // criando uma lista p meio que simular temporariamente como elas mudariam com base nos dados la do firebase
-    final List<String> conquistasLiberadasNoFirebase = [
-          'primeira_vitoria',
-          'registro_ouro',
-          'pilar_financas',
-          'ritmo_semanal',
-          'sede_conhecimento',
-          'sequencia_guerreiro',
-          'superavit',
-          'caminho_estruturado',
-          'sonho_realizado',
-          'plano_uma_era',
-        ];
-
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
@@ -31,83 +22,89 @@ class ConquistasPage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         children: [
           
-          // CONQUISTAS COMUNS:
+          // chamada da funcao ddo rank das conquistas 
           rankConquistas('Conquistas Comuns', '+50 xp', comum),
-          
-          ...listaDeConquistasDoApp.where((conqAtual) => conqAtual.corRaridade == comum).map((dados) {
-            // pega a lista de conquistas completa que eu criei no dicionario_conquista, usa o .where justamente pra filtrar 
-            // so as comuns e depois o .map funciona como um loop, ele vai pegar cada conquista comum que sobrou depois do filtro, 
-            // uma por uma, e vai criar um widget pra ela usando a funcao conquista que eu criei la embaixo.
-            // esse ... eh o operador spread, ele serve justamente pra pegar a lista de widgets que a funcao conquista retorna e
-            // literalmente espalhar ela ali dentro da ListView, ja que a ListView espera uma lista de widgets
 
-            final bool estaDesbloqueada = conquistasLiberadasNoFirebase.contains(dados.id);
-            // esse bool olha pra lista de conquistas liberadas no firebase, aquela temporaria q eu criei ali em cima, e ve se o ID da conquista atual
-            // que ta sendo peneirada, ta la dentro, se tiver, ele retorna true pq ta desbloqueada, se nao, ele retorna false
-
-            return conquista( // eh oq monta de fato o widget da conquista, passando o nome, descricao, icone e cor da raridade
-              dados.nome,
-              dados.descricao,
-              estaDesbloqueada ? Icons.check_circle : Icons.lock_outline, // se tiver desbloqueada, icone de check, se nao, icone de bloqueado
-              dados.corRaridade,
-            );
-          }),
+          // CONQUISTAS COMUNS:
+          conquista('Primeira Vitória', 
+          'Conclua uma meta qualquer de curto ou longo prazo.', Icons.check_circle, comum),
+          conquista('Anotação de Campo', 
+          'Crie sua primeira nota', Icons.lock_outline, comum),
+          conquista('Registro de Ouro.', 
+          'Registre um gasto ou receita pela primeira vez.', Icons.check_circle, comum),
+          conquista('Pilar das Finanças.', 
+          'Configure o limite mensal de gastos pela primeira vez.', Icons.check_circle, comum),
+          conquista('Identidade Forjada.', 
+          'Personalize seu título de perfil pela primeira vez.', Icons.lock_outline, comum),
+          conquista('Mente Ágil.', 
+          'Conclua uma meta de curto prazo em menos de 24 horas após criá-la.', Icons.lock_outline, comum),
 
 
-          // CONQUISTAS INCOMUNS:
           rankConquistas('Conquistas Incomuns', '+150 xp', incomum),
 
-          ...listaDeConquistasDoApp.where((conqAtual) => conqAtual.corRaridade == incomum).map((dados) {
-            final bool estaDesbloqueada = conquistasLiberadasNoFirebase.contains(dados.id);
-            return conquista(
-              dados.nome,
-              dados.descricao,
-              estaDesbloqueada ? Icons.check_circle : Icons.lock_outline,
-              dados.corRaridade,
-            );
-          }),
+          // CONQUISTAS INCOMUNS:
+          conquista('Ritmo Semanal', 
+          'Alcance uma sequência diária de 7 dias.', Icons.check_circle, incomum),
+          conquista('Série de Triunfos', 
+          'Conclua 5 metas de curto prazo no total.', Icons.lock_outline, incomum),
+          conquista('Disciplina Financeira.', 
+          'Registre gastos por 7 dias consecutivos.', Icons.lock_outline, incomum),
+          conquista('Sede de Conhecimento.', 
+          'Conclua 3 metas da categoria “Estudo” em uma única semana.', Icons.check_circle, incomum),
+          conquista('Elixir da Vida.', 
+          'Conclua 3 metas da categoria “Saúde” em uma única semana.', Icons.check_circle, incomum),
+          conquista('Mosaico de Ideias.', 
+          'Crie pelo menos 2 notas de cada categoria no total.', Icons.lock_outline, incomum),
 
+
+          rankConquistas('Conquistas Raras', '+500 xp', raro),
 
           // CONQUISTAS RARAS:
-          rankConquistas('Conquistas Raras', '+500 xp', raro),
-          
-          ...listaDeConquistasDoApp.where((conqAtual) => conqAtual.corRaridade == raro).map((dados) {
-            final bool estaDesbloqueada = conquistasLiberadasNoFirebase.contains(dados.id);
-            return conquista(
-              dados.nome,
-              dados.descricao,
-              estaDesbloqueada ? Icons.check_circle : Icons.lock_outline,
-              dados.corRaridade,
-            );
-          }),
+          conquista('Sequência de Guerreiro', 
+          'Alcance uma sequência diária de 30 dias.', Icons.check_circle, raro),
+          conquista('Zênite Vital', 
+          'Responda o quiz semanal com felicidade máxima durante 4 semanas consecutivas.', Icons.lock_outline, raro),
+          conquista('Vigor Pleno.', 
+          'Mantenha a Stamina cheia durante 4 semanas.', Icons.lock_outline, raro),
+          conquista('Armadura de Ouro.', 
+          'Mantenha o HP cheio durante 4 semanas.', Icons.lock_outline, raro),
+          conquista('Superávit.', 
+          'Termine o mês com o saldo disponível maior que a despesa mensal.', Icons.check_circle, raro),
+          conquista('Muralha financeira.', 
+          'Passe uma semana inteira sem registrar nenhum “gasto extra”.', Icons.check_circle, raro),
 
 
-          // CONQUISTAS ÉPICAS:
           rankConquistas('Conquistas Épicas', '+1000 xp', epico),
 
-          ...listaDeConquistasDoApp.where((conqAtual) => conqAtual.corRaridade == epico).map((dados) {
-            final bool estaDesbloqueada = conquistasLiberadasNoFirebase.contains(dados.id);
-            return conquista(
-              dados.nome,
-              dados.descricao,
-              estaDesbloqueada ? Icons.check_circle : Icons.lock_outline,
-              dados.corRaridade,
-            );
-          }),
+          // CONQUISTAS ÉPICAS:
+          conquista('Caminho Estruturado', 
+          'Conclua 6 metas a longo prazo no total.', Icons.check_circle, epico),
+          conquista('Mente de Cristal', 
+          'Responda o quiz semanal por 12 semanas consecutivos (3 meses).', Icons.lock_outline, epico),
+          conquista('Fortaleza Pessoal.', 
+          'Mantenha HP e Stamina, ao mesmo tempo, acima de 80 durante 12 semanas consecutivas .', Icons.lock_outline, epico),
+          conquista('Jornada da Perfeição.', 
+          'Complete uma meta a longo prazo sem perder nenhum ponto de HP durante o período.', Icons.lock_outline, epico),
+          conquista('Sonho Realizado.', 
+          'Complete uma meta da categoria “financeira” de valor maior ou igual a 5 vezes a sua receita mensal.', Icons.check_circle, epico),
+          conquista('Mapa Completo.', 
+          'Conclua pelo menos 3 metas quaisquer (curto ou longo prazo) de cada categoria .', Icons.check_circle, epico),
 
 
-          // CONQUISTAS LENDÁRIAS:
           rankConquistas('Conquistas Lendárias', '+5000 xp', lendario),
-
-          ...listaDeConquistasDoApp.where((conqAtual) => conqAtual.corRaridade == lendario).map((dados) {
-            final bool estaDesbloqueada = conquistasLiberadasNoFirebase.contains(dados.id);
-            return conquista(
-              dados.nome,
-              dados.descricao,
-              estaDesbloqueada ? Icons.check_circle : Icons.lock_outline,
-              dados.corRaridade,
-            );
-          }),
+          // CONQUISTAS LENDÁRIAS:
+          conquista('Plano de Uma Era', 
+          'Conclua 12 metas a longo prazo no total.', Icons.check_circle, lendario),
+          conquista('Eternidade Vita', 
+          'Mantenha uma sequência de 100 dias ativos.', Icons.lock_outline, lendario),
+          conquista('Cofre de ferro.', 
+          'Termine 6 meses consecutivos sem ultrapassar o limite mensal de gastos.', Icons.lock_outline, lendario),
+          conquista('Império Pessoal.', 
+          'Termine 12 meses consecutivos com saldo positivo (saldo disponível > despesa mensal).', Icons.lock_outline, lendario),
+          conquista('Atlas Universal.', 
+          'Conclua pelo menos 3 metas a longo prazo de cada categoria.', Icons.check_circle, lendario),
+          conquista('Ciclo Perfeito.', 
+          'Responda o quiz semanal durante 52 semanas consecutivas (1 ano).', Icons.lock_outline, lendario),
           
         ],
       ),

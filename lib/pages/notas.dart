@@ -294,7 +294,6 @@ final Stream<QuerySnapshot> _notasStream = FirebaseFirestore.instance.collection
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator()); // se tiver carregando, pro usuario saber disso, mostra a bolinha girando na tela
                 }
-                
                 final docs = snapshot.data?.docs ?? []; // se o snapshot tiver dados, pega os documentos, se nao tiver, deixa como lista vazia, pra evitar crash
 
                 final notasFiltradas = docs.map((doc) => Nota.fromDocument(doc)).where((nota) { // converte de volta o doc do firebase pro objeto nota
@@ -566,7 +565,7 @@ final Stream<QuerySnapshot> _notasStream = FirebaseFirestore.instance.collection
 
             const SizedBox(height: 16), 
 
-            // data e iconezinhos de editar e apagar (agora funcionais)
+            // data e iconezinhos de editar e apagar (atualmente, apenas estaticos)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -591,9 +590,9 @@ final Stream<QuerySnapshot> _notasStream = FirebaseFirestore.instance.collection
                         List<String> partesData = dataHora.split(' ')[0].split('/'); // pega a parte da data (oq vem antes do espaco) com split(' ') e depois separa dia, mes e ano com outro split
                         // dessa vez usando barra p separar. devolve entao uma lista com 3 textos, sendo eles dia, mes e ano
                         int dia = int.parse(partesData[0]);
-                        int mes = int.parse(partesData[1]); // converte pra int
+                        int mes = int.parse(partesData[1]); // o int() nao funcionou n sei pq, ent tive que usar o parse()
                         int ano = int.parse(partesData[2]);
-                        DateTime dataDoCard = DateTime(ano, mes, dia); // retransforma pra DateTime p poder editar no calendario nativo
+                        DateTime dataDoCard = DateTime(ano, mes, dia);
 
                         final notaPreenchida = Nota( // cria o modelo nota preenchido com os dados atuais, p poder enviar p tela de editar
                           id: id,

@@ -3,13 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'firebase_options.dart';
 
-// import 'pages/notas.dart';
-// import 'pages/conquistas.dart';
-// import 'pages/titulos.dart';
 import 'package:vita_appprojetos/pages/auth_page.dart';
-// import 'package:vita_appprojetos/pages/home_page.dart';
-// import 'pages/conquistas.dart';
-// import 'pages/titulos.dart';
+import 'package:vita_appprojetos/pages/home_page.dart';
 import 'package:vita_appprojetos/pages/metas.dart';
 import 'package:vita_appprojetos/pages/overlay_page.dart';
 import 'package:vita_appprojetos/pages/tela_usuario.dart';
@@ -54,8 +49,7 @@ class VitaApp extends StatelessWidget {
       routes: {
         '/HOME': (context) => const OverlayPage(),
         '/METAS': (context) => const GoalsPage(),
-        '/PERFIL': (context) => ProfileScreen(aoClicarNoSeletorDeTitulos: () => {}),
-        '/HOME': (context) => const OverlayPage(),
+        '/PERFIL': (context) => const ProfileScreen(),
       },
     );
   }

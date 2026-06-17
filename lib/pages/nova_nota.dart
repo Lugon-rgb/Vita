@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../modelos/modelo_nota.dart';
 
 class NovaNotaPage extends StatefulWidget {
-  final Nota? notaParaEditar; // se a nota vier preenchida, a tela vai funcionar como edicao
-  // mas se vier vazia, funciona como criacao
+  final Nota? notaParaEditar; // se a nota vier preenchida, a tela vai funcionar como edição
+  // mas se vier vazia, funciona como criação
   const NovaNotaPage({super.key, this.notaParaEditar});
 
   @override
@@ -21,7 +21,7 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
   String _categoriaSelecionada = 'Outros'; // selecionada por padrao
   DateTime? _dataSelecionada; // como eh opcional, pode ser nula
 
-  // variavel que aponta para a colecao de notas do Firebase
+  // variavel que aponta para a coleção de notas do Firebase
   final CollectionReference _notasCollection = FirebaseFirestore.instance.collection('notas');
 
   @override
@@ -62,7 +62,7 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.dark(
-              primary: Color(0xFF2A4BA0),
+              primary: Color(0xFF2A4BA0), // Azul vivo
               onPrimary: Colors.white,
               surface: Color(0xFF1E1E1E),
               onSurface: Colors.white,
@@ -76,7 +76,7 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
     if (escolheu != null) { // se for uma data valida
       setState(() {
         _dataSelecionada = escolheu; // guardando a data em uma variavel p depois mandar p firebase
-        _dataController.text = 
+        _dataController.text =
             "${escolheu.day.toString().padLeft(2, '0')}/${escolheu.month.toString().padLeft(2, '0')}/${escolheu.year}";
             // formatei p exibir na caixinha de texto (dd/mm/aaaa)
       });
@@ -96,7 +96,7 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
       return;
     }
 
-    // se o usuario escolheu uma data usar ela
+    // se o usuario escolheu uma data, usar ela combinada com o horário atual. 
     // se nao escolheu (ja q eh opcional), usar o DateTime.now() igual na captura rapida.
     DateTime dataFinal = _dataSelecionada ?? DateTime.now();
 
@@ -184,7 +184,7 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
             const Text('Categoria', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
-              initialValue: _categoriaSelecionada, //valor selecionado atualmente
+              value: _categoriaSelecionada, //valor selecionado atualmente
               dropdownColor: const Color(0xFF141923),
               style: const TextStyle(color: Colors.white, fontSize: 16),
               icon: const Icon(Icons.arrow_drop_down, color: Colors.white60),
@@ -208,9 +208,7 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
               },
             ),
 
-
             const SizedBox(height: 20),
-
 
             // campo da data
             const Text('Data (Opcional)', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
@@ -225,9 +223,7 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
               ),
             ),
 
-
             const SizedBox(height: 20),
-
 
             // campo do conteudo
             const Text('Conteúdo', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
@@ -239,9 +235,7 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
               decoration: _customInputDecoration('Digite os detalhes da nota aqui...'),
             ),
 
-
             const SizedBox(height: 35),
-
 
             // botao de salvar
             SizedBox(
@@ -253,10 +247,9 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
                   'Salvar Nota',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-
                 style: ElevatedButton.styleFrom(
                   // trocar a cor do botao dependendo se os campos obrigatorios estao preenchidos ou nao, p dar um feedback visual pro usuario
-                  backgroundColor: _camposPreenchidos() ? const Color(0xFF2A4BA0) : const Color(0xFF1E3A8A).withValues(alpha: 0.4),
+                  backgroundColor: _camposPreenchidos() ? const Color(0xFF2A4BA0) : const Color(0xFF1E3A8A).withOpacity(0.4),
                   foregroundColor: _camposPreenchidos() ? Colors.white : Colors.white38,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
