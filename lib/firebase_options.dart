@@ -57,6 +57,7 @@ class DefaultFirebaseOptions {
     projectId: 'vita-86079',
     storageBucket: 'vita-86079.firebasestorage.app',
   );
+
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCfbmBOMuoIdGMSPg0pcxcNgvCTbrRsmwA',
     appId: '1:453171614776:ios:34e869770c8f82df8c02cd',
@@ -65,6 +66,7 @@ class DefaultFirebaseOptions {
     storageBucket: 'vita-86079.firebasestorage.app',
     iosBundleId: 'com.example.vitaAppprojetos',
   );
+
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyCfbmBOMuoIdGMSPg0pcxcNgvCTbrRsmwA',
     appId: '1:453171614776:ios:34e869770c8f82df8c02cd',
@@ -83,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'vita-86079.firebasestorage.app',
     measurementId: 'G-MFLCSLFT2X',
   );
+
 }
