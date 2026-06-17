@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:fluttermoji/fluttermoji.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vita_appprojetos/pages/auth_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -32,22 +34,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // CARREGAR AVATAR DO FIREBASE
   Future<void> carregarAvatar() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
 
-    final doc = await FirebaseFirestore.instance
-        .collection('usuarios')
-        .doc(user.uid)
-        .get();
+  final doc = await FirebaseFirestore.instance
+      .collection('usuarios')
+      .doc(user.uid)
+      .get();
 
-    final avatar = doc.data()?['avatar'];
+  final avatar = doc.data()?['avatar'];
 
-    if (avatar != null) {
-      // Fluttermoji salva automaticamente internamente no widget
-      // então só precisamos forçar rebuild
-      setState(() {});
-    }
+  if (avatar != null) {
+    // Salva no SharedPreferences para o fluttermoji ler
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('fluttermoji', avatar);
+    setState(() {}); // reconstrói o widget com o avatar carregado
   }
+}
 
   // SALVAR AVATAR NO FIREBASE
   Future<void> salvarAvatar() async {
