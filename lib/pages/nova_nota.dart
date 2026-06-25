@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../modelos/modelo_nota.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class NovaNotaPage extends StatefulWidget {
   final Nota? notaParaEditar; // se a nota vier preenchida, a tela vai funcionar como edição
@@ -22,7 +24,16 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
   DateTime? _dataSelecionada; // como eh opcional, pode ser nula
 
   // variavel que aponta para a coleção de notas do Firebase
-  final CollectionReference _notasCollection = FirebaseFirestore.instance.collection('notas');
+  //final CollectionReference _notasCollection = FirebaseFirestore.instance.collection('notas');
+
+  // antes estatico, agora dinamico
+  CollectionReference get _notasCollection {
+  final user = FirebaseAuth.instance.currentUser;
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(user?.uid ?? 'deslogado')
+      .collection('notas');
+}
 
   @override
   void initState() {
@@ -160,9 +171,10 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
           icon: const Icon(Icons.arrow_back, color: Colors.white), // setinha p voltar
           onPressed: () => Navigator.of(context).pop(), // fecha a tela
         ),
-        title: const Text(
-          'Nova Nota',
-          style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+        // mudanca pro nova nota virar editar nota caso a nota venha p editar
+        title: Text(
+          widget.notaParaEditar == null ? 'Nova Nota' : 'Editar Nota', // <--- DINÂMICO
+          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
       body: SafeArea(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../modelos/modelo_nota.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'nova_nota.dart';
 
 class NotasPage extends StatefulWidget {
@@ -18,13 +19,33 @@ final TextEditingController _conteudoController = TextEditingController();
 final TextEditingController _buscaController = TextEditingController();
 
 // criei uma variavel que aponta pra uma colecao do Firebase das notas
-final CollectionReference _notasCollection = FirebaseFirestore.instance.collection('notas');
+//final CollectionReference _notasCollection = FirebaseFirestore.instance.collection('notas');
+
+// troquei a variavel estatica por um get que vai pegar o uid do usuario atual toda vez que for salvar ou apagar uma nota
+CollectionReference get _notasCollection{
+  final user = FirebaseAuth.instance.currentUser;
+  return FirebaseFirestore.instance
+    .collection('users')
+    .doc(user?.uid ?? 'deslogado')
+    .collection('notas');
+}
 
 String _filtroCategoria = 'Todas'; // variavel para guardar o filtro de categoria selecionado, comeca com "todas" por padrao
  
-final Stream<QuerySnapshot> _notasStream = FirebaseFirestore.instance.collection('notas').orderBy('dataHora', descending: true).snapshots();// conecta ao firebase uma unica vez, quando abrir a tela,
+// final Stream<QuerySnapshot> _notasStream = FirebaseFirestore.instance.collection('notas').orderBy('dataHora', descending: true).snapshots();// conecta ao firebase uma unica vez, quando abrir a tela,
       // pegando a colecao de notas, ordenando pela data e monitorando em tempo real com esse snapshots. dai toda vez que algo mudar la no firebase, o StreamBuilder que ta mais pra baixo
       // vai receber a nova lista de notas atualizada e redesenhar a tela automaticamente 
+
+// como fiz com a variavel la em cima agora o get faz ser dinamico por usuario ao inves de estatico
+Stream<QuerySnapshot> get _notasStream {
+  final user = FirebaseAuth.instance.currentUser;
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(user?.uid ?? 'deslogado')
+      .collection('notas')
+      .orderBy('dataHora', descending: true)
+      .snapshots();
+}
 
 @override
   void initState() {
