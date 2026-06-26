@@ -16,30 +16,35 @@ class OverlayPage extends StatefulWidget {
 class _OverlayPageState extends State<OverlayPage> {
   int currentPageIndex = 0;
 
-  String _tituloEquipado = "Guerreiro do Foco"; // simulacao temporaria do titulo equipado, dps vai ser puxado do firebase
+  String _tituloEquipado =
+      "Guerreiro do Foco"; // simulacao temporaria do titulo equipado, dps vai ser puxado do firebase
 
-
-  void _abrirSeletorDeTitulos() async { // funcao que abre a tela de titulos e espera o resultado do titulo selecionado para atualizar o titulo equipado
+  void _abrirSeletorDeTitulos() async {
+    // funcao que abre a tela de titulos e espera o resultado do titulo selecionado para atualizar o titulo equipado
     final resultado = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const TitulosPage()),
     );
 
-    if (resultado != null && resultado is String) { // se o usuario tiver selecionado um título valido, roda o setState para redesenhar as telas
-      setState(() { // redesenha a tela
+    if (resultado != null && resultado is String) {
+      // se o usuario tiver selecionado um título valido, roda o setState para redesenhar as telas
+      setState(() {
+        // redesenha a tela
         _tituloEquipado = resultado; // atualizan o titulo equipado
-        currentPageIndex = 0; // volta pra homepage para mostrar o titulo equipado atualizado
+        currentPageIndex =
+            0; // volta pra homepage para mostrar o titulo equipado atualizado
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-
     final Map<int, Widget> _pages = {
-      0: HomePage(titulo: _tituloEquipado, 
-          aoClicarNoTitulo: _abrirSeletorDeTitulos, // passando a funcao como parametro que vai agir na homepage
-        ),
+      0: HomePage(
+        titulo: _tituloEquipado,
+        aoClicarNoTitulo:
+            _abrirSeletorDeTitulos, // passando a funcao como parametro que vai agir na homepage
+      ),
       1: const GoalsPage(),
       2: const NotasPage(),
       3: const Financias(),

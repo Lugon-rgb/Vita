@@ -1,16 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttermoji/fluttermoji.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:vita_appprojetos/pages/auth_page.dart';
+import 'package:vita_appprojetos/pages/conquistas.dart';
 
-// Tela principal (perfil)
 class ProfileScreen extends StatefulWidget {
-
-  final VoidCallback aoClicarNoSeletorDeTitulos; // funcao passada como parametro do overlay p ser usada aqui, vai abrir a tela de titulos
-
+  final VoidCallback? aoClicarNoSeletorDeTitulos;
 
   const ProfileScreen({
     super.key,
-    required this.aoClicarNoSeletorDeTitulos, // obrigatoria como parametro
+    this.aoClicarNoSeletorDeTitulos,
   });
 
   @override
@@ -19,158 +21,192 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   late Map<String, bool> switchStates;
-  late final user = FirebaseAuth.instance.currentUser;
+  final User? user = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
     super.initState();
+
     switchStates = {
       "Notificações Push": true,
       "Quizzes Semanais": true,
       "Mostrar Nível XP": false,
       "Mostrar Status do Streak": true,
     };
+
+    carregarAvatar();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // Cor de fundo personalizada (preto/cinza escuro)
-      backgroundColor: const Color(0xFF0D0F14),
+  Future<void> carregarAvatar() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
 
-      // Barra superior
-      appBar: AppBar(
-        title: const Text("Perfil"),
-        backgroundColor: Colors.transparent, // transparente
-        elevation: 0, // remove sombra
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(currentUser.uid)
+          .get();
+
+      final avatar = doc.data()?['avatar'];
+
+      if (avatar != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('fluttermoji', avatar);
+        if (mounted) setState(() {});
+      }
+    } catch (_) {
+      // Mantém o perfil funcionando mesmo se o avatar não puder ser carregado.
+    }
+  }
+
+  Future<void> salvarAvatar() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
+
+    final avatar = FluttermojiController().getFluttermojiOptions();
+
+    await FirebaseFirestore.instance.collection('usuarios').doc(currentUser.uid).set({
+      'avatar': avatar,
+    }, SetOptions(merge: true));
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Avatar salvo com sucesso!")),
+      );
+    }
+  }
+
+  void _openAvatarCustomizer() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF1A1D24),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-
-      // Conteúdo da tela com espaçamento
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-
-        // Permite rolagem
-        child: ListView(
+      builder: (_) => SizedBox(
+        height: MediaQuery.of(context).size.height * 0.75,
+        child: Column(
           children: [
-            _buildProfileCard(), // card do usuário
-
-            const SizedBox(height: 20),
-
-            _buildSectionTitle("Configurações"),
-
-            // Lista de switches (visual apenas)
-            _buildSwitchTile("Notificações Push"),
-            _buildSwitchTile("Quizzes Semanais"),
-            _buildSwitchTile("Mostrar Nível XP"),
-            _buildSwitchTile("Mostrar Status do Streak"),
-
-            const SizedBox(height: 20),
-
-            _buildSectionTitle("Dados e Progresso"),
-
-            // Cards informativos (sem ação)
-            _buildInfoCard("Refazer Guia de Semana"),
-            _buildInfoCard("Limpar Atividade Recente"),
-
-            // cards funcionais (navegam para conquistas e títulos)
-
-            _buildNavigationCard(
-              title: "Conquistas",
-              icon: Icons.emoji_events_outlined,
-              onTap: () {
-                Navigator.push(
-                  context, 
-                  MaterialPageRoute(builder: (context) => const ConquistasPage()),
-                );
-              },
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-            _buildNavigationCard(
-              title: "Títulos",
-              icon: Icons.military_tech_outlined,
-              onTap: widget.aoClicarNoSeletorDeTitulos, // usa a funcao que veio do overlay como parametro pra abrir a tela de titulos
+            const SizedBox(height: 16),
+            const Text(
+              "Personalizar Avatar",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            
-
-            const SizedBox(height: 20),
-
-            _buildLogoutButton(), // "botão" sair (visual)
+            const SizedBox(height: 16),
+            FluttermojiCircleAvatar(radius: 50),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: FluttermojiCustomizer(
+                      scaffoldWidth: MediaQuery.of(context).size.width,
+                      autosave: true,
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: salvarAvatar,
+                    child: const Text("Salvar avatar"),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavigationCard({ 
-  // widget dos cards que vao navegar p conquistas e titulos, recebe como parametro o titulo do card, icone e oq acontece quando clica
-  // pode ser usado futuramente para outros cards que navegam pra outras telas, só passar o titulo, icone e o onTap desejado
-  required String title,
-  required IconData icon,
-  required VoidCallback onTap,
-}) {
-  return GestureDetector(
-    onTap: onTap, // detecta o clique pra ativar o ontap passado como parametro
-    child: Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1D24),
-        borderRadius: BorderRadius.circular(12),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0D0F14),
+      appBar: AppBar(
+        title: const Text("Perfil"),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      child: Row(
-        children: [
-          Icon(icon, color: const Color.fromARGB(255, 68, 138, 255), size: 22),
-
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView(
+          children: [
+            _buildProfileCard(),
+            const SizedBox(height: 20),
+            _buildSectionTitle("Configurações"),
+            _buildSwitchTile("Notificações Push"),
+            _buildSwitchTile("Quizzes Semanais"),
+            _buildSwitchTile("Mostrar Nível XP"),
+            _buildSwitchTile("Mostrar Status do Streak"),
+            const SizedBox(height: 20),
+            _buildSectionTitle("Dados e Progresso"),
+            _buildInfoCard("Refazer Guia de Semana"),
+            _buildInfoCard("Limpar Atividade Recente"),
+            _buildNavigationCard(
+              title: "Conquistas",
+              icon: Icons.emoji_events_outlined,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ConquistasPage(),
+                  ),
+                );
+              },
             ),
-          ),
-          const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 14),
-        ],
+            _buildNavigationCard(
+              title: "Títulos",
+              icon: Icons.military_tech_outlined,
+              onTap: widget.aoClicarNoSeletorDeTitulos ?? () {},
+            ),
+            const SizedBox(height: 20),
+            _buildLogoutButton(),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-
-  // =========================
-  // CARD DE PERFIL
-  // =========================
   Widget _buildProfileCard() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1D24), // fundo do card
+        color: const Color(0xFF1A1D24),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
-          // Ícone de usuário
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: Colors.blueAccent.withValues(alpha: 0.2),
-            child: const Icon(Icons.person, color: Colors.blueAccent),
-          ),
-
+          FluttermojiCircleAvatar(radius: 50),
           const SizedBox(height: 10),
-
-          // Nome
+          TextButton.icon(
+            onPressed: _openAvatarCustomizer,
+            icon: const Icon(Icons.edit, color: Colors.blueAccent),
+            label: const Text(
+              "Personalizar avatar",
+              style: TextStyle(color: Colors.blueAccent),
+            ),
+          ),
+          const SizedBox(height: 8),
           Text(
             user?.displayName ?? 'Usuário',
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-
           const SizedBox(height: 4),
-
-          // Email
-          Text(user!.email!, style: const TextStyle(color: Colors.grey)),
-
+          Text(
+            user?.email ?? 'Email não informado',
+            style: const TextStyle(color: Colors.grey),
+          ),
           const SizedBox(height: 12),
-
-          // Estatísticas (nível e streak)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: const [
@@ -183,9 +219,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // =========================
-  // TÍTULO DE SEÇÃO
-  // =========================
+  Widget _buildNavigationCard({
+    required String title,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1D24),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: const Color.fromARGB(255, 68, 138, 255),
+              size: 22,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 14),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -200,9 +271,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // =========================
-  // SWITCH (CONFIGURAÇÃO)
-  // =========================
   Widget _buildSwitchTile(String title) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -213,15 +281,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Material(
         type: MaterialType.transparency,
         child: SwitchListTile(
-          value: switchStates[title]!,
+          value: switchStates[title] ?? false,
           onChanged: (bool newValue) {
             setState(() {
               switchStates[title] = newValue;
             });
           },
-          title: Text(title, style: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w600),
+          title: Text(
+            title,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           ),
           activeThumbColor: Colors.blueAccent,
         ),
@@ -229,9 +297,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // =========================
-  // CARD SIMPLES DE TEXTO
-  // =========================
   Widget _buildInfoCard(String title) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -240,46 +305,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
         color: const Color(0xFF1A1D24),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(title, style: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w600),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
       ),
     );
   }
 
-  // =========================
-  // "BOTÃO" SAIR (VISUAL)
-  // =========================
   Widget _buildLogoutButton() {
     return GestureDetector(
-      onTap: () {
-        FirebaseAuth.instance.signOut();
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => AuthPage()),
-        );
+      onTap: () async {
+        await FirebaseAuth.instance.signOut();
+
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => AuthPage()),
+          );
+        }
       },
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.redAccent.withValues(alpha: 0.2),
+          color: Colors.redAccent.withOpacity(0.2),
           borderRadius: BorderRadius.circular(12),
         ),
         child: const Center(
           child: Text(
             "Sair da Conta",
-            style: TextStyle(color: Colors.redAccent, fontSize: 15,
-          fontWeight: FontWeight.w600),
-          ),
+            style: TextStyle(
+              color: Colors.redAccent,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
+      ),
     );
   }
 }
 
-// =========================
-// WIDGET DE ESTATÍSTICA
-// =========================
 class _StatItem extends StatelessWidget {
   final String label;
   final String value;
@@ -290,7 +355,6 @@ class _StatItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Número (ex: 18)
         Text(
           value,
           style: const TextStyle(
@@ -299,8 +363,6 @@ class _StatItem extends StatelessWidget {
             color: Colors.blueAccent,
           ),
         ),
-
-        // Texto (ex: Nível)
         Text(label, style: const TextStyle(color: Colors.grey)),
       ],
     );
