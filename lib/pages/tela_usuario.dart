@@ -1,12 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/pages/auth_page.dart';
+import 'package:vita_appprojetos/pages/conquistas.dart';
 
 // Tela principal (perfil)
 class ProfileScreen extends StatefulWidget {
-
-  final VoidCallback aoClicarNoSeletorDeTitulos; // funcao passada como parametro do overlay p ser usada aqui, vai abrir a tela de titulos
-
+  final VoidCallback
+  aoClicarNoSeletorDeTitulos; // funcao passada como parametro do overlay p ser usada aqui, vai abrir a tela de titulos
 
   const ProfileScreen({
     super.key,
@@ -73,23 +73,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildInfoCard("Limpar Atividade Recente"),
 
             // cards funcionais (navegam para conquistas e títulos)
-
             _buildNavigationCard(
               title: "Conquistas",
               icon: Icons.emoji_events_outlined,
               onTap: () {
                 Navigator.push(
-                  context, 
-                  MaterialPageRoute(builder: (context) => const ConquistasPage()),
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ConquistasPage(),
+                  ),
                 );
               },
             ),
             _buildNavigationCard(
               title: "Títulos",
               icon: Icons.military_tech_outlined,
-              onTap: widget.aoClicarNoSeletorDeTitulos, // usa a funcao que veio do overlay como parametro pra abrir a tela de titulos
+              onTap: widget
+                  .aoClicarNoSeletorDeTitulos, // usa a funcao que veio do overlay como parametro pra abrir a tela de titulos
             ),
-            
 
             const SizedBox(height: 20),
 
@@ -100,41 +101,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildNavigationCard({ 
-  // widget dos cards que vao navegar p conquistas e titulos, recebe como parametro o titulo do card, icone e oq acontece quando clica
-  // pode ser usado futuramente para outros cards que navegam pra outras telas, só passar o titulo, icone e o onTap desejado
-  required String title,
-  required IconData icon,
-  required VoidCallback onTap,
-}) {
-  return GestureDetector(
-    onTap: onTap, // detecta o clique pra ativar o ontap passado como parametro
-    child: Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1D24),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: const Color.fromARGB(255, 68, 138, 255), size: 22),
-
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+  Widget _buildNavigationCard({
+    // widget dos cards que vao navegar p conquistas e titulos, recebe como parametro o titulo do card, icone e oq acontece quando clica
+    // pode ser usado futuramente para outros cards que navegam pra outras telas, só passar o titulo, icone e o onTap desejado
+    required String title,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap:
+          onTap, // detecta o clique pra ativar o ontap passado como parametro
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1D24),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: const Color.fromARGB(255, 68, 138, 255),
+              size: 22,
             ),
-          ),
-          const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 14),
-        ],
-      ),
-    ),
-  );
-}
 
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 14),
+          ],
+        ),
+      ),
+    );
+  }
 
   // =========================
   // CARD DE PERFIL
@@ -219,9 +227,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               switchStates[title] = newValue;
             });
           },
-          title: Text(title, style: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w600),
+          title: Text(
+            title,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           ),
           activeThumbColor: Colors.blueAccent,
         ),
@@ -240,9 +248,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         color: const Color(0xFF1A1D24),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(title, style: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w600),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -268,11 +276,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: const Center(
           child: Text(
             "Sair da Conta",
-            style: TextStyle(color: Colors.redAccent, fontSize: 15,
-          fontWeight: FontWeight.w600),
-          ),
+            style: TextStyle(
+              color: Colors.redAccent,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
+      ),
     );
   }
 }
