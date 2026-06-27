@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:vita_appprojetos/data/dicionario_conquista.dart';
 
 
@@ -7,110 +9,121 @@ class ConquistasPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // criando uma lista p meio que simular temporariamente como elas mudariam com base nos dados la do firebase
-    final List<String> conquistasLiberadasNoFirebase = [
-          'primeira_vitoria',
-          'registro_ouro',
-          'pilar_financas',
-          'ritmo_semanal',
-          'sede_conhecimento',
-          'sequencia_guerreiro',
-          'superavit',
-          'caminho_estruturado',
-          'sonho_realizado',
-          'plano_uma_era',
-        ];
+    
+    // NOVO> agora pega o usuario logado no celular pra ver as conquistas que ele ja tem
+    final user = FirebaseAuth.instance.currentUser!;
+
 
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
         title: const Text('CONQUISTAS'),
       ),
-      body: ListView(
-        scrollDirection: Axis.vertical,
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        children: [
-          
-          // CONQUISTAS COMUNS:
-          rankConquistas('Conquistas Comuns', '+50 xp', comum),
-          
-          ...listaDeConquistasDoApp.where((conqAtual) => conqAtual.corRaridade == comum).map((dados) {
-            // pega a lista de conquistas completa que eu criei no dicionario_conquista, usa o .where justamente pra filtrar 
-            // so as comuns e depois o .map funciona como um loop, ele vai pegar cada conquista comum que sobrou depois do filtro, 
-            // uma por uma, e vai criar um widget pra ela usando a funcao conquista que eu criei la embaixo.
-            // esse ... eh o operador spread, ele serve justamente pra pegar a lista de widgets que a funcao conquista retorna e
-            // literalmente espalhar ela ali dentro da ListView, ja que a ListView espera uma lista de widgets
+      // novo body enrolando a listview num streambuilder
+      body: StreamBuilder<QuerySnapshot>(
+        // agora o body vai ter uma Stream que aponta pra subcolecao de conquistas do usuario atual
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('conquistas')
+            .snapshots(),
+        builder: (context, snapshot) {
+          // se o Firebase estiver carregando, bota o círculo de progresso na tela
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator(color: Colors.blue));
+          }
 
-            final bool estaDesbloqueada = conquistasLiberadasNoFirebase.contains(dados.id);
-            // esse bool olha pra lista de conquistas liberadas no firebase, aquela temporaria q eu criei ali em cima, e ve se o ID da conquista atual
-            // que ta sendo peneirada, ta la dentro, se tiver, ele retorna true pq ta desbloqueada, se nao, ele retorna false
+          // pega todos os documentos que vieram do Firebase e extrai os IDs deles (ex: 'anotacao_campo')
+          final List<String> conquistasLiberadasNoFirebase = snapshot.hasData
+              ? snapshot.data!.docs.map((doc) => doc.id).toList()
+              : [];
 
-            return conquista( // eh oq monta de fato o widget da conquista, passando o nome, descricao, icone e cor da raridade
-              dados.nome,
-              dados.descricao,
-              estaDesbloqueada ? Icons.check_circle : Icons.lock_outline, // se tiver desbloqueada, icone de check, se nao, icone de bloqueado
-              dados.corRaridade,
-            );
-          }),
+          return ListView(
+            scrollDirection: Axis.vertical,
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            children: [
+              
+              // CONQUISTAS COMUNS:
+              rankConquistas('Conquistas Comuns', '+50 xp', comum),
+              
+              ...listaDeConquistasDoApp.where((conqAtual) => conqAtual.corRaridade == comum).map((dados) {
+                // pega a lista de conquistas completa que eu criei no dicionario_conquista, usa o .where justamente pra filtrar 
+                // so as comuns e depois o .map funciona como um loop, ele vai pegar cada conquista comum que sobrou depois do filtro, 
+                // uma por uma, e vai criar um widget pra ela usando a funcao conquista que eu criei la embaixo.
+                // esse ... eh o operador spread, ele serve justamente pra pegar a lista de widgets que a funcao conquista retorna e
+                // literalmente espalhar ela ali dentro da ListView, ja que a ListView espera uma lista de widgets
 
+                final bool estaDesbloqueada = conquistasLiberadasNoFirebase.contains(dados.id);
+                // esse bool olha pra lista de conquistas liberadas no firebase, aquela temporaria q eu criei ali em cima, e ve se o ID da conquista atual
+                // que ta sendo peneirada, ta la dentro, se tiver, ele retorna true pq ta desbloqueada, se nao, ele retorna false
 
-          // CONQUISTAS INCOMUNS:
-          rankConquistas('Conquistas Incomuns', '+150 xp', incomum),
-
-          ...listaDeConquistasDoApp.where((conqAtual) => conqAtual.corRaridade == incomum).map((dados) {
-            final bool estaDesbloqueada = conquistasLiberadasNoFirebase.contains(dados.id);
-            return conquista(
-              dados.nome,
-              dados.descricao,
-              estaDesbloqueada ? Icons.check_circle : Icons.lock_outline,
-              dados.corRaridade,
-            );
-          }),
-
-
-          // CONQUISTAS RARAS:
-          rankConquistas('Conquistas Raras', '+500 xp', raro),
-          
-          ...listaDeConquistasDoApp.where((conqAtual) => conqAtual.corRaridade == raro).map((dados) {
-            final bool estaDesbloqueada = conquistasLiberadasNoFirebase.contains(dados.id);
-            return conquista(
-              dados.nome,
-              dados.descricao,
-              estaDesbloqueada ? Icons.check_circle : Icons.lock_outline,
-              dados.corRaridade,
-            );
-          }),
+                return conquista( // eh oq monta de fato o widget da conquista, passando o nome, descricao, icone e cor da raridade
+                  dados.nome,
+                  dados.descricao,
+                  estaDesbloqueada ? Icons.check_circle : Icons.lock_outline, // se tiver desbloqueada, icone de check, se nao, icone de bloqueado
+                  dados.corRaridade,
+                );
+              }),
 
 
-          // CONQUISTAS ÉPICAS:
-          rankConquistas('Conquistas Épicas', '+1000 xp', epico),
+              // CONQUISTAS INCOMUNS:
+              rankConquistas('Conquistas Incomuns', '+150 xp', incomum),
 
-          ...listaDeConquistasDoApp.where((conqAtual) => conqAtual.corRaridade == epico).map((dados) {
-            final bool estaDesbloqueada = conquistasLiberadasNoFirebase.contains(dados.id);
-            return conquista(
-              dados.nome,
-              dados.descricao,
-              estaDesbloqueada ? Icons.check_circle : Icons.lock_outline,
-              dados.corRaridade,
-            );
-          }),
+              ...listaDeConquistasDoApp.where((conqAtual) => conqAtual.corRaridade == incomum).map((dados) {
+                final bool estaDesbloqueada = conquistasLiberadasNoFirebase.contains(dados.id);
+                return conquista(
+                  dados.nome,
+                  dados.descricao,
+                  estaDesbloqueada ? Icons.check_circle : Icons.lock_outline,
+                  dados.corRaridade,
+                );
+              }),
 
 
-          // CONQUISTAS LENDÁRIAS:
-          rankConquistas('Conquistas Lendárias', '+5000 xp', lendario),
+              // CONQUISTAS RARAS:
+              rankConquistas('Conquistas Raras', '+500 xp', raro),
+              
+              ...listaDeConquistasDoApp.where((conqAtual) => conqAtual.corRaridade == raro).map((dados) {
+                final bool estaDesbloqueada = conquistasLiberadasNoFirebase.contains(dados.id);
+                return conquista(
+                  dados.nome,
+                  dados.descricao,
+                  estaDesbloqueada ? Icons.check_circle : Icons.lock_outline,
+                  dados.corRaridade,
+                );
+              }),
 
-          ...listaDeConquistasDoApp.where((conqAtual) => conqAtual.corRaridade == lendario).map((dados) {
-            final bool estaDesbloqueada = conquistasLiberadasNoFirebase.contains(dados.id);
-            return conquista(
-              dados.nome,
-              dados.descricao,
-              estaDesbloqueada ? Icons.check_circle : Icons.lock_outline,
-              dados.corRaridade,
-            );
-          }),
-          
-        ],
-      ),
+
+              // CONQUISTAS ÉPICAS:
+              rankConquistas('Conquistas Épicas', '+1000 xp', epico),
+
+              ...listaDeConquistasDoApp.where((conqAtual) => conqAtual.corRaridade == epico).map((dados) {
+                final bool estaDesbloqueada = conquistasLiberadasNoFirebase.contains(dados.id);
+                return conquista(
+                  dados.nome,
+                  dados.descricao,
+                  estaDesbloqueada ? Icons.check_circle : Icons.lock_outline,
+                  dados.corRaridade,
+                );
+              }),
+
+
+              // CONQUISTAS LENDÁRIAS:
+              rankConquistas('Conquistas Lendárias', '+5000 xp', lendario),
+
+              ...listaDeConquistasDoApp.where((conqAtual) => conqAtual.corRaridade == lendario).map((dados) {
+                final bool estaDesbloqueada = conquistasLiberadasNoFirebase.contains(dados.id);
+                return conquista(
+                  dados.nome,
+                  dados.descricao,
+                  estaDesbloqueada ? Icons.check_circle : Icons.lock_outline,
+                  dados.corRaridade,
+                );
+              }),
+            ],
+          );
+        }
+      )
     );
   }
 

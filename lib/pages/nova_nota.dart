@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../modelos/modelo_nota.dart';
+import '../data/conquista_desbloqueio.dart';
 
 class NovaNotaPage extends StatefulWidget {
   final Nota? notaParaEditar; // se a nota vier preenchida, a tela vai funcionar como edicao
@@ -22,7 +24,15 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
   DateTime? _dataSelecionada; // como eh opcional, pode ser nula
 
   // variavel que aponta para a colecao de notas do Firebase
-  final CollectionReference _notasCollection = FirebaseFirestore.instance.collection('notas');
+  // final CollectionReference _notasCollection = FirebaseFirestore.instance.collection('notas');
+
+  CollectionReference get _notasCollection {
+  final user = FirebaseAuth.instance.currentUser;
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(user?.uid ?? 'deslogado')
+      .collection('notas');
+}
 
   @override
   void initState() {
@@ -112,11 +122,39 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
       if (widget.notaParaEditar == null) { // 
         await _notasCollection.add(novaNota.toMap()); // transforma em mapa, manda para o firebase e espera o processo ser concluido c o await
         // se a nota tiver vazia, cria uma nova nota normal
+
+        //desbloqueio de conquista anotacao de campo
+        bool ganhouAnotacao = await ConquistaDesbloqueio.desbloquear('anotacao_campo', 50);
+
+        if (ganhouAnotacao && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('🏆 Conquista "Anotação de Campo" desbloqueada!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+
       } 
       else {
         await _notasCollection.doc(widget.notaParaEditar!.id).update(novaNota.toMap()); // transforma em mapa, manda para o firebase e espera o processo ser concluido c o await
         // se a nota tiver preenchida, procura o documento pelo id e atualiza ele com os novos dados da nota editada
       }
+
+      // desbloqueio de conquista mosaico de ideias
+      String? nomeConquistaMosaico = await ConquistaDesbloqueio.mosaicoIdeias();
+
+      if (nomeConquistaMosaico != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('🏆 Conquista "$nomeConquistaMosaico" desbloqueada!'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
 
@@ -160,9 +198,9 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
           icon: const Icon(Icons.arrow_back, color: Colors.white), // setinha p voltar
           onPressed: () => Navigator.of(context).pop(), // fecha a tela
         ),
-        title: const Text(
-          'Nova Nota',
-          style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+        title: Text(
+          widget.notaParaEditar == null ? 'Nova Nota' : 'Editar Nota',
+          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
       body: SafeArea(
