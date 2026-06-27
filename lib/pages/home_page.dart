@@ -7,14 +7,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vita_appprojetos/pages/TelaQuiz.dart';
 
 class HomePage extends StatefulWidget {
+  final String titulo; // guarda o nome do titulo atual
+  final VoidCallback aoClicarNoTitulo; // funcao chamada quando clica no titulo
 
-final String titulo; // guarda o nome do titulo atual
-final VoidCallback aoClicarNoTitulo; // funcao chamada quando clica no titulo
-
-const HomePage({
-  super.key, 
-  required this.titulo, // obrigatorio passar o titulo
-  required this.aoClicarNoTitulo, // obrigatorio passar a funcao do clique
+  const HomePage({
+    super.key,
+    required this.titulo, // obrigatorio passar o titulo
+    required this.aoClicarNoTitulo, // obrigatorio passar a funcao do clique
   });
 
   @override
@@ -762,11 +761,13 @@ class _HomePageState extends State<HomePage> {
 
           const SizedBox(height: 2),
 
-          GestureDetector( // titulo clicavl que agora abre a tela de titulos
-            onTap: widget.aoClicarNoTitulo, // quando clicar no titulo, ativa a funcao que veio como parametro do overlay p abrir a tela de titulos
+          GestureDetector(
+            // titulo clicavl que agora abre a tela de titulos
+            onTap: widget
+                .aoClicarNoTitulo, // quando clicar no titulo, ativa a funcao que veio como parametro do overlay p abrir a tela de titulos
             child: Text(
               widget.titulo, // usa o titulo que veio do overlay
-              style:TextStyle(
+              style: TextStyle(
                 color: Colors.grey,
                 fontSize: 16,
                 fontWeight: FontWeight.normal,

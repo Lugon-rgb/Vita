@@ -10,10 +10,7 @@ import 'package:vita_appprojetos/pages/conquistas.dart';
 class ProfileScreen extends StatefulWidget {
   final VoidCallback? aoClicarNoSeletorDeTitulos;
 
-  const ProfileScreen({
-    super.key,
-    this.aoClicarNoSeletorDeTitulos,
-  });
+  const ProfileScreen({super.key, this.aoClicarNoSeletorDeTitulos});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -22,6 +19,9 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late Map<String, bool> switchStates;
   final User? user = FirebaseAuth.instance.currentUser;
+  final db = FirebaseFirestore.instance;
+  int nivel = 1;
+  int streak = 0;
 
   @override
   void initState() {
@@ -35,6 +35,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     };
 
     carregarAvatar();
+    _carregarDados();
+  }
+
+  Future<void> _carregarDados() async {
+    if (user == null) return;
+    try {
+      final dados = await db.collection('users').doc(user!.uid).get();
+      if (dados.exists && mounted) {
+        final data = dados.data() as Map<String, dynamic>? ?? {};
+        setState(() {
+          nivel = data['nivel'] ?? 1;
+          streak = data['streak'] ?? 0;
+        });
+      }
+    } catch (e) {
+      debugPrint('Erro ao carregar perfil: $e');
+    }
   }
 
   Future<void> carregarAvatar() async {
@@ -43,7 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final doc = await FirebaseFirestore.instance
-          .collection('usuarios')
+          .collection('users')
           .doc(currentUser.uid)
           .get();
 
@@ -65,9 +82,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final avatar = FluttermojiController().getFluttermojiOptions();
 
-    await FirebaseFirestore.instance.collection('usuarios').doc(currentUser.uid).set({
-      'avatar': avatar,
-    }, SetOptions(merge: true));
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser.uid)
+        .set({'avatar': avatar}, SetOptions(merge: true));
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -209,9 +227,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: const [
-              _StatItem(label: "Nível", value: "18"),
-              _StatItem(label: "Streak", value: "7"),
+            children: [
+              _StatItem(label: "Nível", value: '$nivel'),
+              _StatItem(label: "Streak", value: '$streak dias'),
             ],
           ),
         ],
