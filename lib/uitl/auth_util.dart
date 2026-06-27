@@ -32,6 +32,13 @@ class AuthUtil {
     );
   }
 
+  Future<UserCredential> reauthenticateUser({
+    required String email,
+    required String senha,
+  }) {
+    return _firebaseAuth.reauthenticateWithCredential(credential);
+  }
+
   Future<String> emailRedefSenha(String email) async {
     try {
       await _firebaseAuth.sendPasswordResetEmail(email: email);

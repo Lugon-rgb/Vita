@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:vita_appprojetos/pages/auth_page.dart';
 import 'package:vita_appprojetos/pages/conquistas.dart';
+import 'package:vita_appprojetos/uitl/dialog_box.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback? aoClicarNoSeletorDeTitulos;
@@ -189,6 +190,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 20),
             _buildLogoutButton(),
+            SizedBox(height: 10),
+            _buildAccountDeleteButton(),
           ],
         ),
       ),
@@ -351,6 +354,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: const Center(
           child: Text(
             "Sair da Conta",
+            style: TextStyle(
+              color: Colors.redAccent,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAccountDeleteButton() {
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (_) {
+            return DialogBox(
+              sim: () {
+                Navigator.pop(context);
+                // delete account logic here
+              },
+              nao: () => Navigator.pop(context),
+            );
+          },
+        );
+      },
+      // onTap: () async {
+      //   await FirebaseAuth.instance.signOut();
+
+      //   if (mounted) {
+      //     Navigator.pushReplacement(
+      //       context,
+      //       MaterialPageRoute(builder: (context) => AuthPage()),
+      //     );
+      //   }
+      // },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.redAccent.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(
+          child: Text(
+            "Excluir Conta",
             style: TextStyle(
               color: Colors.redAccent,
               fontSize: 15,

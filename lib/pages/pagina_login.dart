@@ -32,38 +32,6 @@ class _PaginaLoginState extends State<PaginaLogin> {
   bool _isLoginMode = true;
   bool _isLoading = false;
 
-  File? _fotoPerfil;
-
-  final picker = ImagePicker();
-
-  Future<void> pickImage(ImageSource source) async {
-    final pickedFile = await picker.pickImage(source: source);
-
-    if (pickedFile != null) {
-      setState(() {
-        _fotoPerfil = File(pickedFile.path);
-      });
-    }
-  }
-
-  void addImage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return DialogBox(
-          camera: () {
-            pickImage(ImageSource.camera);
-            Navigator.pop(context);
-          },
-          galeria: () {
-            pickImage(ImageSource.gallery);
-            Navigator.pop(context);
-          },
-        );
-      },
-    );
-  }
-
   void onPressed() {}
 
   void logUserIn() async {
@@ -159,11 +127,6 @@ class _PaginaLoginState extends State<PaginaLogin> {
     _senhaUsuario.clear();
     _confSenha.clear();
     _nomeUsuario.clear();
-    if (mounted) {
-      setState(() {
-        _fotoPerfil = null;
-      });
-    }
   }
 
   @override
@@ -376,30 +339,6 @@ class _PaginaLoginState extends State<PaginaLogin> {
       child: Column(
         mainAxisSize: MainAxisSize.max,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 1.0, bottom: 12),
-            child: GestureDetector(
-              onTap: addImage,
-              child: Container(
-                height: 250,
-                width: 250,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Color.fromRGBO(255, 255, 255, 1)),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(125),
-                  child: _fotoPerfil != null
-                      ? Image.file(_fotoPerfil!, fit: BoxFit.cover)
-                      : Icon(
-                          Icons.camera_alt_outlined,
-                          color: Colors.grey[700],
-                          size: 45,
-                        ),
-                ),
-              ),
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.only(top: 13.0),
             child: RoundedTextFormField(
