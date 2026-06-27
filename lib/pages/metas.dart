@@ -86,6 +86,65 @@ class _GoalsPageState extends State<GoalsPage> {
   ];
   final List<String> periods = ["Curto Prazo", "Longo Prazo"];
 
+  //=================
+  //arthur
+  //contador
+  //=================
+  late final String _uid = FirebaseAuth.instance.currentUser?.uid ?? 'anonimo';
+
+  Future<void> _atualizarContadores() async {
+    final snapshot = await _goalsRef.get();
+    int ativas = 0;
+    int concluidas = 0;
+
+    for (final doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      if ((data['progress'] ?? 0) >= 1.0) {
+        concluidas++;
+      } else {
+        ativas++;
+      }
+    }
+
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'metasAtivas': ativas,
+      'metasConcluidas': concluidas,
+    }, SetOptions(merge: true));
+  }
+
+  // atividades recentes
+  Future<void> _registrarAtividade(String titulo, String descricao) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_uid)
+          .collection('atividades')
+          .add({
+            'titulo': titulo,
+            'descricao': descricao,
+            'xp': 0,
+            'data': Timestamp.now(),
+          });
+
+      // limitar a 5 atividades
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_uid)
+          .collection('atividades')
+          .orderBy('data', descending: true)
+          .get();
+
+      if (snapshot.docs.length > 5) {
+        for (final doc in snapshot.docs.sublist(5)) {
+          await doc.reference.delete();
+        }
+      }
+    } catch (e) {
+      debugPrint('Erro ao registrar atividade: $e');
+    }
+  }
+
   // ========================
   // FIRESTORE: SALVAR / EDITAR
   // ========================
@@ -99,7 +158,7 @@ class _GoalsPageState extends State<GoalsPage> {
       'description': descriptionController.text.trim(),
       'period': selectedGoalPeriod,
       'progress': goal?.progress ?? 0.0,
-    };
+    }; // ← fecha o Map aqui
 
     try {
       if (goal == null) {
@@ -107,7 +166,8 @@ class _GoalsPageState extends State<GoalsPage> {
       } else {
         await _goalsRef.doc(goal.id).update(data);
       }
-
+      await _registrarAtividade('Meta criada', titleController.text.trim());
+      await _atualizarContadores();
       _resetForm();
       Navigator.pop(context);
     } catch (e) {
@@ -123,6 +183,8 @@ class _GoalsPageState extends State<GoalsPage> {
   Future<void> deleteGoal(Goal goal) async {
     try {
       await _goalsRef.doc(goal.id).delete();
+      await _registrarAtividade('Meta removida', goal.title);
+      await _atualizarContadores();
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -137,6 +199,10 @@ class _GoalsPageState extends State<GoalsPage> {
     final newProgress = goal.progress == 1 ? 0.0 : 1.0;
     try {
       await _goalsRef.doc(goal.id).update({'progress': newProgress});
+      if (newProgress == 1.0) {
+        await _registrarAtividade('Meta concluída', goal.title);
+      }
+      await _atualizarContadores();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro ao atualizar progresso: $e')),

@@ -48,7 +48,7 @@ class _TelaEditarQuizState extends State<TelaEditarQuiz> {
   Future<void> _removerPergunta(String docId) async {
     await db
         .collection('users')
-        .doc('user!.uid')
+        .doc(_uid)
         .collection('Quiz')
         .doc(docId)
         .delete();
@@ -129,7 +129,7 @@ class _TelaEditarQuizState extends State<TelaEditarQuiz> {
                 if (editController.text.trim().isEmpty) return;
                 await db
                     .collection('users')
-                    .doc('user!.uid')
+                    .doc(_uid)
                     .collection('Quiz')
                     .doc(docId)
                     .update({
@@ -301,7 +301,7 @@ class _TelaEditarQuizState extends State<TelaEditarQuiz> {
             child: StreamBuilder<QuerySnapshot>(
               stream: db
                   .collection('users')
-                  .doc('user!.uid')
+                  .doc(_uid)
                   .collection('Quiz') // ← mesmo nome aqui
                   .orderBy('criadoEm', descending: false)
                   .snapshots(),
