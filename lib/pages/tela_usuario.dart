@@ -6,7 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:vita_appprojetos/pages/auth_page.dart';
 import 'package:vita_appprojetos/pages/conquistas.dart';
+import 'package:vita_appprojetos/uitl/auth_util.dart';
 import 'package:vita_appprojetos/uitl/dialog_box.dart';
+import 'package:vita_appprojetos/uitl/reAuth_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback? aoClicarNoSeletorDeTitulos;
@@ -366,6 +368,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildAccountDeleteButton() {
+    final AuthUtil _auth = AuthUtil();
+    final _emailUsuario = TextEditingController();
+    final _senhaUsuario = TextEditingController();
     return GestureDetector(
       onTap: () {
         showDialog(
@@ -374,6 +379,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
             return DialogBox(
               sim: () {
                 Navigator.pop(context);
+                showDialog(
+                  context: context,
+                  builder: (_) {
+                    return ReAuthDialogBox(
+                      email: _emailUsuario,
+                      senha: _senhaUsuario,
+                      onConfirm: () async {
+                        await _auth.reauthUser(
+                          email: _emailUsuario.text.trim(),
+                          senha: _senhaUsuario.text.trim(),
+                        );
+                        if (context.mounted) Navigator.pop(context);
+                      },
+                    );
+                  },
+                );
                 // delete account logic here
               },
               nao: () => Navigator.pop(context),
