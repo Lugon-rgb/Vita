@@ -1,15 +1,10 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
-
-import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/pages/pagina_nova_senha.dart';
 import 'package:vita_appprojetos/uitl/auth_util.dart';
-import 'package:vita_appprojetos/uitl/dialog_box.dart';
 import 'package:vita_appprojetos/uitl/my_button.dart';
 import 'package:vita_appprojetos/uitl/text_form_field.dart';
-import 'package:image_picker/image_picker.dart';
 // import 'package:firebase_core/firebase_core.dart';
 
 class PaginaLogin extends StatefulWidget {
@@ -450,6 +445,11 @@ class _PaginaLoginState extends State<PaginaLogin> {
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        Text(
+          "Após o registro um email de verificação será enviado para o endereço fornecido, por favor certifique-se de confirmar seu endereço de email atravês do link",
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 10),
         SizedBox(
           child: MyButton(
             text: "Criar conta",

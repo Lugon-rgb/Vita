@@ -46,6 +46,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final dados = await db.collection('users').doc(user!.uid).get();
       if (dados.exists && mounted) {
+        // ignore: unnecessary_cast
         final data = dados.data() as Map<String, dynamic>? ?? {};
         setState(() {
           nivel = data['nivel'] ?? 1;
@@ -371,47 +372,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final AuthUtil _auth = AuthUtil();
     final _emailUsuario = TextEditingController();
     final _senhaUsuario = TextEditingController();
-    return GestureDetector(
-      onTap: () {
-        showDialog(
-          context: context,
-          builder: (_) {
-            return DialogBox(
-              sim: () {
+
+    Future<dynamic> credReconfirm() {
+      return showDialog(
+        context: context,
+        builder: (_) {
+          return ReAuthDialogBox(
+            email: _emailUsuario,
+            senha: _senhaUsuario,
+            onConfirm: () async {
+              await _auth.reauthUser(
+                email: _emailUsuario.text.trim(),
+                senha: _senhaUsuario.text.trim(),
+              );
+              if (context.mounted) {
                 Navigator.pop(context);
                 showDialog(
                   context: context,
                   builder: (_) {
-                    return ReAuthDialogBox(
-                      email: _emailUsuario,
-                      senha: _senhaUsuario,
-                      onConfirm: () async {
-                        await _auth.reauthUser(
-                          email: _emailUsuario.text.trim(),
-                          senha: _senhaUsuario.text.trim(),
-                        );
-                        if (context.mounted) Navigator.pop(context);
+                    return DialogBox(
+                      sim: () {
+                        _auth.deleteUser();
+                        if (mounted) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => AuthPage()),
+                          );
+                        }
                       },
+                      nao: () {},
                     );
                   },
                 );
-                // delete account logic here
-              },
-              nao: () => Navigator.pop(context),
-            );
-          },
-        );
-      },
-      // onTap: () async {
-      //   await FirebaseAuth.instance.signOut();
+              }
+              ;
+            },
+          );
+        },
+      );
+    }
 
-      //   if (mounted) {
-      //     Navigator.pushReplacement(
-      //       context,
-      //       MaterialPageRoute(builder: (context) => AuthPage()),
-      //     );
-      //   }
-      // },
+    Future<dynamic> confirmDialog() {
+      return showDialog(
+        context: context,
+        builder: (_) {
+          return DialogBox(
+            sim: () {
+              Navigator.pop(context);
+              credReconfirm();
+              // delete account logic here
+            },
+            nao: () => Navigator.pop(context),
+          );
+        },
+      );
+    }
+
+    return GestureDetector(
+      onTap: () {
+        confirmDialog();
+      },
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
