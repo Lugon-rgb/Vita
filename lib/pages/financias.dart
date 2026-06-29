@@ -105,9 +105,11 @@ class _FinanciasState extends State<Financias> {
     return groups;
   }
 
+  // ignore: unused_element
   Future<void> _ganharXpFinancas() async {
     final docRef = db.collection("users").doc(_uid);
     final dados = await docRef.get();
+    // ignore: unnecessary_cast
     final data = dados.data() as Map<String, dynamic>? ?? {};
 
     // Verifica se já ganhou XP hoje

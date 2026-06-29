@@ -6,6 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:vita_appprojetos/pages/auth_page.dart';
 import 'package:vita_appprojetos/pages/conquistas.dart';
+import 'package:vita_appprojetos/uitl/auth_util.dart';
+import 'package:vita_appprojetos/uitl/dialog_box.dart';
+import 'package:vita_appprojetos/uitl/reAuth_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback? aoClicarNoSeletorDeTitulos;
@@ -43,6 +46,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final dados = await db.collection('users').doc(user!.uid).get();
       if (dados.exists && mounted) {
+        // ignore: unnecessary_cast
         final data = dados.data() as Map<String, dynamic>? ?? {};
         setState(() {
           nivel = data['nivel'] ?? 1;
@@ -189,6 +193,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 20),
             _buildLogoutButton(),
+            SizedBox(height: 10),
+            _buildAccountDeleteButton(),
           ],
         ),
       ),
@@ -351,6 +357,90 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: const Center(
           child: Text(
             "Sair da Conta",
+            style: TextStyle(
+              color: Colors.redAccent,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAccountDeleteButton() {
+    final AuthUtil _auth = AuthUtil();
+    final _emailUsuario = TextEditingController();
+    final _senhaUsuario = TextEditingController();
+
+    Future<dynamic> credReconfirm() {
+      return showDialog(
+        context: context,
+        builder: (_) {
+          return ReAuthDialogBox(
+            email: _emailUsuario,
+            senha: _senhaUsuario,
+            onConfirm: () async {
+              await _auth.reauthUser(
+                email: _emailUsuario.text.trim(),
+                senha: _senhaUsuario.text.trim(),
+              );
+              if (context.mounted) {
+                Navigator.pop(context);
+                showDialog(
+                  context: context,
+                  builder: (_) {
+                    return DialogBox(
+                      sim: () {
+                        _auth.deleteUser();
+                        if (mounted) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => AuthPage()),
+                          );
+                        }
+                      },
+                      nao: () {},
+                    );
+                  },
+                );
+              }
+              ;
+            },
+          );
+        },
+      );
+    }
+
+    Future<dynamic> confirmDialog() {
+      return showDialog(
+        context: context,
+        builder: (_) {
+          return DialogBox(
+            sim: () {
+              Navigator.pop(context);
+              credReconfirm();
+              // delete account logic here
+            },
+            nao: () => Navigator.pop(context),
+          );
+        },
+      );
+    }
+
+    return GestureDetector(
+      onTap: () {
+        confirmDialog();
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.redAccent.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(
+          child: Text(
+            "Excluir Conta",
             style: TextStyle(
               color: Colors.redAccent,
               fontSize: 15,

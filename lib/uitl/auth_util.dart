@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class AuthUtil {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final db = FirebaseFirestore.instance;
+
   Future<void> registerUser({
     required String email,
     required String nome,
@@ -14,6 +15,7 @@ class AuthUtil {
   }) async {
     UserCredential userCredential = await _firebaseAuth
         .createUserWithEmailAndPassword(email: email, password: senha);
+    await _firebaseAuth.currentUser!.sendEmailVerification();
     await userCredential.user!.updateDisplayName(nome);
     // await userCredential.user!.updatePhotoURL(fotoPerfil?.path);
     // Reload the user to reflect the changes
@@ -30,6 +32,23 @@ class AuthUtil {
       email: email,
       password: senha,
     );
+  }
+
+  Future<UserCredential> reauthUser({
+    required String email,
+    required String senha,
+  }) async {
+    AuthCredential credential = EmailAuthProvider.credential(
+      email: email,
+      password: senha,
+    );
+    return await _firebaseAuth.currentUser!.reauthenticateWithCredential(
+      credential,
+    );
+  }
+
+  Future<void> deleteUser() async {
+    await _firebaseAuth.currentUser!.delete();
   }
 
   Future<String> emailRedefSenha(String email) async {
