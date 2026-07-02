@@ -49,6 +49,335 @@ class Goal {
 }
 
 // ========================
+// FORMULÁRIO DE CRIAÇÃO/EDIÇÃO DE GOAL
+// ========================
+class GoalFormPage extends StatefulWidget {
+  final Goal? goalToEdit;
+  const GoalFormPage({super.key, this.goalToEdit});
+
+  @override
+  State<GoalFormPage> createState() => _GoalFormPageState();
+}
+
+class _GoalFormPageState extends State<GoalFormPage> {
+  final titleController = TextEditingController();
+  final deadlineController = TextEditingController();
+  final descriptionController = TextEditingController();
+
+  String selectedCategory = "Financeiro";
+  String selectedGoalPeriod = "Curto Prazo";
+
+  late final String _uid = FirebaseAuth.instance.currentUser?.uid ?? 'anonimo';
+
+  final List<String> categories = [
+    "Financeiro",
+    "Saúde",
+    "Carreira",
+    "Pessoal",
+  ];
+  final List<String> periods = ["Curto Prazo", "Longo Prazo"];
+
+  late final CollectionReference _goalsRef = FirebaseFirestore.instance
+      .collection('users')
+      .doc(_uid)
+      .collection('goals');
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.goalToEdit != null) {
+      titleController.text = widget.goalToEdit!.title;
+      deadlineController.text = widget.goalToEdit!.deadline;
+      descriptionController.text = widget.goalToEdit!.description;
+      selectedCategory = widget.goalToEdit!.category;
+      selectedGoalPeriod = widget.goalToEdit!.period;
+    }
+  }
+
+  Future<void> _registrarAtividade(String titulo, String descricao) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_uid)
+          .collection('atividades')
+          .add({
+            'titulo': titulo,
+            'descricao': descricao,
+            'xp': 0,
+            'data': Timestamp.now(),
+          });
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_uid)
+          .collection('atividades')
+          .orderBy('data', descending: true)
+          .get();
+
+      if (snapshot.docs.length > 5) {
+        for (final doc in snapshot.docs.sublist(5)) {
+          await doc.reference.delete();
+        }
+      }
+    } catch (e) {
+      debugPrint('Erro ao registrar atividade: $e');
+    }
+  }
+
+  Future<void> _atualizarContadores() async {
+    final snapshot = await _goalsRef.get();
+    int ativas = 0;
+    int concluidas = 0;
+
+    for (final doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      if ((data['progress'] ?? 0) >= 1.0) {
+        concluidas++;
+      } else {
+        ativas++;
+      }
+    }
+
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'metasAtivas': ativas,
+      'metasConcluidas': concluidas,
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> _salvarGoal() async {
+    if (titleController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Preencha o título obrigatório!')),
+      );
+      return;
+    }
+
+    final data = {
+      'title': titleController.text.trim(),
+      'category': selectedCategory,
+      'deadline': deadlineController.text.trim(),
+      'description': descriptionController.text.trim(),
+      'period': selectedGoalPeriod,
+      'progress': widget.goalToEdit?.progress ?? 0.0,
+    };
+
+    try {
+      if (widget.goalToEdit == null) {
+        await _goalsRef.add(data);
+      } else {
+        await _goalsRef.doc(widget.goalToEdit!.id).update(data);
+      }
+      await _registrarAtividade('Meta criada', titleController.text.trim());
+      await _atualizarContadores();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              widget.goalToEdit == null
+                  ? 'Meta salva com sucesso!'
+                  : 'Meta atualizada com sucesso!',
+            ),
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao salvar: $e')));
+    }
+  }
+
+  bool _camposPreenchidos() {
+    return titleController.text.trim().isNotEmpty;
+  }
+
+  InputDecoration customInput(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: const Color(0xFF111827),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: const BorderSide(color: Color(0xFF2563EB)),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    deadlineController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      backgroundColor: const Color(0xFF0F1117),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back),
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    widget.goalToEdit == null ? "Nova Meta" : "Editar Meta",
+                    style: const TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+              const Text(
+                "Título",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: titleController,
+                decoration: customInput("Ex: Juntar R\$ 5000"),
+              ),
+              const SizedBox(height: 25),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Categoria",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        DropdownButtonFormField<String>(
+                          value: selectedCategory,
+                          dropdownColor: const Color(0xFF1A1D26),
+                          decoration: customInput("Selecione"),
+                          items: categories
+                              .map(
+                                (c) =>
+                                    DropdownMenuItem(value: c, child: Text(c)),
+                              )
+                              .toList(),
+                          onChanged: (value) =>
+                              setState(() => selectedCategory = value!),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Prazo",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        DropdownButtonFormField<String>(
+                          value: selectedGoalPeriod,
+                          dropdownColor: const Color(0xFF1A1D26),
+                          decoration: customInput("Selecione"),
+                          items: periods
+                              .map(
+                                (p) =>
+                                    DropdownMenuItem(value: p, child: Text(p)),
+                              )
+                              .toList(),
+                          onChanged: (value) =>
+                              setState(() => selectedGoalPeriod = value!),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 25),
+              const Text(
+                "Data Limite (Opcional)",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: deadlineController,
+                decoration: customInput("dd/mm/aaaa"),
+              ),
+              const SizedBox(height: 25),
+              const Text(
+                "Descrição (Opcional)",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: descriptionController,
+                maxLines: 4,
+                decoration: customInput("Detalhes da meta..."),
+              ),
+              const SizedBox(height: 30),
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton.icon(
+                  onPressed: _camposPreenchidos() ? _salvarGoal : null,
+                  icon: const Icon(Icons.save),
+                  label: Text(
+                    widget.goalToEdit == null
+                        ? "Salvar Meta"
+                        : "Salvar Alterações",
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _camposPreenchidos()
+                        ? const Color(0xFF2563EB)
+                        : const Color(0xFF1E3A8A).withValues(alpha: 0.4),
+                    foregroundColor: _camposPreenchidos()
+                        ? Colors.white
+                        : Colors.white38,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ========================
 // PÁGINA DE METAS
 // ========================
 class GoalsPage extends StatefulWidget {

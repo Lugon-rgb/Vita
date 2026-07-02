@@ -25,6 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final db = FirebaseFirestore.instance;
   int nivel = 1;
   int streak = 0;
+  final AuthUtil _auth = AuthUtil();
 
   @override
   void initState() {
@@ -201,6 +202,147 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _emailNverficado() {
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (dialogContext) {
+            return AlertDialog(
+              constraints: BoxConstraints(maxHeight: 250),
+              title: const Center(child: Text("Verificação de Email")),
+              backgroundColor: const Color.fromARGB(255, 32, 32, 32),
+              content: const SizedBox(
+                height: 100,
+                child: Column(
+                  children: [
+                    Text(
+                      "Click abaixo para re-enviar o email de verificação",
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 25),
+                    Text(
+                      "(Você será desconectado, log novamente após verificar seu email)",
+                      style: TextStyle(fontSize: 12),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await user!.sendEmailVerification();
+                    await FirebaseAuth.instance.signOut();
+                    if (mounted) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => AuthPage()),
+                      );
+                    }
+                  },
+                  child: const Text("Enviar"),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text("Fechar"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Container(
+            height: 25,
+            width: 110,
+            decoration: BoxDecoration(
+              color: Colors.redAccent.withValues(alpha: 0.45),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                SizedBox(width: 17),
+                Icon(
+                  Icons.close,
+                  color: const Color.fromARGB(255, 255, 35, 35),
+                ),
+                SizedBox(width: 2),
+                Text("Email"),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _emailVerficado() {
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (dialogContext) {
+            return AlertDialog(
+              constraints: BoxConstraints(maxHeight: 190),
+              title: const Center(child: Text("Email Verificado")),
+              backgroundColor: const Color.fromARGB(255, 32, 32, 32),
+              content: const SizedBox(
+                height: 100,
+                child: Column(
+                  children: [Text("Seu endereço de email já foi verificado")],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text("Fechar"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Container(
+            height: 25,
+            width: 110,
+            decoration: BoxDecoration(
+              color: Colors.greenAccent.withValues(alpha: 0.45),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                SizedBox(width: 17),
+                Icon(
+                  Icons.check,
+                  color: const Color.fromARGB(255, 61, 213, 71),
+                ),
+                SizedBox(width: 2),
+                Text("Email"),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _indEmail() {
+    bool emailVeri = user!.emailVerified;
+    if (emailVeri) {
+      return _emailVerficado();
+    } else {
+      return _emailNverficado();
+    }
+  }
+
   Widget _buildProfileCard() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -210,6 +352,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Column(
         children: [
+          _indEmail(),
           FluttermojiCircleAvatar(radius: 50),
           const SizedBox(height: 10),
           TextButton.icon(

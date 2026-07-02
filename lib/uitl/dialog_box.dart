@@ -11,7 +11,7 @@ class DialogBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Center(child: Text("Você deseja excluir sua conta?")),
-      backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+      backgroundColor: const Color.fromARGB(255, 32, 32, 32),
       content: SizedBox(
         height: 100,
         child: Column(
