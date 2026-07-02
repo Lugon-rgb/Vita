@@ -25,7 +25,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final db = FirebaseFirestore.instance;
   int nivel = 1;
   int streak = 0;
-  final AuthUtil _auth = AuthUtil();
 
   @override
   void initState() {
