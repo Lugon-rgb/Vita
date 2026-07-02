@@ -21,7 +21,7 @@ const List<ConquistaModelo> listaDeConquistasDoApp = [
   ConquistaModelo(
     id: 'anotacao_campo',
     nome: 'Anotação de Campo',
-    descricao: 'Crie sua primeira nota',
+    descricao: 'Crie sua primeira nota detalhada',
     corRaridade: comum,
   ),
   ConquistaModelo(
@@ -84,7 +84,7 @@ const List<ConquistaModelo> listaDeConquistasDoApp = [
   ConquistaModelo(
     id: 'mosaico_ideias',
     nome: 'Mosaico de Ideias.',
-    descricao: 'Crie pelo menos 2 notas de cada categoria no total.',
+    descricao: 'Tenha 2 notas de cada categoria ativas ao mesmo tempo.',
     corRaridade: incomum,
   ),
 
