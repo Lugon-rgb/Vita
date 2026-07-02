@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../data/conquista_snackbar.dart'; 
+import '../data/conquista_desbloqueio.dart';
 
 class Financias extends StatefulWidget {
   const Financias({super.key});
@@ -288,12 +290,31 @@ class _FinanciasState extends State<Financias> {
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 50),
                 ),
-                onPressed: () {
-                  setState(() {
-                    limite = int.tryParse(limiteController.text) ?? 0;
-                  });
-                  limiteController.clear();
-                  salvarFinancas();
+                onPressed:() async {
+                  int novoLimite = int.tryParse(limiteController.text) ?? 0;
+
+                  if (novoLimite > 0) {
+                    // guarda se o limite anterior era zero antes de atualizar a tela
+                    bool primeiroLimite = (limite == 0); 
+
+                    setState(() {
+                      limite = novoLimite;
+                    });
+
+                    // salva no firebase
+                    await salvarFinancas();
+
+                    limiteController.clear();
+
+                    // se era o primeiro limite, dispara a conquista passando o ID pro snackBar
+                    if (primeiroLimite) {
+                      String? conquistaDesbloqueada = await ConquistaDesbloqueio.checarPilarFinancas();
+                      
+                      if (conquistaDesbloqueada != null && mounted) {
+                        mostrarSnackBarConquista(context, conquistaDesbloqueada);
+                      }
+                    }
+                  }
                 },
                 child: const Text("Salvar limite"),
               ),
@@ -346,13 +367,16 @@ class _FinanciasState extends State<Financias> {
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 50),
                 ),
-                onPressed: () {
+                onPressed:() async { 
                   int valor = int.tryParse(gastoController.text) ?? 0;
                   String nome = nomeController.text.trim().isNotEmpty
                       ? nomeController.text.trim()
                       : "Gasto";
 
                   if (valor > 0) {
+                    // guarda se a lista local estava vazia antes de adicionar o item
+                    bool primeiroRegistro = gastos.isEmpty;
+
                     setState(() {
                       gastos.add({
                         "valor": valor,
@@ -361,10 +385,31 @@ class _FinanciasState extends State<Financias> {
                       });
                       gastou += valor;
                     });
-                    salvarFinancas();
+                    
+                    // aguarda salvar as finanças no banco
+                    await salvarFinancas();
 
                     gastoController.clear();
                     nomeController.clear();
+
+                    // conquista registro de ouro
+                    // se a lista estava zerada antes, roda a logica da conquista
+                    if (primeiroRegistro) {
+                      String? conquistaDesbloqueada = await ConquistaDesbloqueio.checarRegistroDeOuro();
+                      
+                      // se ganhou a conquista (nao era repetida) e a tela continua aberta, sobe o snackBar
+                      if (conquistaDesbloqueada != null && mounted) {
+                        mostrarSnackBarConquista(context, conquistaDesbloqueada);
+                      }
+                    }
+
+                    // conquista disciplina financeira
+                    // passa a lista atualizada de gastos para a analise de datas consecutivas
+                    String? conquistaDias = await ConquistaDesbloqueio.checarDisciplinaFinanceira(gastos);
+                    
+                    if (conquistaDias != null && mounted) {
+                      mostrarSnackBarConquista(context, conquistaDias);
+                    }
                   }
                 },
                 child: const Text("Adicionar gasto"),
