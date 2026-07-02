@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../modelos/modelo_nota.dart';
 import '../data/conquista_desbloqueio.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class NovaNotaPage extends StatefulWidget {
   final Nota?
@@ -25,6 +25,8 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
   DateTime? _dataSelecionada; // como eh opcional, pode ser nula
 
   // variavel que aponta para a colecao de notas do Firebase
+  // final CollectionReference _notasCollection = FirebaseFirestore.instance.collection('notas');
+
   CollectionReference get _notasCollection {
     final user = FirebaseAuth.instance.currentUser;
     return FirebaseFirestore.instance
@@ -32,6 +34,7 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
         .doc(user?.uid ?? 'deslogado')
         .collection('notas');
   }
+
   @override
   void initState() {
     super.initState();
@@ -95,12 +98,15 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
   // funcao p salvar a nota estruturada no Firebase
   void _salvarNotaCompleta() async {
     final String titulo = _tituloController.text.trim();
-    final String conteudo = _conteudoController.text.trim(); //tipo o rstrip no python
+    final String conteudo = _conteudoController.text
+        .trim(); //tipo o rstrip no python
 
     // medida de seguranca, pra caso ocorra algum bug e o usuario consiga clicar no botao de salvar mesmo com os campos obrigatorios vazios
     if (titulo.isEmpty || conteudo.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha o título e o conteúdo obrigatórios!')),
+        const SnackBar(
+          content: Text('Preencha o título e o conteúdo obrigatórios!'),
+        ),
       );
       return;
     }
@@ -110,7 +116,9 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
     DateTime dataFinal = _dataSelecionada ?? DateTime.now();
 
     final novaNota = Nota(
-      id: widget.notaParaEditar?.id, // se tiver vazio, o firebase gera um id novo. se tiver preenchida (para editar), mantém o id antigo,
+      id: widget
+          .notaParaEditar
+          ?.id, // se tiver vazio, o firebase gera um id novo. se tiver preenchida (para editar), mantém o id antigo,
       titulo: titulo,
       conteudo: conteudo,
       categoria: _categoriaSelecionada,
@@ -119,11 +127,16 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
 
     try {
       if (widget.notaParaEditar == null) {
-        await _notasCollection.add(novaNota.toMap()); // transforma em mapa, manda para o firebase e espera o processo ser concluido c o await
+        await _notasCollection.add(
+          novaNota.toMap(),
+        ); // transforma em mapa, manda para o firebase e espera o processo ser concluido c o await
         // se a nota tiver vazia, cria uma nova nota normal
 
-        //desbloqueio de conquista anotacao de campo
-        bool ganhouAnotacao = await ConquistaDesbloqueio.desbloquear('anotacao_campo', 50);
+        // desbloqueio de conquista anotacao de campo
+        bool ganhouAnotacao = await ConquistaDesbloqueio.desbloquear(
+          'anotacao_campo',
+          50,
+        );
 
         if (ganhouAnotacao && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -134,9 +147,12 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
             ),
           );
         }
-
       } else {
-        await _notasCollection.doc(widget.notaParaEditar!.id).update(novaNota.toMap()); // transforma em mapa, manda para o firebase e espera o processo ser concluido c o await
+        await _notasCollection
+            .doc(widget.notaParaEditar!.id)
+            .update(
+              novaNota.toMap(),
+            ); // transforma em mapa, manda para o firebase e espera o processo ser concluido c o await
         // se a nota tiver preenchida, procura o documento pelo id e atualiza ele com os novos dados da nota editada
       }
 
@@ -146,7 +162,9 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
       if (nomeConquistaMosaico != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('🏆 Conquista "$nomeConquistaMosaico" desbloqueada!'),
+            content: Text(
+              '🏆 Conquista "${nomeConquistaMosaico}" desbloqueada!',
+            ),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 3),
           ),
@@ -155,14 +173,22 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(widget.notaParaEditar == null ? 'Nota salva com sucesso!' : 'Nota atualizada com sucesso!')),
+          SnackBar(
+            content: Text(
+              widget.notaParaEditar == null
+                  ? 'Nota salva com sucesso!'
+                  : 'Nota atualizada com sucesso!',
+            ),
+          ),
         );
-        Navigator.of(context).pop(); // fecha a tela de nova nota e volta para a listagem
+        Navigator.of(
+          context,
+        ).pop(); // fecha a tela de nova nota e volta para a listagem
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao salvar nota: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao salvar nota: $e')));
     }
   }
 
@@ -205,9 +231,9 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
           ), // setinha p voltar
           onPressed: () => Navigator.of(context).pop(), // fecha a tela
         ),
-        title: Text(
-          widget.notaParaEditar == null ? 'Nova Nota' : 'Editar Nota',
-          style: const TextStyle(
+        title: const Text(
+          'Nova Nota',
+          style: TextStyle(
             color: Colors.white,
             fontSize: 24,
             fontWeight: FontWeight.bold,
