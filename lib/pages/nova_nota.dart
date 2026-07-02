@@ -231,9 +231,9 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
           ), // setinha p voltar
           onPressed: () => Navigator.of(context).pop(), // fecha a tela
         ),
-        title: const Text(
-          'Nova Nota',
-          style: TextStyle(
+        title: Text(
+          widget.notaParaEditar == null ? 'Nova Nota' : 'Editar Nota',
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -251,6 +251,14 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
                 color: Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _tituloController,
+              style: const TextStyle(color: Colors.white),
+              decoration: _customInputDecoration(
+                'Ex: Resumo de Álgebra Linear...',
               ),
             ),
             const SizedBox(height: 10),
