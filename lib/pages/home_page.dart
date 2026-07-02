@@ -333,40 +333,48 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // META
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 30,
-                      horizontal: 8,
-                    ),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const GoalFormPage()),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 30,
+                        horizontal: 8,
+                      ),
 
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 20,
-                      horizontal: 10,
-                    ),
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 20,
+                        horizontal: 10,
+                      ),
 
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: const Color.fromARGB(255, 26, 29, 30),
-                    ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: const Color.fromARGB(255, 26, 29, 30),
+                      ),
 
-                    child: const Column(
-                      children: [
-                        Icon(
-                          Icons.track_changes,
-                          color: Color.fromARGB(255, 30, 64, 214),
-                        ),
-
-                        SizedBox(height: 8),
-
-                        Text(
-                          'NOVA META',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                      child: const Column(
+                        children: [
+                          Icon(
+                            Icons.track_changes,
+                            color: Color.fromARGB(255, 30, 64, 214),
                           ),
-                        ),
-                      ],
+
+                          SizedBox(height: 8),
+
+                          Text(
+                            'NOVA META',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
