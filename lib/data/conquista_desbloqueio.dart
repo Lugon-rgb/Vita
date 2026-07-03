@@ -74,17 +74,17 @@ class ConquistaDesbloqueio {
 
     if (diasDeStreak >= 7) {
       bool ganhou = await ConquistaDesbloqueio.desbloquear('ritmo_semanal', 150);
-      if (ganhou) conquistadasAgora.add('Ritmo Semanal');
+      if (ganhou) conquistadasAgora.add('ritmo_semanal');
     }
     
     if (diasDeStreak >= 30) {
       bool ganhou = await ConquistaDesbloqueio.desbloquear('sequencia_guerreiro', 500);
-      if (ganhou) conquistadasAgora.add('Sequência de Guerreiro');
+      if (ganhou) conquistadasAgora.add('sequencia_guerreiro');
     }
     
     if (diasDeStreak >= 100) {
       bool ganhou = await ConquistaDesbloqueio.desbloquear('eternidade_vita', 5000);
-      if (ganhou) conquistadasAgora.add('Eternidade Vita');
+      if (ganhou) conquistadasAgora.add('eternidade_vita');
     }
     
     return conquistadasAgora;
@@ -164,7 +164,7 @@ class ConquistaDesbloqueio {
 
       // se a maior sequência atingir 7 dias, tenta desbloquear a conquista
       if (maiorSequencia >= 7) {
-        bool ganhou = await ConquistaDesbloqueio.desbloquear('disciplina_financeira', 500); // Ex: +500 XP por ser mais difícil
+        bool ganhou = await ConquistaDesbloqueio.desbloquear('disciplina_financeira', 150); //
         if (ganhou) {
           return 'disciplina_financeira';
         }
