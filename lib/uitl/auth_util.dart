@@ -48,6 +48,8 @@ class AuthUtil {
   }
 
   Future<void> deleteUser() async {
+    final uid = _firebaseAuth.currentUser!.uid;
+    await db.collection('users').doc(uid).delete();
     await _firebaseAuth.currentUser!.delete();
   }
 
