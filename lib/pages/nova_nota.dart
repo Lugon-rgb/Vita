@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../modelos/modelo_nota.dart';
 import '../data/conquista_desbloqueio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../data/conquista_snackbar.dart'; // Certifique-se de usar o caminho correto onde salvou o arquivo
 
 class NovaNotaPage extends StatefulWidget {
   final Nota?
@@ -132,20 +133,15 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
         ); // transforma em mapa, manda para o firebase e espera o processo ser concluido c o await
         // se a nota tiver vazia, cria uma nova nota normal
 
-        // desbloqueio de conquista anotacao de campo
+        //desbloqueio de conquista anotacao de campo
         bool ganhouAnotacao = await ConquistaDesbloqueio.desbloquear(
           'anotacao_campo',
           50,
         );
 
         if (ganhouAnotacao && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('🏆 Conquista "Anotação de Campo" desbloqueada!'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 3),
-            ),
-          );
+          // novo modo de feedback visual
+          mostrarSnackBarConquista(context, 'anotacao_campo');
         }
       } else {
         await _notasCollection
@@ -160,15 +156,8 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
       String? nomeConquistaMosaico = await ConquistaDesbloqueio.mosaicoIdeias();
 
       if (nomeConquistaMosaico != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '🏆 Conquista "${nomeConquistaMosaico}" desbloqueada!',
-            ),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        // novo modo de feedback visual
+        mostrarSnackBarConquista(context, 'mosaico_ideias');
       }
 
       if (mounted) {
@@ -251,14 +240,6 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
                 color: Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _tituloController,
-              style: const TextStyle(color: Colors.white),
-              decoration: _customInputDecoration(
-                'Ex: Resumo de Álgebra Linear...',
               ),
             ),
             const SizedBox(height: 10),
