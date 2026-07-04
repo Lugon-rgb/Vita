@@ -6,6 +6,7 @@ import 'package:vita_appprojetos/pages/metas.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vita_appprojetos/pages/TelaQuiz.dart';
+import 'package:vita_appprojetos/pages/metas.dart';
 
 class HomePage extends StatefulWidget {
   final String titulo; // guarda o nome do titulo atual
