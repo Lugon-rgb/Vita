@@ -136,7 +136,6 @@ class _HomePageState extends State<HomePage> {
       // chamada da funcao que retorna uma lista de conquistas desbloqueadas com base no streak atual
       List<String> novasConquistas =
           await ConquistaDesbloqueio.checarConquistasDeStreak(streak);
-
       // se houver conquistas novas, mostra o snackBar para cada uma
       if (novasConquistas.isNotEmpty && mounted) {
         for (String nomeConquista in novasConquistas) {
