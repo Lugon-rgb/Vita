@@ -523,31 +523,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
             email: _emailUsuario,
             senha: _senhaUsuario,
             onConfirm: () async {
-              await _auth.reauthUser(
-                email: _emailUsuario.text.trim(),
-                senha: _senhaUsuario.text.trim(),
-              );
-              if (context.mounted) {
-                Navigator.pop(context);
-                showDialog(
-                  context: context,
-                  builder: (_) {
-                    return DialogBox(
-                      sim: () {
-                        _auth.deleteUser();
-                        if (mounted) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => AuthPage()),
-                          );
-                        }
-                      },
-                      nao: () {},
-                    );
-                  },
+              try {
+                await _auth.reauthUser(
+                  email: _emailUsuario.text.trim(),
+                  senha: _senhaUsuario.text.trim(),
                 );
+                if (context.mounted) {
+                  Navigator.pop(context); // fecha o ReAuthDialog
+                  showDialog(
+                    context: context,
+                    builder: (_) {
+                      return DialogBox(
+                        sim: () async {
+                          Navigator.pop(context);
+                          print('Deletando conta...');
+                          await _auth.deleteUser();
+                          print('Conta deletada!');
+                          if (context.mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AuthPage(),
+                              ),
+                            );
+                          }
+                        },
+                        nao: () => Navigator.pop(context),
+                      );
+                    },
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Credenciais incorretas. Tente novamente.'),
+                      backgroundColor: Colors.redAccent,
+                    ),
+                  );
+                }
               }
-              ;
             },
           );
         },

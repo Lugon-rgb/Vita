@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vita_appprojetos/pages/TelaQuiz.dart';
 import '../data/conquista_desbloqueio.dart';
-import '../data/conquista_snackbar.dart'; 
+import '../data/conquista_snackbar.dart';
 
 class HomePage extends StatefulWidget {
   final String titulo; // guarda o nome do titulo atual
@@ -134,8 +134,8 @@ class _HomePageState extends State<HomePage> {
       }, SetOptions(merge: true));
 
       // chamada da funcao que retorna uma lista de conquistas desbloqueadas com base no streak atual
-      List<String> novasConquistas = await ConquistaDesbloqueio.checarConquistasDeStreak(streak);
-
+      List<String> novasConquistas =
+          await ConquistaDesbloqueio.checarConquistasDeStreak(streak);
       // se houver conquistas novas, mostra o snackBar para cada uma
       if (novasConquistas.isNotEmpty && mounted) {
         for (String nomeConquista in novasConquistas) {

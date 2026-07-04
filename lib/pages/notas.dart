@@ -18,6 +18,9 @@ class _NotasPageState extends State<NotasPage> {
   final TextEditingController _buscaController = TextEditingController();
 
   // criei uma variavel que aponta pra uma colecao do Firebase das notas
+  //final CollectionReference _notasCollection = FirebaseFirestore.instance.collection('notas');
+
+  // a variavel q antes era estatica, agora tem um get que faz ela ser dinamica e ver baseado no usuario em questao
   CollectionReference get _notasCollection {
     final user = FirebaseAuth.instance.currentUser!;
     return FirebaseFirestore.instance
@@ -28,6 +31,10 @@ class _NotasPageState extends State<NotasPage> {
 
   String _filtroCategoria =
       'Todas'; // variavel para guardar o filtro de categoria selecionado, comeca com "todas" por padrao
+
+  //final Stream<QuerySnapshot> _notasStream = FirebaseFirestore.instance.collection('notas').orderBy('dataHora', descending: true).snapshots(); // conecta ao firebase uma unica vez, quando abrir a tela,
+  // pegando a colecao de notas, ordenando pela data e monitorando em tempo real com esse snapshots. dai toda vez que algo mudar la no firebase, o StreamBuilder que ta mais pra baixo
+  // vai receber a nova lista de notas atualizada e redesenhar a tela automaticamente
 
   // tornando dinamica tb
   Stream<QuerySnapshot> get _notasStream {
