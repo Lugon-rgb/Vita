@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../modelos/modelo_nota.dart';
 import '../data/conquista_desbloqueio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
