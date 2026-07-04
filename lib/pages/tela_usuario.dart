@@ -6,14 +6,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:vita_appprojetos/pages/auth_page.dart';
 import 'package:vita_appprojetos/pages/conquistas.dart';
+import 'package:vita_appprojetos/uitl/auth_util.dart';
+import 'package:vita_appprojetos/uitl/dialog_box.dart';
+import 'package:vita_appprojetos/uitl/reAuth_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback? aoClicarNoSeletorDeTitulos;
 
-  const ProfileScreen({
-    super.key,
-    this.aoClicarNoSeletorDeTitulos,
-  });
+  const ProfileScreen({super.key, this.aoClicarNoSeletorDeTitulos});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -22,6 +22,9 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late Map<String, bool> switchStates;
   final User? user = FirebaseAuth.instance.currentUser;
+  final db = FirebaseFirestore.instance;
+  int nivel = 1;
+  int streak = 0;
 
   @override
   void initState() {
@@ -35,6 +38,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     };
 
     carregarAvatar();
+    _carregarDados();
+  }
+
+  Future<void> _carregarDados() async {
+    if (user == null) return;
+    try {
+      final dados = await db.collection('users').doc(user!.uid).get();
+      if (dados.exists && mounted) {
+        // ignore: unnecessary_cast
+        final data = dados.data() as Map<String, dynamic>? ?? {};
+        setState(() {
+          nivel = data['nivel'] ?? 1;
+          streak = data['streak'] ?? 0;
+        });
+      }
+    } catch (e) {
+      debugPrint('Erro ao carregar perfil: $e');
+    }
   }
 
   Future<void> carregarAvatar() async {
@@ -43,7 +64,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final doc = await FirebaseFirestore.instance
-          .collection('usuarios')
+          .collection('users')
           .doc(currentUser.uid)
           .get();
 
@@ -65,9 +86,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final avatar = FluttermojiController().getFluttermojiOptions();
 
-    await FirebaseFirestore.instance.collection('usuarios').doc(currentUser.uid).set({
-      'avatar': avatar,
-    }, SetOptions(merge: true));
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser.uid)
+        .set({'avatar': avatar}, SetOptions(merge: true));
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -171,10 +193,153 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 20),
             _buildLogoutButton(),
+            SizedBox(height: 10),
+            _buildAccountDeleteButton(),
           ],
         ),
       ),
     );
+  }
+
+  Widget _emailNverficado() {
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (dialogContext) {
+            return AlertDialog(
+              constraints: BoxConstraints(maxHeight: 250),
+              title: const Center(child: Text("Verificação de Email")),
+              backgroundColor: const Color.fromARGB(255, 32, 32, 32),
+              content: const SizedBox(
+                height: 100,
+                child: Column(
+                  children: [
+                    Text(
+                      "Click abaixo para re-enviar o email de verificação",
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 25),
+                    Text(
+                      "(Você será desconectado, log novamente após verificar seu email)",
+                      style: TextStyle(fontSize: 12),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await user!.sendEmailVerification();
+                    await FirebaseAuth.instance.signOut();
+                    if (mounted) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => AuthPage()),
+                      );
+                    }
+                  },
+                  child: const Text("Enviar"),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text("Fechar"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Container(
+            height: 25,
+            width: 110,
+            decoration: BoxDecoration(
+              color: Colors.redAccent.withValues(alpha: 0.45),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                SizedBox(width: 17),
+                Icon(
+                  Icons.close,
+                  color: const Color.fromARGB(255, 255, 35, 35),
+                ),
+                SizedBox(width: 2),
+                Text("Email"),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _emailVerficado() {
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (dialogContext) {
+            return AlertDialog(
+              constraints: BoxConstraints(maxHeight: 190),
+              title: const Center(child: Text("Email Verificado")),
+              backgroundColor: const Color.fromARGB(255, 32, 32, 32),
+              content: const SizedBox(
+                height: 100,
+                child: Column(
+                  children: [Text("Seu endereço de email já foi verificado")],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text("Fechar"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Container(
+            height: 25,
+            width: 110,
+            decoration: BoxDecoration(
+              color: Colors.greenAccent.withValues(alpha: 0.45),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                SizedBox(width: 17),
+                Icon(
+                  Icons.check,
+                  color: const Color.fromARGB(255, 61, 213, 71),
+                ),
+                SizedBox(width: 2),
+                Text("Email"),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _indEmail() {
+    bool emailVeri = user!.emailVerified;
+    if (emailVeri) {
+      return _emailVerficado();
+    } else {
+      return _emailNverficado();
+    }
   }
 
   Widget _buildProfileCard() {
@@ -186,6 +351,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Column(
         children: [
+          _indEmail(),
           FluttermojiCircleAvatar(radius: 50),
           const SizedBox(height: 10),
           TextButton.icon(
@@ -209,9 +375,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: const [
-              _StatItem(label: "Nível", value: "18"),
-              _StatItem(label: "Streak", value: "7"),
+            children: [
+              _StatItem(label: "Nível", value: '$nivel'),
+              _StatItem(label: "Streak", value: '$streak dias'),
             ],
           ),
         ],
@@ -333,6 +499,105 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: const Center(
           child: Text(
             "Sair da Conta",
+            style: TextStyle(
+              color: Colors.redAccent,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAccountDeleteButton() {
+    final AuthUtil _auth = AuthUtil();
+    final _emailUsuario = TextEditingController();
+    final _senhaUsuario = TextEditingController();
+
+    Future<dynamic> credReconfirm() {
+      return showDialog(
+        context: context,
+        builder: (_) {
+          return ReAuthDialogBox(
+            email: _emailUsuario,
+            senha: _senhaUsuario,
+            onConfirm: () async {
+              try {
+                await _auth.reauthUser(
+                  email: _emailUsuario.text.trim(),
+                  senha: _senhaUsuario.text.trim(),
+                );
+                if (context.mounted) {
+                  Navigator.pop(context); // fecha o ReAuthDialog
+                  showDialog(
+                    context: context,
+                    builder: (_) {
+                      return DialogBox(
+                        sim: () async {
+                          Navigator.pop(context);
+                          print('Deletando conta...');
+                          await _auth.deleteUser();
+                          print('Conta deletada!');
+                          if (context.mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AuthPage(),
+                              ),
+                            );
+                          }
+                        },
+                        nao: () => Navigator.pop(context),
+                      );
+                    },
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Credenciais incorretas. Tente novamente.'),
+                      backgroundColor: Colors.redAccent,
+                    ),
+                  );
+                }
+              }
+            },
+          );
+        },
+      );
+    }
+
+    Future<dynamic> confirmDialog() {
+      return showDialog(
+        context: context,
+        builder: (_) {
+          return DialogBox(
+            sim: () {
+              Navigator.pop(context);
+              credReconfirm();
+              // delete account logic here
+            },
+            nao: () => Navigator.pop(context),
+          );
+        },
+      );
+    }
+
+    return GestureDetector(
+      onTap: () {
+        confirmDialog();
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.redAccent.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(
+          child: Text(
+            "Excluir Conta",
             style: TextStyle(
               color: Colors.redAccent,
               fontSize: 15,

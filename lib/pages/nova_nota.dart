@@ -3,9 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../modelos/modelo_nota.dart';
 import '../data/conquista_desbloqueio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../data/conquista_snackbar.dart'; // Certifique-se de usar o caminho correto onde salvou o arquivo
 
 class NovaNotaPage extends StatefulWidget {
-  final Nota? notaParaEditar; // se a nota vier preenchida, a tela vai funcionar como edicao
+  final Nota?
+  notaParaEditar; // se a nota vier preenchida, a tela vai funcionar como edicao
   // mas se vier vazia, funciona como criacao
   const NovaNotaPage({super.key, this.notaParaEditar});
 
@@ -27,12 +30,12 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
   // final CollectionReference _notasCollection = FirebaseFirestore.instance.collection('notas');
 
   CollectionReference get _notasCollection {
-  final user = FirebaseAuth.instance.currentUser;
-  return FirebaseFirestore.instance
-      .collection('users')
-      .doc(user?.uid ?? 'deslogado')
-      .collection('notas');
-}
+    final user = FirebaseAuth.instance.currentUser;
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(user?.uid ?? 'deslogado')
+        .collection('notas');
+  }
 
   @override
   void initState() {
@@ -40,21 +43,20 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
     // vigia os campos para atualizar a cor do botão salvar em tempo real
     _tituloController.addListener(_atualizarTela);
     _conteudoController.addListener(_atualizarTela);
-  
+
     // se o notaParaEditar nao for nulo, preenche os campos da nota com os dados antigos p poder editar
     if (widget.notaParaEditar != null) {
-        _tituloController.text = widget.notaParaEditar!.titulo;
-        _conteudoController.text = widget.notaParaEditar!.conteudo;
-        _categoriaSelecionada = widget.notaParaEditar!.categoria;
-        _dataSelecionada = widget.notaParaEditar!.dataHora;
+      _tituloController.text = widget.notaParaEditar!.titulo;
+      _conteudoController.text = widget.notaParaEditar!.conteudo;
+      _categoriaSelecionada = widget.notaParaEditar!.categoria;
+      _dataSelecionada = widget.notaParaEditar!.dataHora;
 
-        // formatando a data antiga p ela aparecer ja preenchida no input 
-        _dataController.text =
-            "${_dataSelecionada!.day.toString().padLeft(2, '0')}/${_dataSelecionada!.month.toString().padLeft(2, '0')}/${_dataSelecionada!.year}";
+      // formatando a data antiga p ela aparecer ja preenchida no input
+      _dataController.text =
+          "${_dataSelecionada!.day.toString().padLeft(2, '0')}/${_dataSelecionada!.month.toString().padLeft(2, '0')}/${_dataSelecionada!.year}";
     }
   }
 
-  
   // funcao p atualizar a tela smp que o usuario digitar algo, se tiver ativa ainda
   void _atualizarTela() {
     if (mounted) setState(() {});
@@ -83,12 +85,14 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
       },
     );
 
-    if (escolheu != null) { // se for uma data valida
+    if (escolheu != null) {
+      // se for uma data valida
       setState(() {
-        _dataSelecionada = escolheu; // guardando a data em uma variavel p depois mandar p firebase
-        _dataController.text = 
+        _dataSelecionada =
+            escolheu; // guardando a data em uma variavel p depois mandar p firebase
+        _dataController.text =
             "${escolheu.day.toString().padLeft(2, '0')}/${escolheu.month.toString().padLeft(2, '0')}/${escolheu.year}";
-            // formatei p exibir na caixinha de texto (dd/mm/aaaa)
+        // formatei p exibir na caixinha de texto (dd/mm/aaaa)
       });
     }
   }
@@ -96,12 +100,15 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
   // funcao p salvar a nota estruturada no Firebase
   void _salvarNotaCompleta() async {
     final String titulo = _tituloController.text.trim();
-    final String conteudo = _conteudoController.text.trim(); //tipo o rstrip no python
+    final String conteudo = _conteudoController.text
+        .trim(); //tipo o rstrip no python
 
     // medida de seguranca, pra caso ocorra algum bug e o usuario consiga clicar no botao de salvar mesmo com os campos obrigatorios vazios
     if (titulo.isEmpty || conteudo.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha o título e o conteúdo obrigatórios!')),
+        const SnackBar(
+          content: Text('Preencha o título e o conteúdo obrigatórios!'),
+        ),
       );
       return;
     }
@@ -111,7 +118,9 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
     DateTime dataFinal = _dataSelecionada ?? DateTime.now();
 
     final novaNota = Nota(
-      id: widget.notaParaEditar?.id, // se tiver vazio, o firebase gera um id novo. se tiver preenchida (para editar), mantém o id antigo, 
+      id: widget
+          .notaParaEditar
+          ?.id, // se tiver vazio, o firebase gera um id novo. se tiver preenchida (para editar), mantém o id antigo,
       titulo: titulo,
       conteudo: conteudo,
       categoria: _categoriaSelecionada,
@@ -119,26 +128,28 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
     );
 
     try {
-      if (widget.notaParaEditar == null) { // 
-        await _notasCollection.add(novaNota.toMap()); // transforma em mapa, manda para o firebase e espera o processo ser concluido c o await
+      if (widget.notaParaEditar == null) {
+        await _notasCollection.add(
+          novaNota.toMap(),
+        ); // transforma em mapa, manda para o firebase e espera o processo ser concluido c o await
         // se a nota tiver vazia, cria uma nova nota normal
 
         //desbloqueio de conquista anotacao de campo
-        bool ganhouAnotacao = await ConquistaDesbloqueio.desbloquear('anotacao_campo', 50);
+        bool ganhouAnotacao = await ConquistaDesbloqueio.desbloquear(
+          'anotacao_campo',
+          50,
+        );
 
         if (ganhouAnotacao && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('🏆 Conquista "Anotação de Campo" desbloqueada!'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 3),
-            ),
-          );
+          // novo modo de feedback visual
+          mostrarSnackBarConquista(context, 'anotacao_campo');
         }
-
-      } 
-      else {
-        await _notasCollection.doc(widget.notaParaEditar!.id).update(novaNota.toMap()); // transforma em mapa, manda para o firebase e espera o processo ser concluido c o await
+      } else {
+        await _notasCollection
+            .doc(widget.notaParaEditar!.id)
+            .update(
+              novaNota.toMap(),
+            ); // transforma em mapa, manda para o firebase e espera o processo ser concluido c o await
         // se a nota tiver preenchida, procura o documento pelo id e atualiza ele com os novos dados da nota editada
       }
 
@@ -146,32 +157,35 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
       String? nomeConquistaMosaico = await ConquistaDesbloqueio.mosaicoIdeias();
 
       if (nomeConquistaMosaico != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('🏆 Conquista "$nomeConquistaMosaico" desbloqueada!'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        // novo modo de feedback visual
+        mostrarSnackBarConquista(context, 'mosaico_ideias');
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-
-          SnackBar(content: Text(widget.notaParaEditar == null ? 'Nota salva com sucesso!' : 'Nota atualizada com sucesso!')),
+          SnackBar(
+            content: Text(
+              widget.notaParaEditar == null
+                  ? 'Nota salva com sucesso!'
+                  : 'Nota atualizada com sucesso!',
+            ),
+          ),
         );
-        Navigator.of(context).pop(); // fecha a tela de nova nota e volta para a listagem
+        Navigator.of(
+          context,
+        ).pop(); // fecha a tela de nova nota e volta para a listagem
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao salvar nota: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao salvar nota: $e')));
     }
   }
 
   // funcao auxiliar q vai retornar true se os campos obrigatorios estiverem preenchidos
   bool _camposPreenchidos() {
-    return _tituloController.text.trim().isNotEmpty && _conteudoController.text.trim().isNotEmpty;
+    return _tituloController.text.trim().isNotEmpty &&
+        _conteudoController.text.trim().isNotEmpty;
     //usei isso pra poder mudar a cor do botao de salvar mais tarde, caso estejam preenchidos
   }
 
@@ -187,7 +201,13 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
   @override
   Widget build(BuildContext context) {
     // lista de opções pro dropdown das categorias
-    final List<String> categorias = ['Estudos', 'Saúde', 'Finanças', 'Pessoal', 'Outros'];
+    final List<String> categorias = [
+      'Estudos',
+      'Saúde',
+      'Finanças',
+      'Pessoal',
+      'Outros',
+    ];
 
     return Scaffold(
       backgroundColor: const Color(0xFF090F16),
@@ -195,12 +215,19 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white), // setinha p voltar
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ), // setinha p voltar
           onPressed: () => Navigator.of(context).pop(), // fecha a tela
         ),
         title: Text(
           widget.notaParaEditar == null ? 'Nova Nota' : 'Editar Nota',
-          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: SafeArea(
@@ -208,29 +235,48 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
           children: [
             // campo do titulo
-            const Text('Título', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+            const Text(
+              'Título',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 10),
             TextField(
               controller: _tituloController,
               style: const TextStyle(color: Colors.white),
-              decoration: _customInputDecoration('Ex: Resumo de Álgebra Linear...'),
+              decoration: _customInputDecoration(
+                'Ex: Resumo de Álgebra Linear...',
+              ),
             ),
 
             const SizedBox(height: 20),
 
             // campo da categoria com um dropdown
-            const Text('Categoria', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+            const Text(
+              'Categoria',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
-              initialValue: _categoriaSelecionada, //valor selecionado atualmente
+              initialValue:
+                  _categoriaSelecionada, //valor selecionado atualmente
               dropdownColor: const Color(0xFF141923),
               style: const TextStyle(color: Colors.white, fontSize: 16),
               icon: const Icon(Icons.arrow_drop_down, color: Colors.white60),
-              decoration: _customInputDecoration(''), // como ele ja exibe a categoria selecionada, n precisa do hint text, 
+              decoration: _customInputDecoration(
+                '',
+              ), // como ele ja exibe a categoria selecionada, n precisa do hint text,
               // entao eu pus uma string vazia so p poder usar a decoracao da funcao em questao
-
-              items: categorias.map((String categoria) { // esse .map transforma cada string da lista em widgets do tipo DropdownMenuItem,
-              // que eh o formato que o dropdown precisa pra exibir as opções
+              items: categorias.map((String categoria) {
+                // esse .map transforma cada string da lista em widgets do tipo DropdownMenuItem,
+                // que eh o formato que o dropdown precisa pra exibir as opções
                 return DropdownMenuItem<String>(
                   value: categoria,
                   child: Text(categoria),
@@ -240,52 +286,71 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
               onChanged: (String? novoValor) {
                 if (novoValor != null) {
                   setState(() {
-                    _categoriaSelecionada = novoValor; // muda a variavel pra nova escolha de categoria
+                    _categoriaSelecionada =
+                        novoValor; // muda a variavel pra nova escolha de categoria
                   });
                 }
               },
             ),
 
-
             const SizedBox(height: 20),
 
-
             // campo da data
-            const Text('Data (Opcional)', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+            const Text(
+              'Data (Opcional)',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 10),
             TextField(
               controller: _dataController,
-              readOnly: true, // impede o usuário de abrir o teclado físico do celular
-              onTap: _selecionarData, // abre o calendário q settei antes ao clicar
+              readOnly:
+                  true, // impede o usuário de abrir o teclado físico do celular
+              onTap:
+                  _selecionarData, // abre o calendário q settei antes ao clicar
               style: const TextStyle(color: Colors.white),
               decoration: _customInputDecoration('dd/mm/aaaa').copyWith(
-                suffixIcon: const Icon(Icons.calendar_today, color: Colors.white38, size: 18),
+                suffixIcon: const Icon(
+                  Icons.calendar_today,
+                  color: Colors.white38,
+                  size: 18,
+                ),
               ),
             ),
 
-
             const SizedBox(height: 20),
 
-
             // campo do conteudo
-            const Text('Conteúdo', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+            const Text(
+              'Conteúdo',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 10),
             TextField(
               controller: _conteudoController,
               maxLines: 6, // campo maiorzinho p caber o bloco de notas de texto
               style: const TextStyle(color: Colors.white),
-              decoration: _customInputDecoration('Digite os detalhes da nota aqui...'),
+              decoration: _customInputDecoration(
+                'Digite os detalhes da nota aqui...',
+              ),
             ),
 
-
             const SizedBox(height: 35),
-
 
             // botao de salvar
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: _camposPreenchidos() ? _salvarNotaCompleta : null, // a opcao de clicar fica desativada se os campos obrigatorios estiverem vazios
+                onPressed: _camposPreenchidos()
+                    ? _salvarNotaCompleta
+                    : null, // a opcao de clicar fica desativada se os campos obrigatorios estiverem vazios
                 icon: const Icon(Icons.save, size: 18),
                 label: const Text(
                   'Salvar Nota',
@@ -294,8 +359,12 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
 
                 style: ElevatedButton.styleFrom(
                   // trocar a cor do botao dependendo se os campos obrigatorios estao preenchidos ou nao, p dar um feedback visual pro usuario
-                  backgroundColor: _camposPreenchidos() ? const Color(0xFF2A4BA0) : const Color(0xFF1E3A8A).withValues(alpha: 0.4),
-                  foregroundColor: _camposPreenchidos() ? Colors.white : Colors.white38,
+                  backgroundColor: _camposPreenchidos()
+                      ? const Color(0xFF2A4BA0)
+                      : const Color(0xFF1E3A8A).withValues(alpha: 0.4),
+                  foregroundColor: _camposPreenchidos()
+                      ? Colors.white
+                      : Colors.white38,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -319,11 +388,17 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF1E293B), width: 1), // cor da borda sem estar em foco
+        borderSide: const BorderSide(
+          color: Color(0xFF1E293B),
+          width: 1,
+        ), // cor da borda sem estar em foco
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF2A4BA0), width: 1.5), // cor da borda em foco
+        borderSide: const BorderSide(
+          color: Color(0xFF2A4BA0),
+          width: 1.5,
+        ), // cor da borda em foco
       ),
     );
   }

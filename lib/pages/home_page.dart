@@ -1,20 +1,22 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'editar_quiz.dart';
 import 'nova_nota.dart';
+// ignore: unused_import
 import 'package:vita_appprojetos/pages/metas.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vita_appprojetos/pages/TelaQuiz.dart';
+import '../data/conquista_desbloqueio.dart';
+import '../data/conquista_snackbar.dart';
 
 class HomePage extends StatefulWidget {
+  final String titulo; // guarda o nome do titulo atual
+  final VoidCallback aoClicarNoTitulo; // funcao chamada quando clica no titulo
 
-final String titulo; // guarda o nome do titulo atual
-final VoidCallback aoClicarNoTitulo; // funcao chamada quando clica no titulo
-
-const HomePage({
-  super.key, 
-  required this.titulo, // obrigatorio passar o titulo
-  required this.aoClicarNoTitulo, // obrigatorio passar a funcao do clique
+  const HomePage({
+    super.key,
+    required this.titulo, // obrigatorio passar o titulo
+    required this.aoClicarNoTitulo, // obrigatorio passar a funcao do clique
   });
 
   @override
@@ -130,6 +132,16 @@ class _HomePageState extends State<HomePage> {
         "melhorStreak": melhorStreak,
         "ultimoAcesso": Timestamp.now(),
       }, SetOptions(merge: true));
+
+      // chamada da funcao que retorna uma lista de conquistas desbloqueadas com base no streak atual
+      List<String> novasConquistas =
+          await ConquistaDesbloqueio.checarConquistasDeStreak(streak);
+      // se houver conquistas novas, mostra o snackBar para cada uma
+      if (novasConquistas.isNotEmpty && mounted) {
+        for (String nomeConquista in novasConquistas) {
+          mostrarSnackBarConquista(context, nomeConquista);
+        }
+      }
 
       setState(() {});
     } catch (e) {
@@ -333,40 +345,48 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // META
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 30,
-                      horizontal: 8,
-                    ),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const GoalFormPage()),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 30,
+                        horizontal: 8,
+                      ),
 
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 20,
-                      horizontal: 10,
-                    ),
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 20,
+                        horizontal: 10,
+                      ),
 
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: const Color.fromARGB(255, 26, 29, 30),
-                    ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: const Color.fromARGB(255, 26, 29, 30),
+                      ),
 
-                    child: const Column(
-                      children: [
-                        Icon(
-                          Icons.track_changes,
-                          color: Color.fromARGB(255, 30, 64, 214),
-                        ),
-
-                        SizedBox(height: 8),
-
-                        Text(
-                          'NOVA META',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                      child: const Column(
+                        children: [
+                          Icon(
+                            Icons.track_changes,
+                            color: Color.fromARGB(255, 30, 64, 214),
                           ),
-                        ),
-                      ],
+
+                          SizedBox(height: 8),
+
+                          Text(
+                            'NOVA META',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -762,11 +782,13 @@ class _HomePageState extends State<HomePage> {
 
           const SizedBox(height: 2),
 
-          GestureDetector( // titulo clicavl que agora abre a tela de titulos
-            onTap: widget.aoClicarNoTitulo, // quando clicar no titulo, ativa a funcao que veio como parametro do overlay p abrir a tela de titulos
+          GestureDetector(
+            // titulo clicavl que agora abre a tela de titulos
+            onTap: widget
+                .aoClicarNoTitulo, // quando clicar no titulo, ativa a funcao que veio como parametro do overlay p abrir a tela de titulos
             child: Text(
               widget.titulo, // usa o titulo que veio do overlay
-              style:TextStyle(
+              style: TextStyle(
                 color: Colors.grey,
                 fontSize: 16,
                 fontWeight: FontWeight.normal,
