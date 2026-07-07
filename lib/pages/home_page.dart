@@ -767,38 +767,40 @@ class _HomePageState extends State<HomePage> {
   }
 
   AppBar appBar() {
-    return AppBar(
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            'Olá, ${user?.displayName ?? 'Usuário'}',
+  return AppBar(
+    toolbarHeight: 70, // aumenta a altura só aqui, pra caber as 2 linhas sem "subir"
+    centerTitle: true,
+    title: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          'Olá, ${user?.displayName ?? 'Usuário'}',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        const SizedBox(height: 2),
+
+        GestureDetector(
+          onTap: widget.aoClicarNoTitulo,
+          child: Text(
+            widget.titulo,
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+              fontSize: 16,
+              fontWeight: FontWeight.normal,
             ),
           ),
-
-          const SizedBox(height: 2),
-
-          GestureDetector(
-            // titulo clicavl que agora abre a tela de titulos
-            onTap: widget
-                .aoClicarNoTitulo, // quando clicar no titulo, ativa a funcao que veio como parametro do overlay p abrir a tela de titulos
-            child: Text(
-              widget.titulo, // usa o titulo que veio do overlay
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 16,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-          ),
-        ],
-      ),
-      backgroundColor: const Color.fromARGB(255, 13, 15, 17),
-      elevation: 0.0,
-    );
-  }
+        ),
+      ],
+    ),
+    backgroundColor: const Color.fromARGB(255, 13, 15, 17),
+    elevation: 0.0,
+  );
+}
 }
