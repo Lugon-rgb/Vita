@@ -121,12 +121,6 @@ const List<TituloModelo> listaDeTitulosDoApp = [
     corRaridade: epico,
   ),
   TituloModelo(
-    id: 't_clarividente',
-    nome: 'Clarividente',
-    descricao: 'Atingir a conquista “Mente de Cristal”.',
-    corRaridade: epico,
-  ),
-  TituloModelo(
     id: 't_magnata',
     nome: 'Magnata',
     descricao: 'Atingir a conquista “Sonho Realizado”.',
@@ -145,12 +139,6 @@ const List<TituloModelo> listaDeTitulosDoApp = [
     id: 't_espartano',
     nome: 'Espartano',
     descricao: 'Atingir a conquista “Eternidade Vita”.',
-    corRaridade: lendario,
-  ),
-  TituloModelo(
-    id: 't_uzumaki',
-    nome: 'Uzumaki',
-    descricao: 'Atingir a conquista “Ciclo Perfeito”.',
     corRaridade: lendario,
   ),
   TituloModelo(
@@ -174,12 +162,6 @@ const List<TituloModelo> listaDeTitulosDoApp = [
 
   // ocultos
   
-  TituloModelo(
-    id: 't_inominavel',
-    nome: 'O Inominável',
-    descricao: 'Atinge ao salvar uma nota sem preencher o título.',
-    corRaridade: misterioso,
-  ),
   TituloModelo(
     id: 't_mestre_centavo',
     nome: 'Mestre do Centavo',

@@ -74,9 +74,9 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.dark(
-              primary: Color(0xFF2A4BA0),
+              primary: Color.fromARGB(255, 30, 64, 214),
               onPrimary: Colors.white,
-              surface: Color(0xFF1E1E1E),
+              surface: Color.fromARGB(255, 26, 29, 30),
               onSurface: Colors.white,
             ),
           ),
@@ -210,10 +210,9 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF090F16),
+      backgroundColor: const Color.fromARGB(255, 13, 15, 17),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        backgroundColor: const Color.fromARGB(255, 13, 15, 17),
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back,
@@ -223,11 +222,7 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
         ),
         title: Text(
           widget.notaParaEditar == null ? 'Nova Nota' : 'Editar Nota',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(color: Colors.white),
         ),
       ),
       body: SafeArea(
@@ -239,14 +234,14 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
               'Título',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: _tituloController,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white, fontSize: 16),
               decoration: _customInputDecoration(
                 'Ex: Resumo de Álgebra Linear...',
               ),
@@ -259,17 +254,17 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
               'Categoria',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
               initialValue:
                   _categoriaSelecionada, //valor selecionado atualmente
-              dropdownColor: const Color(0xFF141923),
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-              icon: const Icon(Icons.arrow_drop_down, color: Colors.white60),
+              dropdownColor: const Color.fromARGB(255, 26, 29, 30),
+              style: const TextStyle(color: Colors.white, fontSize: 18),
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
               decoration: _customInputDecoration(
                 '',
               ), // como ele ja exibe a categoria selecionada, n precisa do hint text,
@@ -300,8 +295,8 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
               'Data (Opcional)',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 10),
@@ -311,11 +306,11 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
                   true, // impede o usuário de abrir o teclado físico do celular
               onTap:
                   _selecionarData, // abre o calendário q settei antes ao clicar
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white, fontSize: 16),
               decoration: _customInputDecoration('dd/mm/aaaa').copyWith(
                 suffixIcon: const Icon(
                   Icons.calendar_today,
-                  color: Colors.white38,
+                  color: Colors.grey,
                   size: 18,
                 ),
               ),
@@ -328,15 +323,15 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
               'Conteúdo',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: _conteudoController,
               maxLines: 6, // campo maiorzinho p caber o bloco de notas de texto
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white, fontSize: 16),
               decoration: _customInputDecoration(
                 'Digite os detalhes da nota aqui...',
               ),
@@ -354,21 +349,21 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
                 icon: const Icon(Icons.save, size: 18),
                 label: const Text(
                   'Salvar Nota',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
 
                 style: ElevatedButton.styleFrom(
                   // trocar a cor do botao dependendo se os campos obrigatorios estao preenchidos ou nao, p dar um feedback visual pro usuario
                   backgroundColor: _camposPreenchidos()
-                      ? const Color(0xFF2A4BA0)
-                      : const Color(0xFF1E3A8A).withValues(alpha: 0.4),
+                      ? const Color.fromARGB(255, 30, 64, 214)
+                      : const Color.fromARGB(255, 20, 34, 110),
                   foregroundColor: _camposPreenchidos()
                       ? Colors.white
                       : Colors.white38,
+                  minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
@@ -382,22 +377,20 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
   InputDecoration _customInputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: Colors.white30, fontSize: 14),
+      hintStyle: const TextStyle(color: Colors.grey, fontSize: 16),
       filled: true,
-      fillColor: const Color(0xFF141923), // cor de dentro da caixa
+      fillColor: const Color.fromARGB(255, 26, 29, 30), // cor de dentro da caixa
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(15),
         borderSide: const BorderSide(
-          color: Color(0xFF1E293B),
-          width: 1,
+          color: Colors.white24,
         ), // cor da borda sem estar em foco
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(15),
         borderSide: const BorderSide(
-          color: Color(0xFF2A4BA0),
-          width: 1.5,
+          color: Colors.blue,
         ), // cor da borda em foco
       ),
     );

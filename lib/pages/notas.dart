@@ -146,9 +146,9 @@ class _NotasPageState extends State<NotasPage> {
         _conteudoController.text.trim().isNotEmpty) {
       // esse trim eh uma limpeza de texto, removendo espacos em branco inuteis
       // do inicio e do fim de um texto. Isso tambem impede o usuario de salvar uma captura rapida apenas digitando '   ', apertando espaco sem digitar nada.
-      return const Color(0xFF2A4BA0); // azul vivo
+      return const Color.fromARGB(255, 30, 64, 214); // azul vivo (mesmo tom dos botões de Finanças)
     } else {
-      return const Color(0xFF1E3A8A); // azul apagado
+      return const Color.fromARGB(255, 20, 34, 110); // azul apagado
     }
   }
 
@@ -174,7 +174,7 @@ class _NotasPageState extends State<NotasPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           // desenha caixinha no meio da tela com aviso, escurece o fundo e bloqueia cliques na tela de traz
-          backgroundColor: const Color(0xFF1E1E1E),
+          backgroundColor: const Color.fromARGB(255, 26, 29, 30),
           title: const Text(
             'Apagar nota? Essa ação não poderá ser desfeita.',
             style: TextStyle(
@@ -206,7 +206,7 @@ class _NotasPageState extends State<NotasPage> {
               child: const Text(
                 'Apagar', // mensagem para deletar de fato
                 style: TextStyle(
-                  color: Color(0xFFFF5252),
+                  color: Colors.redAccent,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -229,58 +229,47 @@ class _NotasPageState extends State<NotasPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: const Color.fromARGB(255, 13, 15, 17),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 13, 15, 17),
+        title: const Text("Notas", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const NovaNotaPage(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add, color: Colors.white, size: 18),
+              label: const Text(
+                'Nova Nota',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 30, 64, 214),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
           children: [
-            // titulo + nova nota
-            Row(
-              // titulo
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Notas",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                // botao nova nota ainda so estatico
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const NovaNotaPage(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.add, color: Colors.white, size: 18),
-                  label: const Text(
-                    'Nova Nota',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2A4BA0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
             // captura rapida implementada perfeitamente!
             _construirCapturaRapida(),
             const SizedBox(height: 24),
@@ -293,11 +282,11 @@ class _NotasPageState extends State<NotasPage> {
               decoration: InputDecoration(
                 hintText: 'Pesquisar notas...', // muito maneira essa funcao
                 hintStyle: const TextStyle(
-                  color: Color.fromARGB(97, 255, 255, 255),
+                  color: Colors.grey,
                 ),
                 prefixIcon: const Icon(
                   Icons.search,
-                  color: Color.fromARGB(97, 255, 255, 255),
+                  color: Colors.grey,
                   size: 20,
                 ), // nao da p usar fora do textfield, teria que fazer uma row mesmo
 
@@ -305,20 +294,16 @@ class _NotasPageState extends State<NotasPage> {
 
                 filled:
                     true, // p eu pintar o fundo do textfield, eu aparentemente preciso dizer antes que ele TEM uma cor no fundo, pq eh transparente por padrao
-                fillColor: const Color(0xFF1E1E1E), // dai eu pinto, la ele
+                fillColor: const Color.fromARGB(255, 26, 29, 30), // dai eu pinto, la ele
 
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide
-                      .none, // eh p tirar a borda, p deixar invisivel a linha em volta da caixa
+                  borderSide: const BorderSide(color: Colors.white24),
+                  borderRadius: BorderRadius.circular(15),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: Color(0xFF2A4BA0),
-                    width: 1,
-                  ), // aqui eu coloco a borda pra aparecer quando o usuario clica no "busca", p ter um feedback
-                ),
+                  borderSide: const BorderSide(color: Colors.blue),
+                  borderRadius: BorderRadius.circular(15),
+                ), // aqui eu coloco a borda pra aparecer quando o usuario clica no "busca", p ter um feedback
               ),
             ),
 
@@ -495,13 +480,10 @@ class _NotasPageState extends State<NotasPage> {
   // widget auxiliar pro bloco de captura rápida
   Widget _construirCapturaRapida() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(
-          0xFF141923,
-        ), // Azul escuro de fundo da captura rápida
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E293B), width: 1),
+        color: const Color.fromARGB(255, 26, 29, 30), // mesma cor de card usada em Finanças
+        borderRadius: BorderRadius.circular(20),
       ),
 
       child: Column(
@@ -509,12 +491,12 @@ class _NotasPageState extends State<NotasPage> {
         children: [
           const Row(
             children: [
-              Icon(Icons.bolt, color: Color(0xFF2A4BA0), size: 18),
+              Icon(Icons.bolt, color: Colors.blue, size: 18),
               SizedBox(width: 6),
               Text(
                 'CAPTURA RÁPIDA',
                 style: TextStyle(
-                  color: Color(0xFF2A4BA0),
+                  color: Colors.blue,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,
                   fontSize: 12,
@@ -534,7 +516,7 @@ class _NotasPageState extends State<NotasPage> {
               hintText:
                   'Título...', // eh um texto auxiliar pra pessoa saber o que digitar
               hintStyle: const TextStyle(
-                color: Color.fromRGBO(255, 255, 255, 0.384),
+                color: Colors.grey,
               ),
               // isDense: true,
               contentPadding: const EdgeInsets.all(
@@ -542,15 +524,15 @@ class _NotasPageState extends State<NotasPage> {
               ), // padding entre o texto e a caixa
               enabledBorder: OutlineInputBorder(
                 // sem estar selecionada
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF262626)),
+                borderSide: const BorderSide(color: Colors.white24),
+                borderRadius: BorderRadius.circular(15),
               ),
               focusedBorder: OutlineInputBorder(
                 // depois de ser selecionada
-                borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(
-                  color: Color(0xFF2A4BA0),
+                  color: Colors.blue,
                 ), // a mudanca da cor eh meio q um feedback visual
+                borderRadius: BorderRadius.circular(15),
               ),
             ),
           ),
@@ -566,17 +548,17 @@ class _NotasPageState extends State<NotasPage> {
             decoration: InputDecoration(
               hintText: 'Conteúdo...',
               hintStyle: const TextStyle(
-                color: Color.fromARGB(97, 255, 255, 255),
+                color: Colors.grey,
               ),
               // isDense: true,
               contentPadding: const EdgeInsets.all(12),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF262626)),
+                borderSide: const BorderSide(color: Colors.white24),
+                borderRadius: BorderRadius.circular(15),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF2A4BA0)),
+                borderSide: const BorderSide(color: Colors.blue),
+                borderRadius: BorderRadius.circular(15),
               ),
             ),
           ),
@@ -591,10 +573,11 @@ class _NotasPageState extends State<NotasPage> {
                   _salvarNota, // chama a funcao que salva a nota e adiciona la embaixo
               style: ElevatedButton.styleFrom(
                 backgroundColor: _definirCorBotaoSalvar(),
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(15),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 12),
               ),
               child: Text(
                 'Salvar',
@@ -616,9 +599,9 @@ class _NotasPageState extends State<NotasPage> {
     Color corDoTexto;
 
     if (taSelecionado == true) {
-      corDoBotao = const Color(0xFF2A4BA0); // se tiver selecionado
+      corDoBotao = const Color.fromARGB(255, 30, 64, 214); // se tiver selecionado
     } else {
-      corDoBotao = const Color(0xFF222222); // se nao
+      corDoBotao = const Color.fromARGB(255, 26, 29, 30); // se nao
     }
 
     if (taSelecionado == true) {
@@ -654,8 +637,8 @@ class _NotasPageState extends State<NotasPage> {
     String dataHora,
   ) {
     return Card(
-      color: const Color(0xFF1E1E1E),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: const Color.fromARGB(255, 26, 29, 30),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -685,7 +668,7 @@ class _NotasPageState extends State<NotasPage> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2D2D2D),
+                    color: const Color.fromARGB(255, 38, 42, 44),
                     borderRadius: BorderRadius.circular(6),
                   ),
 
@@ -725,7 +708,7 @@ class _NotasPageState extends State<NotasPage> {
                 Text(
                   dataHora,
                   style: const TextStyle(
-                    color: Color.fromARGB(77, 255, 255, 255),
+                    color: Colors.grey,
                   ),
                 ),
 
@@ -735,7 +718,7 @@ class _NotasPageState extends State<NotasPage> {
                     IconButton(
                       icon: const Icon(
                         Icons.edit_outlined,
-                        color: Color.fromARGB(97, 255, 255, 255),
+                        color: Colors.grey,
                         size: 20,
                       ),
                       padding: const EdgeInsets.only(right: 12.0),
@@ -780,7 +763,7 @@ class _NotasPageState extends State<NotasPage> {
                     IconButton(
                       icon: const Icon(
                         Icons.delete_outline,
-                        color: Color.fromARGB(255, 255, 82, 82),
+                        color: Colors.redAccent,
                         size: 20,
                       ),
                       padding: EdgeInsets.zero,

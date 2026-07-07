@@ -294,7 +294,7 @@ class _HomePageState extends State<HomePage> {
                     child: LinearProgressIndicator(
                       value: vida / 100,
                       minHeight: 8,
-                      backgroundColor: Colors.white,
+                      backgroundColor: Colors.white24,
                       valueColor: const AlwaysStoppedAnimation(
                         Colors.redAccent,
                       ),
@@ -328,7 +328,7 @@ class _HomePageState extends State<HomePage> {
                     child: LinearProgressIndicator(
                       value: estamina / 100,
                       minHeight: 8,
-                      backgroundColor: Colors.white,
+                      backgroundColor: Colors.white24,
                       valueColor: const AlwaysStoppedAnimation(
                         Color.fromARGB(255, 33, 207, 178),
                       ),
@@ -705,7 +705,7 @@ class _HomePageState extends State<HomePage> {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: const Color.fromARGB(255, 26, 29, 30),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(15),
                         ),
                         child: Row(
                           children: [

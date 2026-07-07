@@ -199,7 +199,7 @@ class _FinanciasState extends State<Financias> {
       backgroundColor: const Color.fromARGB(255, 13, 15, 17),
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 13, 15, 17),
-        title: const Text("Finanças", style: TextStyle(color: Colors.white)),
+        title: const Text("Finanças", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
       ),
       body: SingleChildScrollView(
         child: Padding(

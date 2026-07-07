@@ -197,19 +197,20 @@ class _GoalFormPageState extends State<GoalFormPage> {
   InputDecoration customInput(String hint) {
     return InputDecoration(
       hintText: hint,
+      hintStyle: const TextStyle(color: Colors.grey),
       filled: true,
-      fillColor: const Color(0xFF111827),
+      fillColor: const Color.fromARGB(255, 26, 29, 30),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+        borderSide: const BorderSide(color: Colors.white24),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+        borderSide: const BorderSide(color: Colors.white24),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
-        borderSide: const BorderSide(color: Color(0xFF2563EB)),
+        borderSide: const BorderSide(color: Colors.blue),
       ),
     );
   }
@@ -226,37 +227,32 @@ class _GoalFormPageState extends State<GoalFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: const Color(0xFF0F1117),
+      backgroundColor: const Color.fromARGB(255, 13, 15, 17),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 13, 15, 17),
+        title: Text(
+          widget.goalToEdit == null ? "Nova Meta" : "Editar Meta",
+          style: const TextStyle(color: Colors.white),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back),
-                  ),
-                  const SizedBox(width: 5),
-                  Text(
-                    widget.goalToEdit == null ? "Nova Meta" : "Editar Meta",
-                    style: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
               const Text(
                 "Título",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 10),
               TextField(
                 controller: titleController,
+                style: const TextStyle(color: Colors.white),
                 decoration: customInput("Ex: Juntar R\$ 5000"),
               ),
               const SizedBox(height: 25),
@@ -269,6 +265,7 @@ class _GoalFormPageState extends State<GoalFormPage> {
                         const Text(
                           "Categoria",
                           style: TextStyle(
+                            color: Colors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -276,7 +273,8 @@ class _GoalFormPageState extends State<GoalFormPage> {
                         const SizedBox(height: 10),
                         DropdownButtonFormField<String>(
                           value: selectedCategory,
-                          dropdownColor: const Color(0xFF1A1D26),
+                          dropdownColor: const Color.fromARGB(255, 26, 29, 30),
+                          style: const TextStyle(color: Colors.white, fontSize: 18),
                           decoration: customInput("Selecione"),
                           items: categories
                               .map(
@@ -298,6 +296,7 @@ class _GoalFormPageState extends State<GoalFormPage> {
                         const Text(
                           "Prazo",
                           style: TextStyle(
+                            color: Colors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -305,7 +304,8 @@ class _GoalFormPageState extends State<GoalFormPage> {
                         const SizedBox(height: 10),
                         DropdownButtonFormField<String>(
                           value: selectedGoalPeriod,
-                          dropdownColor: const Color(0xFF1A1D26),
+                          dropdownColor: const Color.fromARGB(255, 26, 29, 30),
+                          style: const TextStyle(color: Colors.white, fontSize: 18),
                           decoration: customInput("Selecione"),
                           items: periods
                               .map(
@@ -324,28 +324,38 @@ class _GoalFormPageState extends State<GoalFormPage> {
               const SizedBox(height: 25),
               const Text(
                 "Data Limite (Opcional)",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 10),
               TextField(
                 controller: deadlineController,
+                style: const TextStyle(color: Colors.white),
                 decoration: customInput("dd/mm/aaaa"),
               ),
               const SizedBox(height: 25),
               const Text(
                 "Descrição (Opcional)",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 10),
               TextField(
                 controller: descriptionController,
                 maxLines: 4,
+                style: const TextStyle(color: Colors.white),
                 decoration: customInput("Detalhes da meta..."),
               ),
               const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
-                height: 55,
+                height: 50,
                 child: ElevatedButton.icon(
                   onPressed: _camposPreenchidos() ? _salvarGoal : null,
                   icon: const Icon(Icons.save),
@@ -357,8 +367,8 @@ class _GoalFormPageState extends State<GoalFormPage> {
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _camposPreenchidos()
-                        ? const Color(0xFF2563EB)
-                        : const Color(0xFF1E3A8A).withValues(alpha: 0.4),
+                        ? const Color.fromARGB(255, 30, 64, 214)
+                        : const Color.fromARGB(255, 20, 34, 110),
                     foregroundColor: _camposPreenchidos()
                         ? Colors.white
                         : Colors.white38,
@@ -586,42 +596,39 @@ class _GoalsPageState extends State<GoalsPage> {
       MaterialPageRoute(
         builder: (_) => Scaffold(
           resizeToAvoidBottomInset: true,
-          backgroundColor: const Color(0xFF0F1117),
+          backgroundColor: const Color.fromARGB(255, 13, 15, 17),
+          appBar: AppBar(
+            backgroundColor: const Color.fromARGB(255, 13, 15, 17),
+            leading: IconButton(
+              onPressed: () {
+                _resetForm();
+                Navigator.pop(context);
+              },
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+            ),
+            title: Text(
+              editingGoal == null ? "Nova Meta" : "Editar Meta",
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
           body: SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          _resetForm();
-                          Navigator.pop(context);
-                        },
-                        icon: const Icon(Icons.arrow_back),
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        editingGoal == null ? "Nova Meta" : "Editar Meta",
-                        style: const TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-
                   const Text(
                     "Título",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   TextField(
                     controller: titleController,
+                    style: const TextStyle(color: Colors.white),
                     decoration: customInput("Ex: Juntar R\$ 5000"),
                   ),
 
@@ -636,6 +643,7 @@ class _GoalsPageState extends State<GoalsPage> {
                             const Text(
                               "Categoria",
                               style: TextStyle(
+                                color: Colors.white,
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -643,7 +651,8 @@ class _GoalsPageState extends State<GoalsPage> {
                             const SizedBox(height: 10),
                             DropdownButtonFormField<String>(
                               value: selectedCategory,
-                              dropdownColor: const Color(0xFF1A1D26),
+                              dropdownColor: const Color.fromARGB(255, 26, 29, 30),
+                              style: const TextStyle(color: Colors.white, fontSize: 18),
                               decoration: customInput("Selecione"),
                               items: categories
                                   .map(
@@ -667,6 +676,7 @@ class _GoalsPageState extends State<GoalsPage> {
                             const Text(
                               "Prazo",
                               style: TextStyle(
+                                color: Colors.white,
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -674,7 +684,8 @@ class _GoalsPageState extends State<GoalsPage> {
                             const SizedBox(height: 10),
                             DropdownButtonFormField<String>(
                               value: selectedGoalPeriod,
-                              dropdownColor: const Color(0xFF1A1D26),
+                              dropdownColor: const Color.fromARGB(255, 26, 29, 30),
+                              style: const TextStyle(color: Colors.white, fontSize: 18),
                               decoration: customInput("Selecione"),
                               items: periods
                                   .map(
@@ -697,11 +708,16 @@ class _GoalsPageState extends State<GoalsPage> {
 
                   const Text(
                     "Data Limite (Opcional)",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   TextField(
                     controller: deadlineController,
+                    style: const TextStyle(color: Colors.white),
                     decoration: customInput("dd/mm/aaaa"),
                   ),
 
@@ -709,12 +725,17 @@ class _GoalsPageState extends State<GoalsPage> {
 
                   const Text(
                     "Descrição (Opcional)",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   TextField(
                     controller: descriptionController,
                     maxLines: 4,
+                    style: const TextStyle(color: Colors.white),
                     decoration: customInput("Detalhes da meta..."),
                   ),
 
@@ -722,7 +743,7 @@ class _GoalsPageState extends State<GoalsPage> {
 
                   SizedBox(
                     width: double.infinity,
-                    height: 55,
+                    height: 50,
                     child: ElevatedButton.icon(
                       onPressed: () => saveGoal(goal: editingGoal),
                       icon: const Icon(Icons.save),
@@ -733,7 +754,8 @@ class _GoalsPageState extends State<GoalsPage> {
                         style: const TextStyle(fontSize: 18),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
+                        backgroundColor: const Color.fromARGB(255, 30, 64, 214),
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
@@ -757,19 +779,20 @@ class _GoalsPageState extends State<GoalsPage> {
   InputDecoration customInput(String hint) {
     return InputDecoration(
       hintText: hint,
+      hintStyle: const TextStyle(color: Colors.grey),
       filled: true,
-      fillColor: const Color(0xFF111827),
+      fillColor: const Color.fromARGB(255, 26, 29, 30),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+        borderSide: const BorderSide(color: Colors.white24),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+        borderSide: const BorderSide(color: Colors.white24),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
-        borderSide: const BorderSide(color: Color(0xFF2563EB)),
+        borderSide: const BorderSide(color: Colors.blue),
       ),
     );
   }
@@ -782,14 +805,16 @@ class _GoalsPageState extends State<GoalsPage> {
         margin: const EdgeInsets.only(right: 10),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF1F2430),
-          borderRadius: BorderRadius.circular(30),
+          color: isSelected
+              ? const Color.fromARGB(255, 30, 64, 214)
+              : const Color.fromARGB(255, 26, 29, 30),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           text,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: isSelected ? Colors.white : Colors.white70,
+            color: isSelected ? Colors.white : const Color.fromARGB(179, 255, 255, 255),
           ),
         ),
       ),
@@ -804,7 +829,9 @@ class _GoalsPageState extends State<GoalsPage> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF0F1117) : Colors.transparent,
+            color: isSelected
+                ? const Color.fromARGB(255, 13, 15, 17)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(15),
           ),
           child: Center(
@@ -812,7 +839,7 @@ class _GoalsPageState extends State<GoalsPage> {
               text,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : Colors.white54,
+                color: isSelected ? Colors.white : Colors.grey,
               ),
             ),
           ),
@@ -827,47 +854,47 @@ class _GoalsPageState extends State<GoalsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1117),
+      backgroundColor: const Color.fromARGB(255, 13, 15, 17),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 13, 15, 17),
+        title: const Text("Metas", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                _resetForm();
+                showAddGoalPage();
+              },
+              icon: const Icon(Icons.add, color: Colors.white, size: 18),
+              label: const Text(
+                "Nova Meta",
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 30, 64, 214),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Metas",
-                    style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      _resetForm();
-                      showAddGoalPage();
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text("Nova Meta"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 14,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 25),
-
               Container(
                 padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1A1D26),
+                  color: const Color.fromARGB(255, 26, 29, 30),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -894,7 +921,7 @@ class _GoalsPageState extends State<GoalsPage> {
                 ),
               ),
 
-              const SizedBox(height: 25),
+              const SizedBox(height: 20),
 
               // STREAM — escuta mudanças no Firestore em tempo real
               Expanded(
@@ -908,7 +935,12 @@ class _GoalsPageState extends State<GoalsPage> {
 
                     // Erro
                     if (snapshot.hasError) {
-                      return Center(child: Text('Erro: ${snapshot.error}'));
+                      return Center(
+                        child: Text(
+                          'Erro: ${snapshot.error}',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      );
                     }
 
                     // Converte documentos em lista de Goal e aplica filtros
@@ -924,10 +956,8 @@ class _GoalsPageState extends State<GoalsPage> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(30),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(25),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.1),
-                          ),
+                          color: const Color.fromARGB(255, 26, 29, 30),
+                          borderRadius: BorderRadius.circular(20),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -942,7 +972,7 @@ class _GoalsPageState extends State<GoalsPage> {
                               "Nenhuma meta encontrada.",
                               style: TextStyle(
                                 fontSize: 22,
-                                color: Colors.white60,
+                                color: Colors.grey,
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -954,7 +984,7 @@ class _GoalsPageState extends State<GoalsPage> {
                               child: const Text(
                                 "Criar uma agora",
                                 style: TextStyle(
-                                  color: Color(0xFF2563EB),
+                                  color: Colors.blue,
                                   fontSize: 18,
                                 ),
                               ),
@@ -974,8 +1004,8 @@ class _GoalsPageState extends State<GoalsPage> {
                           margin: const EdgeInsets.only(bottom: 18),
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1A1D26),
-                            borderRadius: BorderRadius.circular(25),
+                            color: const Color.fromARGB(255, 26, 29, 30),
+                            borderRadius: BorderRadius.circular(20),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -983,6 +1013,7 @@ class _GoalsPageState extends State<GoalsPage> {
                               Text(
                                 goal.title,
                                 style: const TextStyle(
+                                  color: Colors.white,
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -990,14 +1021,18 @@ class _GoalsPageState extends State<GoalsPage> {
                               const SizedBox(height: 8),
                               Text(
                                 "${goal.category} • ${goal.period}",
-                                style: const TextStyle(color: Colors.white60),
+                                style: const TextStyle(color: Colors.grey),
                               ),
                               const SizedBox(height: 15),
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(10),
                                 child: LinearProgressIndicator(
                                   value: goal.progress,
-                                  minHeight: 10,
+                                  minHeight: 12,
+                                  backgroundColor: Colors.white24,
+                                  valueColor: const AlwaysStoppedAnimation(
+                                    Colors.green,
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 15),

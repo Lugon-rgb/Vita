@@ -97,12 +97,6 @@ const List<ConquistaModelo> listaDeConquistasDoApp = [
     corRaridade: raro,
   ),
   ConquistaModelo(
-    id: 'zenite_vital',
-    nome: 'Zênite Vital',
-    descricao: 'Responda o quiz semanal com felicidade máxima durante 4 semanas consecutivas.',
-    corRaridade: raro,
-  ),
-  ConquistaModelo(
     id: 'vigor_pleno',
     nome: 'Vigor Pleno.',
     descricao: 'Mantenha a Stamina cheia durante 4 semanas.',
@@ -133,12 +127,6 @@ const List<ConquistaModelo> listaDeConquistasDoApp = [
     id: 'caminho_estruturado',
     nome: 'Caminho Estruturado',
     descricao: 'Conclua 6 metas a longo prazo no total.',
-    corRaridade: epico,
-  ),
-  ConquistaModelo(
-    id: 'mente_cristal',
-    nome: 'Mente de Cristal',
-    descricao: 'Responda o quiz semanal por 12 semanas consecutivos (3 meses).',
     corRaridade: epico,
   ),
   ConquistaModelo(
@@ -196,12 +184,6 @@ const List<ConquistaModelo> listaDeConquistasDoApp = [
     id: 'atlas_universal',
     nome: 'Atlas Universal.',
     descricao: 'Conclua pelo menos 3 metas a longo prazo de cada categoria.',
-    corRaridade: lendario,
-  ),
-  ConquistaModelo(
-    id: 'ciclo_perfeito',
-    nome: 'Ciclo Perfeito.',
-    descricao: 'Responda o quiz semanal durante 52 semanas consecutivas (1 ano).',
     corRaridade: lendario,
   ),
 ];

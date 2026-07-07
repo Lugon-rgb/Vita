@@ -102,7 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF1A1D24),
+      backgroundColor: const Color.fromARGB(255, 26, 29, 30),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -122,7 +122,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 16),
             const Text(
               "Personalizar Avatar",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 16),
             FluttermojiCircleAvatar(radius: 50),
@@ -138,6 +142,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   ElevatedButton(
                     onPressed: salvarAvatar,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 30, 64, 214),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
                     child: const Text("Salvar avatar"),
                   ),
                   const SizedBox(height: 10),
@@ -153,11 +164,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0F14),
+      backgroundColor: const Color.fromARGB(255, 13, 15, 17),
       appBar: AppBar(
-        title: const Text("Perfil"),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        title: const Text("Perfil", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+        backgroundColor: const Color.fromARGB(255, 13, 15, 17),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -209,20 +219,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
           builder: (dialogContext) {
             return AlertDialog(
               constraints: BoxConstraints(maxHeight: 250),
-              title: const Center(child: Text("Verificação de Email")),
-              backgroundColor: const Color.fromARGB(255, 32, 32, 32),
+              title: const Center(
+                child: Text(
+                  "Verificação de Email",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              backgroundColor: const Color.fromARGB(255, 26, 29, 30),
               content: const SizedBox(
                 height: 100,
                 child: Column(
                   children: [
                     Text(
                       "Click abaixo para re-enviar o email de verificação",
+                      style: TextStyle(color: Colors.white),
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: 25),
                     Text(
                       "(Você será desconectado, log novamente após verificar seu email)",
-                      style: TextStyle(fontSize: 12),
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -240,11 +256,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       );
                     }
                   },
-                  child: const Text("Enviar"),
+                  child: const Text(
+                    "Enviar",
+                    style: TextStyle(color: Colors.blue),
+                  ),
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: const Text("Fechar"),
+                  child: const Text(
+                    "Fechar",
+                    style: TextStyle(color: Colors.white38),
+                  ),
                 ),
               ],
             );
@@ -270,7 +292,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   color: const Color.fromARGB(255, 255, 35, 35),
                 ),
                 SizedBox(width: 2),
-                Text("Email"),
+                Text("Email", style: TextStyle(color: Colors.white)),
               ],
             ),
           ),
@@ -287,18 +309,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
           builder: (dialogContext) {
             return AlertDialog(
               constraints: BoxConstraints(maxHeight: 190),
-              title: const Center(child: Text("Email Verificado")),
-              backgroundColor: const Color.fromARGB(255, 32, 32, 32),
+              title: const Center(
+                child: Text(
+                  "Email Verificado",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              backgroundColor: const Color.fromARGB(255, 26, 29, 30),
               content: const SizedBox(
                 height: 100,
                 child: Column(
-                  children: [Text("Seu endereço de email já foi verificado")],
+                  children: [
+                    Text(
+                      "Seu endereço de email já foi verificado",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
                 ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: const Text("Fechar"),
+                  child: const Text(
+                    "Fechar",
+                    style: TextStyle(color: Colors.blue),
+                  ),
                 ),
               ],
             );
@@ -324,7 +359,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   color: const Color.fromARGB(255, 61, 213, 71),
                 ),
                 SizedBox(width: 2),
-                Text("Email"),
+                Text("Email", style: TextStyle(color: Colors.white)),
               ],
             ),
           ),
@@ -346,8 +381,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1D24),
-        borderRadius: BorderRadius.circular(16),
+        color: const Color.fromARGB(255, 26, 29, 30),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         children: [
@@ -356,16 +391,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 10),
           TextButton.icon(
             onPressed: _openAvatarCustomizer,
-            icon: const Icon(Icons.edit, color: Colors.blueAccent),
+            icon: const Icon(Icons.edit, color: Colors.blue),
             label: const Text(
               "Personalizar avatar",
-              style: TextStyle(color: Colors.blueAccent),
+              style: TextStyle(color: Colors.blue),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             user?.displayName ?? 'Usuário',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -396,14 +435,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1D24),
-          borderRadius: BorderRadius.circular(12),
+          color: const Color.fromARGB(255, 26, 29, 30),
+          borderRadius: BorderRadius.circular(15),
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              color: const Color.fromARGB(255, 68, 138, 255),
+              color: const Color.fromARGB(255, 30, 64, 214),
               size: 22,
             ),
             const SizedBox(width: 12),
@@ -411,6 +450,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Text(
                 title,
                 style: const TextStyle(
+                  color: Colors.white,
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                 ),
@@ -441,8 +481,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1D24),
-        borderRadius: BorderRadius.circular(12),
+        color: const Color.fromARGB(255, 26, 29, 30),
+        borderRadius: BorderRadius.circular(15),
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -455,9 +495,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
           title: Text(
             title,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          activeThumbColor: Colors.blueAccent,
+          activeThumbColor: const Color.fromARGB(255, 30, 64, 214),
         ),
       ),
     );
@@ -468,12 +512,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1D24),
-        borderRadius: BorderRadius.circular(12),
+        color: const Color.fromARGB(255, 26, 29, 30),
+        borderRadius: BorderRadius.circular(15),
       ),
       child: Text(
         title,
-        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -494,7 +542,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.redAccent.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(15),
         ),
         child: const Center(
           child: Text(
@@ -593,7 +641,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.redAccent.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(15),
         ),
         child: const Center(
           child: Text(
@@ -625,7 +673,7 @@ class _StatItem extends StatelessWidget {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.blueAccent,
+            color: Color.fromARGB(255, 30, 64, 214),
           ),
         ),
         Text(label, style: const TextStyle(color: Colors.grey)),
