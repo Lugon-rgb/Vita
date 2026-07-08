@@ -84,17 +84,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) return;
 
-    final avatar = FluttermojiController().getFluttermojiOptions();
+    try {
+      final avatar = await FluttermojiController().getFluttermojiOptions(); // <- await adicionado
 
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUser.uid)
-        .set({'avatar': avatar}, SetOptions(merge: true));
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .set({'avatar': avatar}, SetOptions(merge: true));
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Avatar salvo com sucesso!")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Avatar salvo com sucesso!")),
+        );
+      }
+    } catch (e) {
+      debugPrint('Erro ao salvar avatar: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao salvar avatar: $e')),
+        );
+      }
     }
   }
 
