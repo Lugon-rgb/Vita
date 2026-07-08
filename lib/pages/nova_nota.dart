@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../modelos/modelo_nota.dart';
 import '../data/conquista_desbloqueio.dart';
-import '../data/conquista_snackbar.dart'; // Certifique-se de usar o caminho correto onde salvou o arquivo
+import '../data/titulo_desbloqueio.dart';
 
 class NovaNotaPage extends StatefulWidget {
   final Nota?
@@ -127,52 +127,43 @@ class _NovaNotaPageState extends State<NovaNotaPage> {
     );
 
     try {
+      // junta tudo que essa acao desbloqueou, pra devolver pra NotasPage
+      // mostrar depois que essa tela ja tiver fechado
+      List<String> conquistasDesbloqueadas = [];
+
       if (widget.notaParaEditar == null) {
         await _notasCollection.add(
           novaNota.toMap(),
-        ); // transforma em mapa, manda para o firebase e espera o processo ser concluido c o await
-        // se a nota tiver vazia, cria uma nova nota normal
+        );
 
         //desbloqueio de conquista anotacao de campo
         bool ganhouAnotacao = await ConquistaDesbloqueio.desbloquear(
           'anotacao_campo',
           50,
         );
-
-        if (ganhouAnotacao && mounted) {
-          // novo modo de feedback visual
-          mostrarSnackBarConquista(context, 'anotacao_campo');
-        }
+        if (ganhouAnotacao) conquistasDesbloqueadas.add('anotacao_campo');
       } else {
         await _notasCollection
             .doc(widget.notaParaEditar!.id)
             .update(
               novaNota.toMap(),
-            ); // transforma em mapa, manda para o firebase e espera o processo ser concluido c o await
-        // se a nota tiver preenchida, procura o documento pelo id e atualiza ele com os novos dados da nota editada
+            );
       }
 
       // desbloqueio de conquista mosaico de ideias
       String? nomeConquistaMosaico = await ConquistaDesbloqueio.mosaicoIdeias();
+      if (nomeConquistaMosaico != null) conquistasDesbloqueadas.add('mosaico_ideias');
 
-      if (nomeConquistaMosaico != null && mounted) {
-        // novo modo de feedback visual
-        mostrarSnackBarConquista(context, 'mosaico_ideias');
-      }
+      // titulos que essa acao desbloqueou
+      final titulosDesbloqueados = TituloDesbloqueio.consumirTitulosPendentes();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.notaParaEditar == null
-                  ? 'Nota salva com sucesso!'
-                  : 'Nota atualizada com sucesso!',
-            ),
-          ),
-        );
-        Navigator.of(
-          context,
-        ).pop(); // fecha a tela de nova nota e volta para a listagem
+        // fecha a tela na hora e devolve pra NotasPage o que foi desbloqueado
+        Navigator.of(context).pop({
+          'notaCriada': widget.notaParaEditar == null,
+          'conquistas': conquistasDesbloqueadas,
+          'titulos': titulosDesbloqueados,
+        });
       }
     } catch (e) {
       ScaffoldMessenger.of(

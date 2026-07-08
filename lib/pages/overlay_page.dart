@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:vita_appprojetos/pages/financias.dart';
 import 'package:vita_appprojetos/pages/home_page.dart';
 import 'package:vita_appprojetos/pages/metas.dart';
@@ -16,8 +18,56 @@ class OverlayPage extends StatefulWidget {
 class _OverlayPageState extends State<OverlayPage> {
   int currentPageIndex = 0;
 
-  String _tituloEquipado =
-      "Guerreiro do Foco"; // simulacao temporaria do titulo equipado, dps vai ser puxado do firebase
+  // "Novato" e o titulo padrao de toda conta nova, usado enquanto o
+  // titulo de verdade ainda esta sendo carregado do Firebase
+  String _tituloEquipado = "Novato";
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarTituloEquipado();
+  }
+
+  // busca no Firestore qual titulo o usuario tinha equipado da ultima vez
+  Future<void> _carregarTituloEquipado() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final data = doc.data();
+      final tituloSalvo = data?['tituloEquipado'] as String?;
+
+      // so atualiza se de fato existir um titulo salvo, senao mantem "Novato"
+      if (tituloSalvo != null && tituloSalvo.isNotEmpty && mounted) {
+        setState(() {
+          _tituloEquipado = tituloSalvo;
+        });
+      }
+    } catch (e) {
+      debugPrint('Erro ao carregar título equipado: $e');
+    }
+  }
+
+  // salva no Firestore o titulo que o usuario acabou de escolher, pra ele
+  // continuar equipado mesmo depois de fechar e abrir o app de novo
+  Future<void> _salvarTituloEquipado(String novoTitulo) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .set({'tituloEquipado': novoTitulo}, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('Erro ao salvar título equipado: $e');
+    }
+  }
 
   void _abrirSeletorDeTitulos() async {
     // funcao que abre a tela de titulos e espera o resultado do titulo selecionado para atualizar o titulo equipado
@@ -25,7 +75,6 @@ class _OverlayPageState extends State<OverlayPage> {
       context,
       MaterialPageRoute(builder: (context) => const TitulosPage()),
     );
-
     if (resultado != null && resultado is String) {
       // se o usuario tiver selecionado um título valido, roda o setState para redesenhar as telas
       setState(() {
@@ -34,6 +83,9 @@ class _OverlayPageState extends State<OverlayPage> {
         currentPageIndex =
             0; // volta pra homepage para mostrar o titulo equipado atualizado
       });
+
+      // persiste a escolha no Firestore, pra sobreviver a reabertura do app
+      await _salvarTituloEquipado(resultado);
     }
   }
 

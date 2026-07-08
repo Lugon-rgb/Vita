@@ -3,6 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../modelos/modelo_nota.dart';
 import 'nova_nota.dart';
+import '../data/conquista_snackbar.dart';
+import '../data/titulo_snackbar.dart';
+import '../data/espera_snackbar.dart';
 
 class NotasPage extends StatefulWidget {
   const NotasPage({super.key});
@@ -217,6 +220,39 @@ class _NotasPageState extends State<NotasPage> {
     );
   }
 
+  // recebe o resultado devolvido pela NovaNotaPage (o que foi desbloqueado
+  // ao salvar a nota) e mostra tudo em fila, com essa tela ja disponivel
+  Future<void> _mostrarResultadoDaNota(dynamic resultado) async {
+    if (resultado == null || resultado is! Map) return;
+
+    final bool notaCriada = resultado['notaCriada'] ?? false;
+    final List<String> conquistas = List<String>.from(resultado['conquistas'] ?? []);
+    final List<String> titulos = List<String>.from(resultado['titulos'] ?? []);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            notaCriada ? 'Nota salva com sucesso!' : 'Nota atualizada com sucesso!',
+          ),
+        ),
+      );
+      await esperarSnackbar();
+    }
+
+    for (final idConquista in conquistas) {
+      if (!mounted) return;
+      mostrarSnackBarConquista(context, idConquista);
+      await esperarSnackbar();
+    }
+
+    for (final idTitulo in titulos) {
+      if (!mounted) return;
+      mostrarSnackBarTitulo(context, idTitulo);
+      await esperarSnackbar();
+    }
+  }
+
   // equivalente ao free() em C, libera a memoria sobre esses controles
   @override
   void dispose() {
@@ -237,12 +273,13 @@ class _NotasPageState extends State<NotasPage> {
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(
+              onPressed: () async {
+                final resultado = await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => const NovaNotaPage(),
                   ),
                 );
+                await _mostrarResultadoDaNota(resultado);
               },
               icon: const Icon(Icons.add, color: Colors.white, size: 18),
               label: const Text(
@@ -755,7 +792,7 @@ class _NotasPageState extends State<NotasPage> {
                               notaParaEditar: notaPreenchida,
                             ), // manda a nota preenchida p variavel notaParaEditar da tela de nova nota
                           ),
-                        );
+                        ).then(_mostrarResultadoDaNota);
                       },
                     ),
 

@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/data/dicionario_titulos.dart';
 
@@ -6,141 +8,158 @@ class TitulosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // lista q simula temporariamente como os titulos mudariam com base nos dados la do firebase
-    final List<String> titulosLiberadosNoFirebase = [
-      't_novato',
-      't_novato_determinado',
-      't_vigia_moedas',
-      't_andarilho',
-      't_guerreiro_foco',
-      't_sabio_resistente',
-      't_veterano_batalhas',
-      't_mestre_tesouro',
-      't_guardiao_experiente',
-      't_governador_destino',
-      't_magnata',
-      't_campeao_implacavel',
-      't_demiurgo',
-      't_imortalizado',
-      't_inominavel',
-      't_minimalista_absoluto',
-      't_immortalis_vita',
-    ];
+    // pega o usuario logado no celular pra ver os titulos que ele ja tem
+    final user = FirebaseAuth.instance.currentUser!;
 
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(title: const Text('TÍTULOS')),
-      body: ListView(
-        scrollDirection: Axis.vertical,
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        children: [
-          // TÍTULOS COMUNS:
-          rankTitulos('Títulos Comuns', comum),
+      // body enrolando a listview num streambuilder, igual a pagina de conquistas
+      body: StreamBuilder<QuerySnapshot>(
+        // stream que aponta pra subcolecao de titulos do usuario atual
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('titulos')
+            .snapshots(),
+        builder: (context, snapshot) {
+          // se o Firebase estiver carregando, bota o círculo de progresso na tela
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.blue),
+            );
+          }
 
-          ...listaDeTitulosDoApp
-              .where((tituloAtual) => tituloAtual.corRaridade == comum)
-              .map((dados) {
-                final bool estaDesbloqueado = titulosLiberadosNoFirebase
-                    .contains(dados.id);
-                return titulo(
-                  context,
-                  dados.nome,
-                  dados.descricao,
-                  estaDesbloqueado ? Icons.check_circle : Icons.lock_outline,
-                  dados.corRaridade,
-                );
-              }),
+          // pega todos os documentos que vieram do Firebase e extrai os IDs deles (ex: 't_escrivao')
+          final List<String> titulosLiberadosNoFirebase = snapshot.hasData
+              ? snapshot.data!.docs.map((doc) => doc.id).toList()
+              : [];
 
-          // TÍTULOS INCOMUNS:
-          rankTitulos('Títulos Incomuns', incomum),
+          return ListView(
+            scrollDirection: Axis.vertical,
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            children: [
+              // TÍTULOS COMUNS:
+              rankTitulos('Títulos Comuns', comum),
 
-          ...listaDeTitulosDoApp
-              .where((tituloAtual) => tituloAtual.corRaridade == incomum)
-              .map((dados) {
-                final bool estaDesbloqueado = titulosLiberadosNoFirebase
-                    .contains(dados.id);
-                return titulo(
-                  context,
-                  dados.nome,
-                  dados.descricao,
-                  estaDesbloqueado ? Icons.check_circle : Icons.lock_outline,
-                  dados.corRaridade,
-                );
-              }),
+              ...listaDeTitulosDoApp
+                  .where((tituloAtual) => tituloAtual.corRaridade == comum)
+                  .map((dados) {
+                    final bool estaDesbloqueado = titulosLiberadosNoFirebase
+                        .contains(dados.id);
+                    return titulo(
+                      context,
+                      dados.nome,
+                      dados.descricao,
+                      estaDesbloqueado
+                          ? Icons.check_circle
+                          : Icons.lock_outline,
+                      dados.corRaridade,
+                    );
+                  }),
 
-          // TÍTULOS RAROS:
-          rankTitulos('Títulos Raros', raro),
+              // TÍTULOS INCOMUNS:
+              rankTitulos('Títulos Incomuns', incomum),
 
-          ...listaDeTitulosDoApp
-              .where((tituloAtual) => tituloAtual.corRaridade == raro)
-              .map((dados) {
-                final bool estaDesbloqueado = titulosLiberadosNoFirebase
-                    .contains(dados.id);
-                return titulo(
-                  context,
-                  dados.nome,
-                  dados.descricao,
-                  estaDesbloqueado ? Icons.check_circle : Icons.lock_outline,
-                  dados.corRaridade,
-                );
-              }),
+              ...listaDeTitulosDoApp
+                  .where((tituloAtual) => tituloAtual.corRaridade == incomum)
+                  .map((dados) {
+                    final bool estaDesbloqueado = titulosLiberadosNoFirebase
+                        .contains(dados.id);
+                    return titulo(
+                      context,
+                      dados.nome,
+                      dados.descricao,
+                      estaDesbloqueado
+                          ? Icons.check_circle
+                          : Icons.lock_outline,
+                      dados.corRaridade,
+                    );
+                  }),
 
-          // TÍTULOS ÉPICOS:
-          rankTitulos('Títulos Épicos', epico),
+              // TÍTULOS RAROS:
+              rankTitulos('Títulos Raros', raro),
 
-          ...listaDeTitulosDoApp
-              .where((tituloAtual) => tituloAtual.corRaridade == epico)
-              .map((dados) {
-                final bool estaDesbloqueado = titulosLiberadosNoFirebase
-                    .contains(dados.id);
-                return titulo(
-                  context,
-                  dados.nome,
-                  dados.descricao,
-                  estaDesbloqueado ? Icons.check_circle : Icons.lock_outline,
-                  dados.corRaridade,
-                );
-              }),
+              ...listaDeTitulosDoApp
+                  .where((tituloAtual) => tituloAtual.corRaridade == raro)
+                  .map((dados) {
+                    final bool estaDesbloqueado = titulosLiberadosNoFirebase
+                        .contains(dados.id);
+                    return titulo(
+                      context,
+                      dados.nome,
+                      dados.descricao,
+                      estaDesbloqueado
+                          ? Icons.check_circle
+                          : Icons.lock_outline,
+                      dados.corRaridade,
+                    );
+                  }),
 
-          // TÍTULOS LENDÁRIOS:
-          rankTitulos('Títulos Lendários', lendario),
+              // TÍTULOS ÉPICOS:
+              rankTitulos('Títulos Épicos', epico),
 
-          ...listaDeTitulosDoApp
-              .where((tituloAtual) => tituloAtual.corRaridade == lendario)
-              .map((dados) {
-                final bool estaDesbloqueado = titulosLiberadosNoFirebase
-                    .contains(dados.id);
-                return titulo(
-                  context,
-                  dados.nome,
-                  dados.descricao,
-                  estaDesbloqueado ? Icons.check_circle : Icons.lock_outline,
-                  dados.corRaridade,
-                );
-              }),
+              ...listaDeTitulosDoApp
+                  .where((tituloAtual) => tituloAtual.corRaridade == epico)
+                  .map((dados) {
+                    final bool estaDesbloqueado = titulosLiberadosNoFirebase
+                        .contains(dados.id);
+                    return titulo(
+                      context,
+                      dados.nome,
+                      dados.descricao,
+                      estaDesbloqueado
+                          ? Icons.check_circle
+                          : Icons.lock_outline,
+                      dados.corRaridade,
+                    );
+                  }),
 
-          // TÍTULOS OCULTOS:
-          rankTitulos('???', misterioso),
+              // TÍTULOS LENDÁRIOS:
+              rankTitulos('Títulos Lendários', lendario),
 
-          ...listaDeTitulosDoApp
-              .where((tituloAtual) => tituloAtual.corRaridade == misterioso)
-              .map((dados) {
-                final bool estaDesbloqueado = titulosLiberadosNoFirebase
-                    .contains(dados.id);
-                return titulo(
-                  context,
-                  dados.nome,
-                  estaDesbloqueado ? dados.descricao : '???',
-                  estaDesbloqueado ? Icons.check_circle : Icons.lock_outline,
-                  dados.corRaridade,
-                );
-              }),
-        ],
+              ...listaDeTitulosDoApp
+                  .where((tituloAtual) => tituloAtual.corRaridade == lendario)
+                  .map((dados) {
+                    final bool estaDesbloqueado = titulosLiberadosNoFirebase
+                        .contains(dados.id);
+                    return titulo(
+                      context,
+                      dados.nome,
+                      dados.descricao,
+                      estaDesbloqueado
+                          ? Icons.check_circle
+                          : Icons.lock_outline,
+                      dados.corRaridade,
+                    );
+                  }),
+
+              // TÍTULOS OCULTOS:
+              rankTitulos('???', misterioso),
+
+              ...listaDeTitulosDoApp
+                  .where((tituloAtual) => tituloAtual.corRaridade == misterioso)
+                  .map((dados) {
+                    final bool estaDesbloqueado = titulosLiberadosNoFirebase
+                        .contains(dados.id);
+                    return titulo(
+                      context,
+                      dados.nome,
+                      estaDesbloqueado ? dados.descricao : '???',
+                      estaDesbloqueado
+                          ? Icons.check_circle
+                          : Icons.lock_outline,
+                      dados.corRaridade,
+                    );
+                  }),
+            ],
+          );
+        },
       ),
     );
   }
 
-  // criando uma funcao pra criar o titulo de cada bloco de conquistas (rank delas)
+  // criando uma funcao pra criar o titulo de cada bloco de titulos (rank deles)
   Widget rankTitulos(String rank, Color cor) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -156,7 +175,7 @@ class TitulosPage extends StatelessWidget {
     );
   }
 
-  // criando função para criar cada conquista + descrição + ícone + cor da raridade p colorir o circulo do icone
+  // criando função para criar cada título + descrição + ícone + cor da raridade p colorir o circulo do icone
   Widget titulo(
     BuildContext context,
     String nome,

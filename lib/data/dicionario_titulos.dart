@@ -1,4 +1,3 @@
-// lib/data/titulos_data.dart
 import 'package:flutter/material.dart';
 import 'package:vita_appprojetos/modelos/modelo_titulos.dart';
 
@@ -163,15 +162,15 @@ const List<TituloModelo> listaDeTitulosDoApp = [
   // ocultos
   
   TituloModelo(
-    id: 't_mestre_centavo',
-    nome: 'Mestre do Centavo',
-    descricao: 'Atinge ao registrar um gasto de exatamente R\$0,01',
+    id: 't_mestre_real',
+    nome: 'Mestre do Real',
+    descricao: 'Atinge ao registrar um gasto de exatamente 1 Real.',
     corRaridade: misterioso,
   ),
   TituloModelo(
     id: 't_alma_gemea',
     nome: 'Alma Gêmea',
-    descricao: 'Atinge ao manter HP e Stamina com valores idênticos durante 4 semanas consecutivas',
+    descricao: 'Atinge ao manter HP e Stamina com valores idênticos durante 4 semanas consecutivas.',
     corRaridade: misterioso,
   ),
   TituloModelo(
@@ -189,7 +188,7 @@ const List<TituloModelo> listaDeTitulosDoApp = [
   TituloModelo(
     id: 't_immortalis_vita',
     nome: 'Immortalis Vita',
-    descricao: 'Alcançar o nível 100',
+    descricao: 'Alcançar o nível 100.',
     corRaridade: misterioso,
   ),
 ];

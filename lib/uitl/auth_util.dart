@@ -2,6 +2,7 @@
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../data/titulo_desbloqueio.dart';
 
 class AuthUtil {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -22,7 +23,11 @@ class AuthUtil {
     await userCredential.user!.reload();
     // Get fresh reference to ensure displayName is updated globally
     await _firebaseAuth.currentUser?.reload();
+
+    // concede o titulo padrao de boas-vindas
+    await TituloDesbloqueio.desbloquear('t_novato');
   }
+  
 
   Future<UserCredential> logUserIn({
     required String email,

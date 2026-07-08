@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'editar_quiz.dart';
 import 'nova_nota.dart';
@@ -8,6 +9,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vita_appprojetos/pages/TelaQuiz.dart';
 import '../data/conquista_desbloqueio.dart';
 import '../data/conquista_snackbar.dart';
+import '../data/xp_manager.dart';
+import '../data/titulo_desbloqueio.dart';
+import '../data/titulo_snackbar.dart';
+import '../data/espera_snackbar.dart';
 
 class HomePage extends StatefulWidget {
   final String titulo; // guarda o nome do titulo atual
@@ -37,6 +42,9 @@ class _HomePageState extends State<HomePage> {
   int metasConcluidas = 0;
   int metasAtivas = 0;
 
+  StreamSubscription<DocumentSnapshot>? _userSub;
+  int? _nivelAnterior; // guarda o ultimo nivel conhecido, pra detectar quando ele sobe
+
   void verificarStatus() {
     vida = vida.clamp(0, 100);
     estamina = estamina.clamp(0, 100);
@@ -46,8 +54,6 @@ class _HomePageState extends State<HomePage> {
     await db.collection("users").doc(user!.uid).set({
       "vida": vida,
       "estamina": estamina,
-      "xp": xp,
-      "nivel": nivel,
       "streak": streak,
       "melhorStreak": melhorStreak,
       "ultimoAcesso": Timestamp.now(),
@@ -57,33 +63,89 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _ganharXp(int quantidade) async {
-    xp += quantidade;
-    if (xp >= 500) {
-      xp = xp - 500;
-      nivel += 1;
-    }
-    setState(() {});
-    await salvarDados();
+    // a logica de xp/nivel agora e' toda feita pelo GerenciadorXp, de forma
+    // atomica. nao precisamos mais atualizar xp/nivel manualmente aqui: o
+    // listener em tempo real (_escutarDadosDoUsuario) vai receber essa
+    // mudanca do Firestore sozinho e atualizar a tela / mostrar a snackbar
+    // de level up se for o caso
+    await GerenciadorXp.adicionarXp(quantidade);
   }
 
-  Future carregarDados() async {
-    DocumentSnapshot dados = await db
+  // escuta o documento do usuario em tempo real. isso substitui o antigo
+  // carregarDados() (que so lia uma vez, com .get()) por um listener que
+  // atualiza a tela sozinha sempre que algo mudar no Firestore - inclusive
+  // quando o xp/nivel mudam por causa de uma conquista desbloqueada em
+  // qualquer outra tela do app
+  void _escutarDadosDoUsuario() {
+    _userSub = db
         .collection("users")
         .doc(user?.uid ?? "usuario")
-        .get();
+        .snapshots()
+        .listen((dados) {
+      if (!mounted || !dados.exists) return;
 
-    if (mounted && dados.exists) {
+      // usamos dados.data() (um Map comum) em vez do operador dados['campo'],
+      // porque esse operador lanca uma excecao se o campo nao existir no
+      // documento - e e exatamente isso que acontecia com contas novas,
+      // cujo documento e criado sem os campos 'xp'/'nivel' (eles so aparecem
+      // na primeira vez que o usuario ganha xp). Map.data() e seguro:
+      // retorna null pra campos ausentes, em vez de travar o app
+      final campos = dados.data() as Map<String, dynamic>? ?? {};
+
+      final novoNivel = campos['nivel'] ?? 1;
+
+      if (_nivelAnterior != null && novoNivel > _nivelAnterior!) {
+        _mostrarSnackBarLevelUp(novoNivel);
+      }
+
       setState(() {
-        vida = dados['vida'] ?? 100;
-        estamina = dados['estamina'] ?? 100;
-        xp = dados['xp'] ?? 0;
-        nivel = dados['nivel'] ?? 1;
-        streak = dados['streak'] ?? 0;
-        melhorStreak = dados['melhorStreak'] ?? 0;
-        metasConcluidas = dados['metasConcluidas'] ?? 0;
-        metasAtivas = dados['metasAtivas'] ?? 0;
+        vida = campos['vida'] ?? 100;
+        estamina = campos['estamina'] ?? 100;
+        xp = campos['xp'] ?? 0;
+        nivel = novoNivel;
+        streak = campos['streak'] ?? 0;
+        melhorStreak = campos['melhorStreak'] ?? 0;
+        metasConcluidas = campos['metasConcluidas'] ?? 0;
+        metasAtivas = campos['metasAtivas'] ?? 0;
       });
-    }
+
+      _nivelAnterior = novoNivel;
+    }, onError: (erro) {
+      // rede de seguranca: se algo der errado no listener, so registra no
+      // console em vez de deixar uma excecao nao tratada se propagar
+      debugPrint('Erro ao escutar dados do usuário: $erro');
+    });
+  }
+
+  void _mostrarSnackBarLevelUp(int novoNivel) {
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color(0xFF1E1E1E),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: Colors.amber, width: 1.5),
+        ),
+        duration: const Duration(seconds: 4),
+        content: Row(
+          children: [
+            const Text("⭐", style: TextStyle(fontSize: 24)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                "Você subiu para o Nível $novoNivel!",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> verificarStreak() async {
@@ -118,9 +180,17 @@ class _HomePageState extends State<HomePage> {
           } else {
             melhorStreak = data['melhorStreak'] ?? 0;
           }
+
+          // checagem do titulo minimalista absoluto, so roda quando o streak
+          // realmente avanca 1 dia (uma vez por dia real)
+          await TituloDesbloqueio.checarMinimalistaAbsoluto(
+            metasAtivas: data['metasAtivas'] ?? 0,
+            gastos: data['gastos'] ?? [],
+          );
         } else if (diferencaDias > 1) {
           streak = 0;
           melhorStreak = data['melhorStreak'] ?? 0;
+          await TituloDesbloqueio.resetarMinimalista(); // quebrou o streak, zera o contador
         } else {
           streak = data['streak'] ?? 0;
           melhorStreak = data['melhorStreak'] ?? 0;
@@ -140,6 +210,15 @@ class _HomePageState extends State<HomePage> {
       if (novasConquistas.isNotEmpty && mounted) {
         for (String nomeConquista in novasConquistas) {
           mostrarSnackBarConquista(context, nomeConquista);
+          await esperarSnackbar();
+        }
+      }
+
+      final titulosDesbloqueados = TituloDesbloqueio.consumirTitulosPendentes();
+      if (titulosDesbloqueados.isNotEmpty && mounted) {
+        for (String idTitulo in titulosDesbloqueados) {
+          mostrarSnackBarTitulo(context, idTitulo);
+          await esperarSnackbar();
         }
       }
 
@@ -191,8 +270,14 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    carregarDados();
+    _escutarDadosDoUsuario();
     verificarStreak();
+  }
+
+  @override
+  void dispose() {
+    _userSub?.cancel(); // cancela o listener pra nao vazar memoria quando sair da tela
+    super.dispose();
   }
 
   @override
@@ -233,7 +318,7 @@ class _HomePageState extends State<HomePage> {
                             style: TextStyle(color: Colors.grey, fontSize: 14),
                           ),
                           Text(
-                            "$xp / 500 XP",
+                            "$xp / ${GerenciadorXp.limiarDoNivel(nivel)} XP",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
@@ -462,6 +547,15 @@ class _HomePageState extends State<HomePage> {
                                 descricao: "Você completou um quiz",
                                 xp: 25,
                               );
+
+                              // NOVO: ganhar xp pode ter subido de nivel e liberado um titulo
+                              final titulosDesbloqueados =
+                                  TituloDesbloqueio.consumirTitulosPendentes();
+                              if (titulosDesbloqueados.isNotEmpty && mounted) {
+                                for (String idTitulo in titulosDesbloqueados) {
+                                  mostrarSnackBarTitulo(context, idTitulo);
+                                }
+                              }
                             }
                           },
                           child: Container(

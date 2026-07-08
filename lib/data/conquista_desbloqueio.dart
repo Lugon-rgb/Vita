@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'xp_manager.dart';
+import 'titulo_desbloqueio.dart';
 
 class ConquistaDesbloqueio {
   // funcao estatica para desbloquear uma conquista e incrementar o XP do usuario.
@@ -25,12 +27,12 @@ class ConquistaDesbloqueio {
       // se nao existia, cria o documento do desbloqueio
       await conquistaDocRef.set({'desbloqueado': true});
 
-      // soma o xp no documento principal do usuario
-      await userDocRef.update({
-        'xp': FieldValue.increment(
-          xpGanhado,
-        ), // funcao do firebase que altera o campo especifico de forma segura
-      });
+      // soma o xp no documento principal do usuario, ja respeitando a regra
+      // de subida de nivel (a cada 500 xp) de forma atomica
+      await GerenciadorXp.adicionarXp(xpGanhado);
+
+      // verifica se essa conquista libera algum titulo (simples ou combo)
+      await TituloDesbloqueio.checarTituloPorConquista(idDaConquista);
 
       return true;
     } catch (e) {
@@ -156,6 +158,175 @@ class ConquistaDesbloqueio {
     }
   }
 
+  // verifica e libera a conquista primeira_vitoria
+  static Future<String?> checarPrimeiraVitoria() async {
+    try {
+      // chama a funcao central que ja garante que so desbloqueia uma vez
+      bool ganhou = await ConquistaDesbloqueio.desbloquear(
+        'primeira_vitoria',
+        50,
+      );
+
+      if (ganhou) {
+        return 'primeira_vitoria'; // retorna o ID pro snackbar usar
+      }
+      return null;
+    } catch (e) {
+      print("⚠️ Erro na checagem da conquista Primeira Vitória: $e");
+      return null;
+    }
+  }
+
+  // verifica quantas metas de curto prazo o usuario ja concluiu no total.
+  // se atingir 5, libera a conquista 'serie_triunfos'.
+  static Future<String?> checarSerieTriunfos() async {
+    final user = FirebaseAuth.instance.currentUser; // ve quem ta logado
+    if (user == null) return null;
+
+    final userDocRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid);
+    final goalsRef = userDocRef.collection('goals');
+
+    try {
+      // pede pro Firebase contar direto no servidor quantas metas de curto prazo
+      // ja concluidas (progress == 1) existem
+      final contagem = await goalsRef
+          .where('period', isEqualTo: 'Curto Prazo')
+          .where('progress', isEqualTo: 1.0)
+          .count()
+          .get();
+
+      if (contagem.count! >= 5) {
+        bool ganhou = await ConquistaDesbloqueio.desbloquear(
+          'serie_triunfos',
+          150,
+        );
+        if (ganhou) {
+          return 'serie_triunfos';
+        }
+      }
+      return null;
+    } catch (e) {
+      print("⚠️ Erro na checagem da conquista Série de Triunfos: $e");
+      return null;
+    }
+  }
+
+  // verifica quantas metas de longo prazo o usuario ja concluiu no total.
+  // se atingir 6, libera a conquista 'caminho_estruturado'.
+  static Future<String?> checarCaminhoEstruturado() async {
+    final user = FirebaseAuth.instance.currentUser; // ve quem ta logado
+    if (user == null) return null;
+
+    final userDocRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid);
+    final goalsRef = userDocRef.collection('goals');
+
+    try {
+      // pede pro Firebase contar direto no servidor quantas metas de longo prazo
+      // ja concluidas (progress == 1) existem
+      final contagem = await goalsRef
+          .where('period', isEqualTo: 'Longo Prazo')
+          .where('progress', isEqualTo: 1.0)
+          .count()
+          .get();
+
+      if (contagem.count! >= 6) {
+        bool ganhou = await ConquistaDesbloqueio.desbloquear(
+          'caminho_estruturado',
+          1000,
+        );
+        if (ganhou) {
+          return 'caminho_estruturado';
+        }
+      }
+      return null;
+    } catch (e) {
+      print("⚠️ Erro na checagem da conquista Caminho Estruturado: $e");
+      return null;
+    }
+  }
+
+  // verifica se uma meta de curto prazo foi concluida em menos de 24h apos ser criada
+  static Future<String?> checarMenteAgil(DateTime? criadoEm) async {
+    if (criadoEm == null) return null; // metas antigas, criadas antes dessa feature, nao tem essa data
+
+    final diferenca = DateTime.now().difference(criadoEm);
+
+    if (diferenca.inHours < 24) {
+      bool ganhou = await ConquistaDesbloqueio.desbloquear('mente_agil', 50);
+      if (ganhou) {
+        return 'mente_agil';
+      }
+    }
+    return null;
+  }
+
+  // funcao generica e privada: verifica se existem 3 metas concluidas de uma
+  // categoria dentro de uma janela de 7 dias. usada pelas conquistas
+  // 'sede_conhecimento' (Estudos) e 'elixir_vida' (Saúde).
+  static Future<String?> _checarConclusoesEmUmaSemana({
+    required String categoria,
+    required String idConquista,
+    required int xpGanhado,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return null;
+
+    final goalsRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('goals');
+
+    try {
+      final snapshot = await goalsRef
+          .where('category', isEqualTo: categoria)
+          .where('progress', isEqualTo: 1.0)
+          .get();
+
+      final datasConclusao = snapshot.docs
+          .map((doc) => (doc.data()['concluidoEm'] as Timestamp?)?.toDate())
+          .whereType<DateTime>()
+          .toList()
+        ..sort();
+
+      if (datasConclusao.length < 3) return null;
+
+      for (int i = 0; i <= datasConclusao.length - 3; i++) {
+        final diferenca = datasConclusao[i + 2].difference(datasConclusao[i]);
+        if (diferenca.inDays <= 7) {
+          bool ganhou = await desbloquear(idConquista, xpGanhado);
+          if (ganhou) return idConquista;
+          return null;
+        }
+      }
+      return null;
+    } catch (e) {
+      print("⚠️ Erro na checagem da conquista $idConquista: $e");
+      return null;
+    }
+  }
+
+  // verifica e libera a conquista sede_conhecimento (categoria Estudos)
+  static Future<String?> checarSedeConhecimento() {
+    return _checarConclusoesEmUmaSemana(
+      categoria: 'Estudos',
+      idConquista: 'sede_conhecimento',
+      xpGanhado: 150,
+    );
+  }
+
+  // verifica e libera a conquista elixir_vida (categoria Saúde)
+  static Future<String?> checarElixirVida() {
+    return _checarConclusoesEmUmaSemana(
+      categoria: 'Saúde',
+      idConquista: 'elixir_vida',
+      xpGanhado: 150,
+    );
+  }
+
   // verifica e libera a conquista de registrar gastos por 7 dias consecutivos
   static Future<String?> checarDisciplinaFinanceira(
     List<Map<String, dynamic>> listaGastos,
@@ -216,3 +387,4 @@ class ConquistaDesbloqueio {
     }
   }
 }
+

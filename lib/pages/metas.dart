@@ -1,6 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../data/conquista_desbloqueio.dart';
+import '../data/conquista_snackbar.dart';
+import '../data/titulo_desbloqueio.dart';
+import '../data/titulo_snackbar.dart';
+import '../data/espera_snackbar.dart';
 
 class Goal {
   String? id; // ID do documento no Firestore
@@ -10,6 +15,7 @@ class Goal {
   String description;
   String period;
   double progress;
+  DateTime? criadoEm; // data/hora em que a meta foi criada, usada p/ a conquista Mente Ágil
 
   Goal({
     this.id,
@@ -19,9 +25,9 @@ class Goal {
     required this.description,
     required this.period,
     this.progress = 0,
+    this.criadoEm,
   });
 
-  // Converte para Map para salvar no Firestore
   Map<String, dynamic> toMap() {
     return {
       'title': title,
@@ -33,7 +39,6 @@ class Goal {
     };
   }
 
-  // Cria um Goal a partir de um documento do Firestore
   factory Goal.fromDoc(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Goal(
@@ -44,6 +49,7 @@ class Goal {
       description: data['description'] ?? '',
       period: data['period'] ?? '',
       progress: (data['progress'] ?? 0).toDouble(),
+      criadoEm: (data['criadoEm'] as Timestamp?)?.toDate(),
     );
   }
 }
@@ -72,7 +78,7 @@ class _GoalFormPageState extends State<GoalFormPage> {
   final List<String> categories = [
     "Financeiro",
     "Saúde",
-    "Carreira",
+    "Estudos",
     "Pessoal",
   ];
   final List<String> periods = ["Curto Prazo", "Longo Prazo"];
@@ -164,6 +170,7 @@ class _GoalFormPageState extends State<GoalFormPage> {
 
     try {
       if (widget.goalToEdit == null) {
+        data['criadoEm'] = Timestamp.now();
         await _goalsRef.add(data);
       } else {
         await _goalsRef.doc(widget.goalToEdit!.id).update(data);
@@ -416,11 +423,12 @@ class _GoalsPageState extends State<GoalsPage> {
   String selectedPeriod = "Todas";
   String selectedGoalPeriod = "Curto Prazo";
   String selectedFilter = "Todos";
+  String selectedStatus = "Ativas"; // nova aba: "Ativas" ou "Concluídas"
 
   final List<String> categories = [
     "Financeiro",
     "Saúde",
-    "Carreira",
+    "Estudos",
     "Pessoal",
   ];
   final List<String> periods = ["Curto Prazo", "Longo Prazo"];
@@ -487,24 +495,26 @@ class _GoalsPageState extends State<GoalsPage> {
   // ========================
   // FIRESTORE: SALVAR / EDITAR
   // ========================
-  Future<void> saveGoal({Goal? goal}) async {
-    if (titleController.text.trim().isEmpty) return;
+ Future<void> saveGoal({Goal? goal}) async {
+  if (titleController.text.trim().isEmpty) return;
 
-    final data = {
-      'title': titleController.text.trim(),
-      'category': selectedCategory,
-      'deadline': deadlineController.text.trim(),
-      'description': descriptionController.text.trim(),
-      'period': selectedGoalPeriod,
-      'progress': goal?.progress ?? 0.0,
-    }; // ← fecha o Map aqui
+  final data = {
+    'title': titleController.text.trim(),
+    'category': selectedCategory,
+    'deadline': deadlineController.text.trim(),
+    'description': descriptionController.text.trim(),
+    'period': selectedGoalPeriod,
+    'progress': goal?.progress ?? 0.0,
+  };
 
-    try {
-      if (goal == null) {
-        await _goalsRef.add(data);
-      } else {
-        await _goalsRef.doc(goal.id).update(data);
-      }
+  try {
+    if (goal == null) {
+      // so grava a data de criacao quando a meta esta sendo criada de fato
+      data['criadoEm'] = Timestamp.now();
+      await _goalsRef.add(data);
+    } else {
+      await _goalsRef.doc(goal.id).update(data);
+    }
       await _registrarAtividade('Meta criada', titleController.text.trim());
       await _atualizarContadores();
       _resetForm();
@@ -534,20 +544,75 @@ class _GoalsPageState extends State<GoalsPage> {
   // ========================
   // FIRESTORE: ATUALIZAR PROGRESSO
   // ========================
-  Future<void> toggleProgress(Goal goal) async {
-    final newProgress = goal.progress == 1 ? 0.0 : 1.0;
-    try {
-      await _goalsRef.doc(goal.id).update({'progress': newProgress});
-      if (newProgress == 1.0) {
-        await _registrarAtividade('Meta concluída', goal.title);
+ Future<void> toggleProgress(Goal goal) async {
+  final newProgress = goal.progress == 1 ? 0.0 : 1.0;
+  try {
+    await _goalsRef.doc(goal.id).update({
+      'progress': newProgress,
+      // registra a data/hora exata da conclusão, usada pelas conquistas
+      // de "X metas concluídas em uma semana"
+      if (newProgress == 1.0) 'concluidoEm': Timestamp.now(),
+    });
+
+    if (newProgress == 1.0) {
+      await _registrarAtividade('Meta concluída', goal.title);
+
+      final conquistaVitoria = await ConquistaDesbloqueio.checarPrimeiraVitoria();
+      if (conquistaVitoria != null && mounted) {
+        mostrarSnackBarConquista(context, conquistaVitoria);
+        await esperarSnackbar();
       }
-      await _atualizarContadores();
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao atualizar progresso: $e')),
-      );
+
+      if (goal.period == 'Curto Prazo') {
+        final conquistaTriunfos = await ConquistaDesbloqueio.checarSerieTriunfos();
+        if (conquistaTriunfos != null && mounted) {
+          mostrarSnackBarConquista(context, conquistaTriunfos);
+          await esperarSnackbar();
+        }
+
+        final conquistaMenteAgil = await ConquistaDesbloqueio.checarMenteAgil(goal.criadoEm);
+        if (conquistaMenteAgil != null && mounted) {
+          mostrarSnackBarConquista(context, conquistaMenteAgil);
+          await esperarSnackbar();
+        }
+      } else if (goal.period == 'Longo Prazo') {
+        final conquistaCaminho = await ConquistaDesbloqueio.checarCaminhoEstruturado();
+        if (conquistaCaminho != null && mounted) {
+          mostrarSnackBarConquista(context, conquistaCaminho);
+          await esperarSnackbar();
+        }
+      }
+
+      if (goal.category == 'Estudos') {
+        final conquistaEstudo = await ConquistaDesbloqueio.checarSedeConhecimento();
+        if (conquistaEstudo != null && mounted) {
+          mostrarSnackBarConquista(context, conquistaEstudo);
+          await esperarSnackbar();
+        }
+      } else if (goal.category == 'Saúde') {
+        final conquistaSaude = await ConquistaDesbloqueio.checarElixirVida();
+        if (conquistaSaude != null && mounted) {
+          mostrarSnackBarConquista(context, conquistaSaude);
+          await esperarSnackbar();
+        }
+      }
     }
+
+    await _atualizarContadores();
+
+    final titulosDesbloqueados = TituloDesbloqueio.consumirTitulosPendentes();
+    if (titulosDesbloqueados.isNotEmpty && mounted) {
+      for (String idTitulo in titulosDesbloqueados) {
+        mostrarSnackBarTitulo(context, idTitulo);
+        await esperarSnackbar();
+      }
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro ao atualizar progresso: $e')),
+    );
   }
+}
 
   void editGoal(Goal goal) {
     titleController.text = goal.title;
@@ -575,6 +640,13 @@ class _GoalsPageState extends State<GoalsPage> {
   // ========================
   List<Goal> _applyFilters(List<Goal> goals) {
     List<Goal> filtered = goals;
+
+    // separa primeiro por status (aba Ativas / Concluídas)
+    if (selectedStatus == "Ativas") {
+      filtered = filtered.where((g) => g.progress < 1).toList();
+    } else {
+      filtered = filtered.where((g) => g.progress >= 1).toList();
+    }
 
     if (selectedFilter != "Todos") {
       filtered = filtered.where((g) => g.category == selectedFilter).toList();
@@ -848,6 +920,33 @@ class _GoalsPageState extends State<GoalsPage> {
     );
   }
 
+  Widget buildStatusTab(String text) {
+    bool isSelected = selectedStatus == text;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => selectedStatus = text),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? const Color.fromARGB(255, 30, 64, 214)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: isSelected ? Colors.white : Colors.grey,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   // ========================
   // BUILD PRINCIPAL
   // ========================
@@ -899,6 +998,22 @@ class _GoalsPageState extends State<GoalsPage> {
                 ),
                 child: Row(
                   children: [
+                    buildStatusTab("Ativas"),
+                    buildStatusTab("Concluídas"),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 26, 29, 30),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
                     buildTab("Todas"),
                     buildTab("Curto Prazo"),
                     buildTab("Longo Prazo"),
@@ -915,7 +1030,7 @@ class _GoalsPageState extends State<GoalsPage> {
                     buildFilterChip("Todos"),
                     buildFilterChip("Financeiro"),
                     buildFilterChip("Saúde"),
-                    buildFilterChip("Carreira"),
+                    buildFilterChip("Estudos"),
                     buildFilterChip("Pessoal"),
                   ],
                 ),
@@ -952,7 +1067,9 @@ class _GoalsPageState extends State<GoalsPage> {
 
                     // Lista vazia
                     if (filtered.isEmpty) {
+                      final bool estaNaAbaConcluidas = selectedStatus == "Concluídas";
                       return Container(
+
                         width: double.infinity,
                         padding: const EdgeInsets.all(30),
                         decoration: BoxDecoration(
@@ -962,33 +1079,30 @@ class _GoalsPageState extends State<GoalsPage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
-                              Icons.gps_fixed,
+                            Icon(
+                              estaNaAbaConcluidas ? Icons.emoji_events_outlined : Icons.gps_fixed,
                               size: 55,
                               color: Colors.white38,
                             ),
                             const SizedBox(height: 15),
-                            const Text(
-                              "Nenhuma meta encontrada.",
-                              style: TextStyle(
-                                fontSize: 22,
-                                color: Colors.grey,
-                              ),
+                            Text(
+                              estaNaAbaConcluidas
+                                  ? "Nenhuma meta concluída ainda."
+                                  : "Nenhuma meta encontrada.",
+                              style: const TextStyle(fontSize: 22, color: Colors.grey),
                             ),
                             const SizedBox(height: 10),
-                            GestureDetector(
-                              onTap: () {
-                                _resetForm();
-                                showAddGoalPage();
-                              },
-                              child: const Text(
-                                "Criar uma agora",
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                  fontSize: 18,
+                            if (!estaNaAbaConcluidas)
+                              GestureDetector(
+                                onTap: () {
+                                  _resetForm();
+                                  showAddGoalPage();
+                                },
+                                child: const Text(
+                                  "Criar uma agora",
+                                  style: TextStyle(color: Colors.blue, fontSize: 18),
                                 ),
                               ),
-                            ),
                           ],
                         ),
                       );

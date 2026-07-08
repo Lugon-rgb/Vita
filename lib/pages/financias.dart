@@ -4,6 +4,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../data/conquista_snackbar.dart'; 
 import '../data/conquista_desbloqueio.dart';
+import '../data/titulo_desbloqueio.dart';
+import '../data/titulo_snackbar.dart';
+import '../data/espera_snackbar.dart';
 
 class Financias extends StatefulWidget {
   const Financias({super.key});
@@ -312,6 +315,15 @@ class _FinanciasState extends State<Financias> {
                       
                       if (conquistaDesbloqueada != null && mounted) {
                         mostrarSnackBarConquista(context, conquistaDesbloqueada);
+                        await esperarSnackbar();
+                      }
+
+                      final titulosDesbloqueados = TituloDesbloqueio.consumirTitulosPendentes();
+                      if (titulosDesbloqueados.isNotEmpty && mounted) {
+                        for (String idTitulo in titulosDesbloqueados) {
+                          mostrarSnackBarTitulo(context, idTitulo);
+                          await esperarSnackbar();
+                        }
                       }
                     }
                   }
@@ -397,18 +409,27 @@ class _FinanciasState extends State<Financias> {
                     if (primeiroRegistro) {
                       String? conquistaDesbloqueada = await ConquistaDesbloqueio.checarRegistroDeOuro();
                       
-                      // se ganhou a conquista (nao era repetida) e a tela continua aberta, sobe o snackBar
                       if (conquistaDesbloqueada != null && mounted) {
                         mostrarSnackBarConquista(context, conquistaDesbloqueada);
+                        await esperarSnackbar();
                       }
                     }
 
-                    // conquista disciplina financeira
-                    // passa a lista atualizada de gastos para a analise de datas consecutivas
                     String? conquistaDias = await ConquistaDesbloqueio.checarDisciplinaFinanceira(gastos);
                     
                     if (conquistaDias != null && mounted) {
                       mostrarSnackBarConquista(context, conquistaDias);
+                      await esperarSnackbar();
+                    }
+
+                    await TituloDesbloqueio.checarMestreDoReal(valor);
+
+                    final titulosDesbloqueados = TituloDesbloqueio.consumirTitulosPendentes();
+                    if (titulosDesbloqueados.isNotEmpty && mounted) {
+                      for (String idTitulo in titulosDesbloqueados) {
+                        mostrarSnackBarTitulo(context, idTitulo);
+                        await esperarSnackbar();
+                      }
                     }
                   }
                 },
